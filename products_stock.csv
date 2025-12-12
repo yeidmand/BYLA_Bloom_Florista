@@ -1,4 +1,4 @@
-Id;Product;Quantity in stock;Unite price
+product_id;name_produir;quantity_stock;price_unit
 2001;Flores variadas;250; 3,00 
 2002;Rosas;500; 5,00 
 2003;Lirios;150; 12,00
