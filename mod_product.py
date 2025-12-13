@@ -1,47 +1,46 @@
 #Luís 
 
-import pandas as pd~
+import pandas as pd
 
 
 def adicionarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
-    # Declarações de variáveis locais
+    # Remove validação do limite - agora as listas crescem automaticamente
     novonumProdutos = numProdutos
-    if numProdutos < len(nomeProduto):
-        novoNome = validarNome()
+    novoNome = validarNome()
+    
+    print("Insira a descrição do Produto: ")
+    novaDescricao = input()
+    while len(novaDescricao) == 0:
+        print("Erro: Descrição tem que ter mais que 1 carater!")
         print("Insira a descrição do Produto: ")
         novaDescricao = input()
-        while len(novaDescricao) == 0:
-            print("Erro: Descrição tem que ter mais que 1 carater!")
-            print("Insira a descrição do Produto: ")
-            novaDescricao = input()
+    
+    print("Insira a categoria do Produto: ")
+    novaCategoria = input()
+    while len(novaCategoria) == 0:
+        print("Erro: Categoria tem que ter mais que 1 carater!")
         print("Insira a categoria do Produto: ")
         novaCategoria = input()
-        while len(novaCategoria) == 0:
-            print("Erro: Categoria tem que ter mais que 1 carater!")
-            print("Insira a categoria do Produto: ")
-            novaCategoria = input()
-        novoPreco = verificarPreco()
-        novoStock = validarStock()
-        novaDisponibilidade = verificarDisponibilidade(1)
-
-        # Se tem stock inicial, fica Disponível (S), senão Indisponível (N).
-        # Aplicar o princípio KISS (Keep It Simple).
-        # Garante a consistência dos dados:
-        # é impossível ter um produto criado com Stock = 10 e Disponibilidade = "N" por engano do utilizador.
-        if novoStock > 0:
-            novaDisponibilidade = "S"
-        else:
-            novaDisponibilidade = "N"
-        nomeProduto[numProdutos] = novoNome
-        descricaoProduto[numProdutos] = novaDescricao
-        categoriaProduto[numProdutos] = novaCategoria
-        precosProduto[numProdutos] = novoPreco
-        stock[numProdutos] = novoStock
-        disponibilidade[numProdutos] = novaDisponibilidade
-        novonumProdutos = numProdutos + 1
-        print("✅ Produto Adicionado com Sucesso!")
+    
+    novoPreco = verificarPreco()
+    novoStock = validarStock()
+    
+    # Se tem stock inicial, fica Disponível (S), senão Indisponível (N).
+    # Aplicar o princípio KISS (Keep It Simple).
+    if novoStock > 0:
+        novaDisponibilidade = "S"
     else:
-        print("❌ Erro: O catálogo está cheio. Não é possível adicionar mais itens.")
+        novaDisponibilidade = "N"
+    
+    # Uso .append() em vez de índices para adicionar às listas
+    nomeProduto.append(novoNome) 
+    descricaoProduto.append(novaDescricao)  
+    categoriaProduto.append(novaCategoria)  
+    precosProduto.append(novoPreco)  
+    stock.append(novoStock)  
+    disponibilidade.append(novaDisponibilidade) 
+    novonumProdutos = numProdutos + 1
+    print("✅ Produto Adicionado com Sucesso!")
     
     return novonumProdutos
 
@@ -405,12 +404,13 @@ def verificarPreco():
 
 # Main
 # Arrays para armazenar produtos, os seus detalhes e preço
-stock = [0] * (10)
-nomeProduto = [""] * (10)
-descricaoProduto = [""] * (10)
-categoriaProduto = [""] * (10)
-disponibilidade = [""] * (10)
-precosProduto = [0] * (10)
+# Mudei de arrays fixos para listas dinâmicas para não ter limite de 10 produtos (13/12)
+stock = [] 
+nomeProduto = [] 
+descricaoProduto = []
+categoriaProduto = []
+disponibilidade = []
+precosProduto = []
 
 # Controla a execução do menu principal
 opcaoMenu = -1
@@ -419,78 +419,89 @@ opcaoMenu = -1
 # Contador de Produtos
 numProdutos = 3
 
-# Inicializa o contador de produtos em 3 para mostrar as variáveis pré-definidas.
-# Inicializar com 3 itens pré-definidos para facilitar testes
-nomeProduto[0] = "Girassol"
-descricaoProduto[0] = "Flor Amarela"
-categoriaProduto[0] = "Flor"
-precosProduto[0] = 5
-stock[0] = 10
-disponibilidade[0] = "S"
-nomeProduto[1] = "Rosa"
-descricaoProduto[1] = "Flor Vermelha"
-categoriaProduto[1] = "Flor"
-precosProduto[1] = 7
-stock[1] = 20
-disponibilidade[1] = "S"
-nomeProduto[2] = "Orquídea"
-descricaoProduto[2] = "Flor Roxa"
-categoriaProduto[2] = "Planta"
-precosProduto[2] = 27.5
-stock[2] = 1
-disponibilidade[2] = "S"
+# Dados iniciais para testes - 3 produtos pré-definidos
+# Uso .append() para adicionar às listas vazias (13/12)
+
+# Produto 1: Girassol
+nomeProduto.append("Girassol")
+descricaoProduto.append("Flor Amarela")
+categoriaProduto.append("Flor")
+precosProduto.append(5.0)
+stock.append(10)
+disponibilidade.append("S")
+
+# Produto 2: Rosa
+nomeProduto.append("Rosa")
+descricaoProduto.append("Flor Vermelha")
+categoriaProduto.append("Flor")
+precosProduto.append(7.0)
+stock.append(20)
+disponibilidade.append("S")
+
+# Produto 3: Orquídea
+nomeProduto.append("Orquídea")
+descricaoProduto.append("Flor Roxa")
+categoriaProduto.append("Planta")
+precosProduto.append(27.5)
+stock.append(1)
+disponibilidade.append("S")
+
+
+# Atualiza contador após adicionar os 3 produtos iniciais
+numProdutos = 3
+
 
 # Mantém o programa a correr até o utilizador escolher 0
 while opcaoMenu != 0:
-
-    # Menu Gestor.
-    # & ToChar(13) - Representa nova linha
-    print("🌻 ===== Portal Gestor Florista ===== 🌻" + chr(13) + "1. Adicionar Produto ➕" + chr(13) + "2. Alterar Produto 📝" + chr(13) + "3. Remover Produto ❌" + chr(13) + "4. Listar Catálogo 📋" + chr(13) + "5. Filtrar Catálogo 🔍" + chr(13) + "6. Fazer Encomenda 📤" + chr(13) + "7. Adicionar Stock 📥" + chr(13) + "8. Ver estatisticas 📈" + chr(13) + "0. Sair 👋" + chr(13) + chr(13) + "Escolha uma opção: ")
-    opcaoMenu = int(input())
-
+    # Menu Gestor
+    # posso utilizar /n para nova linha num unico print 
+    print("🌻 ===== Portal Gestor Florista ===== 🌻")
+    print("1. Adicionar Produto ➕")
+    print("2. Alterar Produto 📝")
+    print("3. Remover Produto ❌")
+    print("4. Listar Catálogo 📋")
+    print("5. Filtrar Catálogo 🔍")
+    print("6. Fazer Encomenda 📤")
+    print("7. Adicionar Stock 📥")
+    print("8. Ver estatisticas 📈")
+    print("0. Sair 👋")
+    print()
+    
+    opcaoMenu = int(input("Escolha uma opção: "))
+    
     # Lógica para Adicionar Produto aqui
     if opcaoMenu == 1:
-
-        # Chama função para criar o registo do item. Atualiza o contador 'numProdutos'.
+        # Chama função para criar o registo do item
         numProdutos = adicionarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos)
     else:
         if opcaoMenu == 2:
-
-            # Chama função para alterar dados pré-definidos ou inseridos.
+            # Chama função para alterar dados pré-definidos ou inseridos
             alterarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos)
         else:
             if opcaoMenu == 3:
-
-                # Chama função para apagar registo. Atualiza o contador 'numProdutos'.
+                # Chama função para apagar registo
                 numProdutos = removerProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos)
             else:
                 if opcaoMenu == 4:
-
-                    # Função para mostrar todos os dados em formato catálogo.
+                    # Função para mostrar todos os dados em formato catálogo
                     listarCatalogo(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos)
                 else:
                     if opcaoMenu == 5:
-
-                        # Função para mostrar todos os dados de uma filtragem requisitada pelo utilizador.
+                        # Função para mostrar todos os dados de uma filtragem requisitada
                         filtrarCatalogo(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos)
                     else:
                         if opcaoMenu == 6:
-
                             # Função que simula a saída de stock
                             verificarEncomenda(stock, disponibilidade, numProdutos, nomeProduto, precosProduto)
                         else:
                             if opcaoMenu == 7:
-
                                 # Função que simula a entrada de stock
                                 novoStock(nomeProduto, stock, disponibilidade, numProdutos)
                             else:
-
-                                # 20/11 - Funcionalidade extra da parte 2 enunciado a ser introduzida
                                 if opcaoMenu == 8:
+                                    # Funcionalidade extra da parte 2 enunciado
                                     verificarEstatisticas(precosProduto, categoriaProduto, stock, disponibilidade, numProdutos)
                                 else:
-
-                                    # Opção com mensagem de saída de utilizador e de erro caso o mesmo insira algum valor fora das opções do menu.
                                     if opcaoMenu == 0:
                                         print("👋 A sair da aplicação...")
                                     else:
