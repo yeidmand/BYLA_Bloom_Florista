@@ -62,6 +62,7 @@ def create_data_final():
         columns_complaints = [
             "order_id", 
             "client_id", 
+            "accused_shipper",
             "reason_type", 
             "priority", 
             "content", 

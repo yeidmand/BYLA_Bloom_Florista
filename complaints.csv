@@ -1,1 +1,1 @@
-order_id,comment
+﻿order_id;client_id;reason_type;priority;content;date_created;status
