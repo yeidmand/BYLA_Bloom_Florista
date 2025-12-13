@@ -1,0 +1,5 @@
+order_id;product_id;quantity_ordered;price_unit;subtotal
+PT01;2001;10;3,00;30,00
+PT01;2002;5;5,00;25,00
+PT02;2003;2;12,00;24,00
+PT02;2001;20;3,00;60,00
