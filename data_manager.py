@@ -91,8 +91,14 @@ def load_complaints():
         return df
     
     return pd.DataFrame(columns=[
-        "order_id", "client_id", "reason_type", 
-        "priority", "content", "date_created", "status"
+        "order_id", 
+        "client_id", 
+        "accused_shipper",
+        "reason_type", 
+        "priority", 
+        "content", 
+        "date_created", 
+        "status"
     ])
 
 
