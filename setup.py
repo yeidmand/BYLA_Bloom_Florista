@@ -59,13 +59,22 @@ def create_data_final():
 
 
     if not os.path.exists(FILE_COMPLAINTS):
-        cols =["order_id", "content"]
-        pd.DataFrame(columns=cols).to_csv(FILE_COMPLAINTS, index=False, sep=';')
-        print(f"Newly created: {FILE_COMPLAINTS}")
+        columns_complaints = [
+            "order_id", 
+            "client_id", 
+            "reason_type", 
+            "priority", 
+            "content", 
+            "date_created", 
+            "status"
+        ]
+        
+        df_complaints = pd.DataFrame(columns=columns_complaints)
+        
+        df_complaints.to_csv(FILE_COMPLAINTS, index=False, sep=';', encoding='utf-8-sig')
+        print("New file complaints csv has been created.")
     else:
-        print(f"Already exist: {FILE_COMPLAINTS}")
-
-    print("Done!")
+        print("Exited. Skip")
 
 if __name__ == "__main__":
     create_data_final()
