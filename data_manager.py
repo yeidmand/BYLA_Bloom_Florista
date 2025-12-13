@@ -85,12 +85,19 @@ def save_orders(df):
 
 def load_complaints():
     if os.path.exists(FILE_COMPLAINTS):
-        return pd.read_csv(FILE_COMPLAINTS, sep=";")
-    return pd.DataFrame(columns=["order_id", "content"])
+        df = pd.read_csv(FILE_COMPLAINTS, sep=';', dtype=str, encoding='utf-8-sig')
+        if "Unnamed: 0" in df.columns:
+            df = df.drop(columns=["Unnamed: 0"])
+        return df
+    
+    return pd.DataFrame(columns=[
+        "order_id", "client_id", "reason_type", 
+        "priority", "content", "date_created", "status"
+    ])
 
 
 def save_complaints(df):
-    df.to_csv(FILE_COMPLAINTS, index=False, sep=";")
+    df.to_csv(FILE_COMPLAINTS, index=False, sep=';', encoding='utf-8-sig')
 
 
 def load_order_events():
