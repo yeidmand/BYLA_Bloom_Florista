@@ -9,11 +9,12 @@ O objetivo é criar um programa em Python para gerir uma florista, convertendo a
 * **Gestão de Encomendas:** Yeidman
 * **Gestão de Clientes:** Beatriz
 * **Distribuição:** André Silva
-git status
+
+---
+
 ## 🚧 Estado dos Módulos
 
-### 1. Gestão de Produtos (`mod_produtos.py`)
-**Desenvolvido por:** [O Teu Nome]
+### 1. Gestão de Produtos (`mod_product.py`)
 
 Nesta fase inicial (V1), este módulo já replica a lógica do fluxograma original. Ainda não utiliza ficheiros (CSV) nem Pandas, mantendo os dados em listas/arrays na memória durante a execução.
 
@@ -30,12 +31,18 @@ Nesta fase inicial (V1), este módulo já replica a lógica do fluxograma origin
 
 ---
 
-### 2. Gestão de Encomendas (`mod_encomendas.py`)
+### 2. Gestão de Encomendas (`mod_delivery.py`)
 *(Em desenvolvimento...)*
 
 ---
 
-### 3. Gestão de Clientes (`mod_clientes.py`)
+### 3. Gestão de Clientes (`mod_client.py`)
 *(Em desenvolvimento...)*
 
 ---
+
+### 4. Distribuição (`mod_delivery.py`)
+*(Em desenvolvimento...)*
+
+---
+
