@@ -1,6 +1,6 @@
 #Luís 
 
-import pandas as pd~
+import pandas as pd
 
 
 def adicionarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
