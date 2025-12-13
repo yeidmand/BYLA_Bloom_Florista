@@ -57,17 +57,13 @@ while MenuInitial:
             order_details = pending_orders[pending_orders['order_id'] == userInput]
             if not order_details.empty:
                 print(order_details)
-                details = {
-                    "Numero do Pedido": order_details.iloc[0]['order_id'],
-                    "Nome do Cliente": order_details.iloc[0]['name'],
-                    "Contacto": order_details.iloc[0]['contact'],
-                    "Morada": order_details.iloc[0]['address'],
-                    "Codigo Postal": f"{order_details.iloc[0]['ZP1']}-{order_details.iloc[0]['ZP2']}",
-                    "Estado do Pedido": order_details.iloc[0]['order_status'],
-                }
-                for key, value in details.items():
-                    print(f"{key}: {value}")
-                else:
+                order_items_filtered = order_it[order_it['order_id'] == userInput]
+                
+                # 2. Llamar a la función de utilidad para mostrar todos los detalles
+                ut.showDetailsOrder(order_details, order_items_filtered, products_df)
+
+                # **AQUÍ IRÍA CUALQUIER OTRA LÓGICA DE EDICIÓN O SELECCIÓN DE ESTAFETA**    
+            else:
                     print("Pedido não encontrado.")
     else:
         pass

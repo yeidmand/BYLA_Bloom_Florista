@@ -96,7 +96,7 @@ def save_order_events(df):
 
 def load_order_items():
     if os.path.exists(FILE_ORDERS_ITEMS):
-        return pd.read_csv(FILE_ORDERS_ITEMS, sep=';')
+        return pd.read_csv(FILE_ORDERS_ITEMS, sep=';', dtype={'product_id': str})
     return pd.DataFrame(columns=[
         "order_id",
         "product_id",
