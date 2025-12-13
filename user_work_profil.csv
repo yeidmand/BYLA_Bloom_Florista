@@ -1,5 +1,6 @@
-Login;Password;Zone;Work_Hour
-109609;Yeidman;Gestor;all_day
+id_worker;password;dutyArea;work_hour
+SUPm;Flor001;Gestor;all_day
+JUNm;Flor002;Gestor;all_day
 113168;Andre;Center;week_morning
 502;estafeta2;North;week_morning
 503;estafeta3;South;week_morning
