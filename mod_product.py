@@ -47,12 +47,12 @@ def adicionarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProd
 def alterarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
     # NOTA: O stock não é alterado aqui para garantir a integridade das opções 6 e 7 (Saídas/Entradas)
     # Pemite alterar dados de um produto (16/12)
-    
+    opcaomenu = -1
+
     if numProdutos > 0:
         print("Insira o ID/Nº que pretende alterar: ")
         numItemEscolhido = int(input())
-
-
+            
         while numItemEscolhido < 1 or numItemEscolhido > numProdutos:
             print("❌ ID/Nº Artigo Inválido!")
             print("Insira um ID entre 1 e " + str(numProdutos))
@@ -63,7 +63,6 @@ def alterarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProdut
 
         print("A alterar o artigo: " + nomeProduto[i] + " | Descrição atual: " + descricaoProduto[i] + " | Categoria atual: " + categoriaProduto[i] + " | Preço atual: " + str(precosProduto[i]) + " | Stock atual: " + str(stock[i]) + " | Disponibilidade atual: " + disponibilidade[i])
 
-        opcaomenu = -1 # Inicializa com valor inválido para entrar no ciclo (16/12)
         while opcaomenu != 0:
             # Menu de opções com vários prints em vez de char13.
             print("\nEscolha, através do número, o que deseja alterar:")
