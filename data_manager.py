@@ -62,22 +62,19 @@ def save_products(df):
 
 def load_orders():
     if os.path.exists(FILE_ORDERS):
-        return pd.read_csv(FILE_ORDERS, sep=";")
-    return pd.DataFrame(
-        columns=[
-            "order_id",
-            "id_client",
-            "name",
-            "contact",
-            "address",
-            "ZP1",
-            "ZP2",
-            "order_status",
-            "tracking_number",
-            "id_worker",
-        ]
-    )
-
+        return pd.read_csv(FILE_ORDERS, sep=';', dtype=str)
+    return pd.DataFrame(columns= [
+    "order_id",
+    "id_client",
+    "name",
+    "contact",
+    "address",
+    "ZP1",
+    "ZP2",
+    "order_status",
+    "tracking_number",
+    "id_worker"
+])
 
 def save_orders(df):
     df.to_csv(FILE_ORDERS, index=False, sep=";")

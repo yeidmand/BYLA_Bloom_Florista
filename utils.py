@@ -1,18 +1,5 @@
 import pandas as pd
 
-def optionVerify(option, options_list):
-    """
-    Verifies if the given option is in the list of valid options.
-
-    Parameters:
-    option (str): The option to verify.
-    options_list (list): The list of valid options.
-
-    Returns:
-    bool: True if the option is valid, False otherwise.
-    """
-    return option in options_list
-
 def showDetailsOrder(order_details, order_items_df, products_df):
     """
     Muestra los detalles de un solo pedido, incluyendo la lista de productos
@@ -54,3 +41,26 @@ def showDetailsOrder(order_details, order_items_df, products_df):
         for _, item in merged_items.iterrows():
             product_name = item['name_product'] if pd.notna(item['name_product']) else f"Produto ID: {item['product_id']} (Nome não encontrado)"
             print(f"Produto: {product_name} | Quantidade: {item['quantity_ordered']} | Preço Unitário: {item['price_unit']} | Subtotal: {item['subtotal']}")
+
+def showOrderStatus(df_orders):
+    print("\n=== Encomendas ===")
+    for _, row in df_orders.iterrows():
+        print(f"ID: {row['order_id']} | Estado: {row['order_status']}")
+    return
+
+def validoption(choice, valid_options):
+    return choice in valid_options
+
+def showDetailsDestinatario(order_details):
+    if order_details.empty:
+        print("Erro: Detalhes do pedido não encontrados.")
+        return
+
+    print("\n=== Detalhes do Destinatário ===")
+    details = {"Nome do Destinatário": order_details.iloc[0]['name'],
+                "Contacto": order_details.iloc[0]['contact'],
+                "Morada": order_details.iloc[0]['address'],
+                "Codigo Postal": f"{order_details.iloc[0]['ZP1']}-{order_details.iloc[0]['ZP2']}",
+                }
+    for key, value in details.items():
+        print(f"{key}: {value}")
