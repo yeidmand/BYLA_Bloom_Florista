@@ -55,7 +55,7 @@ def save_products(df):
 
 def load_orders():
     if os.path.exists(FILE_ORDERS):
-        return pd.read_csv(FILE_ORDERS, sep=';')
+        return pd.read_csv(FILE_ORDERS, sep=';', dtype=str)
     return pd.DataFrame(columns= [
     "order_id",
     "id_client",
