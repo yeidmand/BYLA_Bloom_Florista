@@ -52,7 +52,7 @@ def alterarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProdut
     if numProdutos > 0:
         print("Insira o ID/Nº que pretende alterar: ")
         numItemEscolhido = int(input())
-            
+
         while numItemEscolhido < 1 or numItemEscolhido > numProdutos:
             print("❌ ID/Nº Artigo Inválido!")
             print("Insira um ID entre 1 e " + str(numProdutos))
@@ -61,7 +61,15 @@ def alterarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProdut
         # Este Assign serve para não ultrapassar o fim da lista/Array
         i = numItemEscolhido - 1
 
-        print("A alterar o artigo: " + nomeProduto[i] + " | Descrição atual: " + descricaoProduto[i] + " | Categoria atual: " + categoriaProduto[i] + " | Preço atual: " + str(precosProduto[i]) + " | Stock atual: " + str(stock[i]) + " | Disponibilidade atual: " + disponibilidade[i])
+        # Usar múltiplos prints (mais claro que um print com \n múltiplos) (16/12)
+        print("\n--- Produto Selecionado ---")
+        print("Nome: " + nomeProduto[i])
+        print("Descrição: " + descricaoProduto[i])
+        print("Categoria: " + categoriaProduto[i])
+        print("Preço: " + str(precosProduto[i]) + "€")
+        print("Stock: " + str(stock[i]) + " unidades")
+        print("Disponibilidade: " + disponibilidade[i])
+        print("---------------------------\n")
 
         while opcaomenu != 0:
             # Menu de opções com vários prints em vez de char13.
