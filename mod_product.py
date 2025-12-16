@@ -46,10 +46,13 @@ def adicionarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProd
 
 def alterarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
     # NOTA: O stock não é alterado aqui para garantir a integridade das opções 6 e 7 (Saídas/Entradas)
-    opcaomenu = -1
+    # Pemite alterar dados de um produto (16/12)
+    
     if numProdutos > 0:
         print("Insira o ID/Nº que pretende alterar: ")
         numItemEscolhido = int(input())
+
+
         while numItemEscolhido < 1 or numItemEscolhido > numProdutos:
             print("❌ ID/Nº Artigo Inválido!")
             print("Insira um ID entre 1 e " + str(numProdutos))
@@ -57,10 +60,22 @@ def alterarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProdut
 
         # Este Assign serve para não ultrapassar o fim da lista/Array
         i = numItemEscolhido - 1
+
         print("A alterar o artigo: " + nomeProduto[i] + " | Descrição atual: " + descricaoProduto[i] + " | Categoria atual: " + categoriaProduto[i] + " | Preço atual: " + str(precosProduto[i]) + " | Stock atual: " + str(stock[i]) + " | Disponibilidade atual: " + disponibilidade[i])
+
+        opcaomenu = -1 # Inicializa com valor inválido para entrar no ciclo (16/12)
         while opcaomenu != 0:
-            print("Escolha, através do número, o que deseja alterar: " + chr(13) + "1. Alterar Nome" + chr(13) + "2. Alterar Descrição" + chr(13) + "3. Alterar Categoria" + chr(13) + "4. Alterar Preço" + chr(13) + "5. Alterar Disponibilidade" + chr(13) + "0. Concluir Alterações" + chr(13))
-            opcaomenu = int(input())
+            # Menu de opções com vários prints em vez de char13.
+            print("\nEscolha, através do número, o que deseja alterar:")
+            print("1. Alterar Nome")
+            print("2. Alterar Descrição")
+            print("3. Alterar Categoria")
+            print("4. Alterar Preço")
+            print("5. Alterar Disponibilidade")
+            print("0. Concluir Alterações")
+
+            opcaomenu = int(input()) # Lê a opção do utilizador.
+
             if opcaomenu == 1:
                 nomeProduto[i] = validarNome()
                 print("Nome alterado com sucesso!")
@@ -68,12 +83,22 @@ def alterarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProdut
                 if opcaomenu == 2:
                     print("Insira a nova Descrição: ")
                     novaDescricao = input()
+                    # Nova validação para descrição não vazia
+                    while len(novaDescricao) == 0:
+                        print("Erro: Descrição tem que ter mais que 1 carater!")
+                        print("Insira a nova Descrição: ")
+                        novaDescricao = input()
                     descricaoProduto[i] = novaDescricao
                     print("Descrição alterada com sucesso!")
                 else:
                     if opcaomenu == 3:
                         print("Escreva nova categoria: ")
                         novaCategoria = input()
+                        # Validação para categoria não vazia
+                        while len(novaCategoria) == 0:
+                            print("Erro: Categoria tem que ter mais que 1 carater!")
+                            print("Escreva nova categoria: ")
+                            novaCategoria = input()
                         categoriaProduto[i] = novaCategoria
                         print("Categoria alterada com sucessso!")
                     else:
