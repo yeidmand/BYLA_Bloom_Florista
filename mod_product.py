@@ -4,45 +4,46 @@ import pandas as pd
 
 
 def adicionarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
-    # Remove validação do limite - agora as listas crescem automaticamente
-    novonumProdutos = numProdutos
-    novoNome = validarNome()
     
-    print("Insira a descrição do Produto: ")
-    novaDescricao = input()
-    while len(novaDescricao) == 0:
+    #Adiciona um novo produto ao catálogo (21/12).
+    # Melhorias de apresentação similares a alterarProduto.
+    
+    # Usar múltiplos prints (mais claro que um print com \n múltiplos)
+    print("Adicionar Novo Produto: \n")
+    
+    # Recolher dados utilizando funções de validação existentes
+    nomeProduto.append(validarNome())
+    
+    print("Insira a descrição do produto: ")
+    descricao = input()
+    while len(descricao) == 0:
         print("Erro: Descrição tem que ter mais que 1 carater!")
-        print("Insira a descrição do Produto: ")
-        novaDescricao = input()
+        descricao = input("Insira a descrição: ")
+    descricaoProduto.append(descricao)
     
-    print("Insira a categoria do Produto: ")
-    novaCategoria = input()
-    while len(novaCategoria) == 0:
+    print("Insira a categoria: ")
+    categoria = input()
+    while len(categoria) == 0:
         print("Erro: Categoria tem que ter mais que 1 carater!")
-        print("Insira a categoria do Produto: ")
-        novaCategoria = input()
+        categoria = input("Insira a categoria: ")
+    categoriaProduto.append(categoria)
     
-    novoPreco = verificarPreco()
-    novoStock = validarStock()
+    precosProduto.append(verificarPreco())
+    stock.append(validarStock())
+    disponibilidade.append(verificarDisponibilidade(1))
     
-    # Se tem stock inicial, fica Disponível (S), senão Indisponível (N).
-    # Aplicar o princípio KISS (Keep It Simple).
-    if novoStock > 0:
-        novaDisponibilidade = "S"
-    else:
-        novaDisponibilidade = "N"
+    numProdutos = numProdutos + 1
     
-    # Uso .append() em vez de índices para adicionar às listas
-    nomeProduto.append(novoNome) 
-    descricaoProduto.append(novaDescricao)  
-    categoriaProduto.append(novaCategoria)  
-    precosProduto.append(novoPreco)  
-    stock.append(novoStock)  
-    disponibilidade.append(novaDisponibilidade) 
-    novonumProdutos = numProdutos + 1
-    print("✅ Produto Adicionado com Sucesso!")
+    # Confirmação dos dados do produto adicionado
+    print("\n Produto adicionado com sucesso! ✅")
+    print("\n")
+    print("Nome: " + nomeProduto[numProdutos - 1])
+    print("Categoria: " + categoriaProduto[numProdutos - 1])
+    print("Preço: " + str(precosProduto[numProdutos - 1]) + "€")
+    print("Stock: " + str(stock[numProdutos - 1]) + " unidades")
+    print("\n")
     
-    return novonumProdutos
+    return numProdutos
 
 def alterarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
     # NOTA: O stock não é alterado aqui para garantir a integridade das opções 6 e 7 (Saídas/Entradas)
