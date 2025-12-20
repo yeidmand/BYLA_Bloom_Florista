@@ -280,43 +280,55 @@ def novoStock(nomeProduto, stock, disponibilidade, numProdutos):
         print("Catálogo Vazio. Não existe stock!")
 
 def removerProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
-    novonumProdutos = numProdutos
 
-    # Variável inicializada vazia
-    confirmacao = ""
+    # Remove um produto do catálogo (20/12).
+    # Estrutura baseada em alterarProduto (reutilização de validação)
+
     if numProdutos > 0:
-        print("Qual o nº do item que deseja remover?")
-        numItemEscolhido = int(input())
-        while numItemEscolhido < 1 or numItemEscolhido > numProdutos:
-            print("❌ ID/Nº Artigo Inválido!")
+        print("Insira o ID do produto a remover: ")
+        idEscolhido = int(input())
+        
+        # Validação de ID (similar a alterarProduto)
+        while idEscolhido < 1 or idEscolhido > numProdutos:
+            print("❌ ID inválido!")
             print("Insira um ID entre 1 e " + str(numProdutos))
-            numItemEscolhido = int(input())
-
-        # Vai fazer com que o item seja o primeiro do indice/primeiro ID
-        decrementarIndice = numItemEscolhido - 1
-
-        # Validação de segurança em caso de erro ao inserir o ID do artigo.
-        confirmacao = verificarDisponibilidade(3)
-        if confirmacao == "S":
-
-            # Quando um item é apagado, forma-se um "buraco" no índice correspondente.
-            # Para preencher esse espaço, o ciclo move os itens à direita do buraco uma posição à esquerda. (+1)
-            # Vai apenas até numProdutos - 2 porque o último elemento (-1) é copiado para a penúltima posição, e não precisamos de ler para além do fim da lista.
-            for i in range(decrementarIndice, numProdutos - 2 + 1, 1):
-                nomeProduto[i] = nomeProduto[i + 1]
-                descricaoProduto[i] = descricaoProduto[i + 1]
-                categoriaProduto[i] = categoriaProduto[i + 1]
-                precosProduto[i] = precosProduto[i + 1]
-                stock[i] = stock[i + 1]
-                disponibilidade[i] = disponibilidade[i + 1]
-            novonumProdutos = numProdutos - 1
-            print("🗑️ Item removido com sucesso!")
+            idEscolhido = int(input())
+        
+        i = idEscolhido - 1
+        
+        # Usar múltiplos prints (mais claro que um print com \n múltiplos)
+        print("\n⚠️  Vai remover o seguinte produto:")
+        print("--- Produto a Remover ---")
+        print("ID: " + str(idEscolhido))
+        print("Nome: " + nomeProduto[i])
+        print("Descrição: " + descricaoProduto[i])
+        print("Categoria: " + categoriaProduto[i])
+        print("Preço: " + str(precosProduto[i]) + "€")
+        print("Stock: " + str(stock[i]) + " unidades")
+        print("-------------------------\n")
+        
+        # Pedir confirmação
+        print("Tem a certeza que deseja remover? (S/N): ")
+        confirmacao = input()
+        
+        if confirmacao.upper() == "S":
+            # Remover de todas as listas usando .pop()
+            nomeProduto.pop(i)
+            descricaoProduto.pop(i)
+            categoriaProduto.pop(i)
+            precosProduto.pop(i)
+            stock.pop(i)
+            disponibilidade.pop(i)
+            
+            print("🗑️  Produto removido com sucesso!")
+            numProdutos = numProdutos - 1
         else:
-            print("Item não removido. Ação cancelada!")
+            print("Operação cancelada.")
     else:
-        print("O Catálogo está vazio!")
+        print("❌ O Catálogo está vazio!")
     
-    return novonumProdutos
+    return numProdutos
+
 
 def validarNome():
     nome = ""
