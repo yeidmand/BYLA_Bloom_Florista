@@ -50,16 +50,21 @@ Este projeto está desenhado para gerir um portal de acesso tanto para **utiliza
 
 ## 🚧 Estado dos Módulos
 
-### 1. Gestão de Produtos (`mod_product.py`)
+### 1. Gestão de Produtos (`mod_product.py`)  - ✅ V2.0 COMPLETO
 
-Nesta fase inicial (V1), este módulo já replica a lógica do fluxograma original. Ainda não utiliza ficheiros (CSV) nem Pandas, mantendo os dados em listas/arrays na memória durante a execução.
+Este módulo está na **V2.0** e já replica a lógica do Flowgorithm em Python. Ainda não utiliza ficheiros (CSV) nem Pandas, mantendo os dados em listas/arrays na memória durante a execução.
 
 **O que já funciona:**
 * ✅ **Catálogo:** Listagem completa de flores e plantas.
-* ✅ **Gestão:** Adicionar novos produtos e remover antigos (com reordenação de listas).
+* ✅ **Gestão:** Adicionar novos produtos, alterar e remover (com reordenação de listas).
 * ✅ **Stock:** Entrada de stock e verificação de produtos esgotados.
-* ✅ **Validações:** Impede preços negativos e nomes vazios.
+* ✅ **Filtros:** Por categoria, disponibilidade, preço e stock.
+* ✅ **Validações:** Impede preços negativos, nomes vazios e IDs inválidos.
 * ✅ **Estatísticas:** Cálculo do valor total em armazém.
+
+**Histórico:**
+* V2.0 (22/12/2024) - Conversão de Flowgorithm para Python
+* V1.0 (13/12 2024) - Lógica original em Flowgorithm para python
 
 **Próximos passos:**
 * Implementar persistência de dados (CSV).
