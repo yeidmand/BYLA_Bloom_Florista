@@ -4,45 +4,46 @@ import pandas as pd
 
 
 def adicionarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
-    # Remove validação do limite - agora as listas crescem automaticamente
-    novonumProdutos = numProdutos
-    novoNome = validarNome()
     
-    print("Insira a descrição do Produto: ")
-    novaDescricao = input()
-    while len(novaDescricao) == 0:
+    #Adiciona um novo produto ao catálogo (21/12).
+    # Melhorias de apresentação similares a alterarProduto.
+    
+    # Usar múltiplos prints (mais claro que um print com \n múltiplos)
+    print("Adicionar Novo Produto\n")
+    
+    # Recolher dados utilizando funções de validação existentes
+    nomeProduto.append(validarNome())
+    
+    print("Insira a descrição do produto: ")
+    descricao = input()
+    while len(descricao) == 0:
         print("Erro: Descrição tem que ter mais que 1 carater!")
-        print("Insira a descrição do Produto: ")
-        novaDescricao = input()
+        descricao = input("Insira a descrição: ")
+    descricaoProduto.append(descricao)
     
-    print("Insira a categoria do Produto: ")
-    novaCategoria = input()
-    while len(novaCategoria) == 0:
+    print("Insira a categoria: ")
+    categoria = input()
+    while len(categoria) == 0:
         print("Erro: Categoria tem que ter mais que 1 carater!")
-        print("Insira a categoria do Produto: ")
-        novaCategoria = input()
+        categoria = input("Insira a categoria: ")
+    categoriaProduto.append(categoria)
     
-    novoPreco = verificarPreco()
-    novoStock = validarStock()
+    precosProduto.append(verificarPreco())
+    stock.append(validarStock())
+    disponibilidade.append(verificarDisponibilidade(1))
     
-    # Se tem stock inicial, fica Disponível (S), senão Indisponível (N).
-    # Aplicar o princípio KISS (Keep It Simple).
-    if novoStock > 0:
-        novaDisponibilidade = "S"
-    else:
-        novaDisponibilidade = "N"
+    numProdutos = numProdutos + 1
     
-    # Uso .append() em vez de índices para adicionar às listas
-    nomeProduto.append(novoNome) 
-    descricaoProduto.append(novaDescricao)  
-    categoriaProduto.append(novaCategoria)  
-    precosProduto.append(novoPreco)  
-    stock.append(novoStock)  
-    disponibilidade.append(novaDisponibilidade) 
-    novonumProdutos = numProdutos + 1
-    print("✅ Produto Adicionado com Sucesso!")
+    # Confirmação dos dados do produto adicionado
+    print("\n Produto adicionado com sucesso! ✅")
+    print("\n")
+    print("Nome: " + nomeProduto[numProdutos - 1])
+    print("Categoria: " + categoriaProduto[numProdutos - 1])
+    print("Preço: " + str(precosProduto[numProdutos - 1]) + "€")
+    print("Stock: " + str(stock[numProdutos - 1]) + " unidades")
+    print("\n")
     
-    return novonumProdutos
+    return numProdutos
 
 def alterarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
     # NOTA: O stock não é alterado aqui para garantir a integridade das opções 6 e 7 (Saídas/Entradas)
@@ -123,161 +124,226 @@ def alterarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProdut
         print("O Catálogo está vazio!")
 
 def filtrarCatalogo(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
+    
+    # Filtra produtos por múltiplos critérios (categoria, disponibilidade, preço, stock) (21/12).
+    
     opcao = -1
+    
     if numProdutos > 0:
+        # While para manter menu ativo até escolher 0
         while opcao != 0:
-
-            # A variável 'resultadoFiltro' é reiniciada dentro do ciclo 'While' para garantir que a cada nova pesquisa começa "limpa"/vazia, evitando falsos positivos de pesquisas anteriores.
+            # Reset a cada pesquisa (evitar resultados errados)
             resultadoFiltro = False
-            print("| Filtrar o catálogo: | " + chr(13) + "1 - Por Categoria" + chr(13) + "2 - Por Disponibilidade" + chr(13) + "3 - Por Preço" + chr(13) + "4 - Por Stock" + chr(13) + "0 - Menu Principal")
-            opcao = int(input())
+            
+            print("\n🔍 ===== Filtrar o Catálogo ===== 🔍")
+            print("1 - Por Categoria")
+            print("2 - Por Disponibilidade")
+            print("3 - Por Preço")
+            print("4 - Por Stock")
+            print("0 - Menu Principal")
+            opcao = int(input("Escolha: "))
+            
+            # OPÇÃO 1: Filtrar por Categoria
             if opcao == 1:
                 print("Insira a categoria pela qual deseja filtrar: ")
                 filtroCategoria = input()
-
-                # 22/11 - Deixava passar, validação feita!
+                
                 while len(filtroCategoria) == 0:
-                    print("A categoria não pode ser vazia. Tente de novo:")
+                    print("A categoria não pode ser vazia. Tente de novo: ")
                     filtroCategoria = input()
-                for i in range(0, numProdutos - 1 + 1, 1):
+                
+                for i in range(0, numProdutos, 1):
                     if categoriaProduto[i] == filtroCategoria:
-                        print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + "|Categoria: " + categoriaProduto[i])
+                        print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Categoria: " + categoriaProduto[i])
                         resultadoFiltro = True
+                
                 if resultadoFiltro == False:
                     print("❌ Não foi encontrado nenhum produto!")
-            else:
-                if opcao == 2:
-                    filtroDisponibilidade = verificarDisponibilidade(2)
+            
+            # OPÇÃO 2: Filtrar por Disponibilidade
+            elif opcao == 2:
+                filtroDisponibilidade = verificarDisponibilidade(2)
+                
+                for i in range(0, numProdutos, 1):
+                    if disponibilidade[i] == filtroDisponibilidade:
+                        # Caso especial: produto marcado como N E com stock 0 (esgotado)
+                        if disponibilidade[i] == "N" and stock[i] == 0:
+                            print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Disponibilidade: " + disponibilidade[i] + " - está esgotado!")
+                        else:
+                            print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Disponibilidade: " + disponibilidade[i])
+                             
+                             # Se encontrou pelo menos 1, então:
+                        resultadoFiltro = True
 
-                    # 20/11 - Após testes, verifiquei que não mostrava os que têm 0 stock como N - Indispoonível. Seguindo lógica do mundo real, criei validações de forma a que mostrasse tudo que tiver N e/ou stock = 0.
-                    for i in range(0, numProdutos - 1 + 1, 1):
-
-                        # 22/11 - Minha lógica estava ao contrário. Nos testes tava a passar coisas erradas que eram mostradas posteriormente no catalogo.
-                        if disponibilidade[i] == filtroDisponibilidade:
-                            if disponibilidade[i] == "N" and stock[i] == 0:
-                                print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Disponibilidade: " + disponibilidade[i] + " está esgotado!")
-                            else:
-                                print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Disponibilidade: " + disponibilidade[i])
-                            resultadoFiltro = True
-                    if resultadoFiltro == False:
-                        print("❌ Não foi encontrado nenhum produto!")
+                # Se não encontrou nenhum:
+                if resultadoFiltro == False:
+                    print("❌ Não foi encontrado nenhum produto!")
+            
+            # OPÇÃO 3: Filtrar por Preço
+            elif opcao == 3:
+                print("Filtrar Preço:")
+                print("1. Preço igual a")
+                print("2. Preço acima de")
+                print("3. Preço abaixo de")
+                opcaoPreco = int(input())
+                
+                if opcaoPreco >= 1 and opcaoPreco <= 3:
+                    filtroPreco = verificarPreco()
+                    
+                    if opcaoPreco == 1:
+                        for i in range(0, numProdutos, 1):
+                            if precosProduto[i] == filtroPreco:
+                                print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Preço: " + str(precosProduto[i]) + "€")
+                                resultadoFiltro = True
+                        
+                        if resultadoFiltro == False:
+                            print("❌ Não foi encontrado nenhum produto!")
+                    
+                    elif opcaoPreco == 2:
+                        for i in range(0, numProdutos, 1):
+                            if precosProduto[i] > filtroPreco:
+                                print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Preço: " + str(precosProduto[i]) + "€")
+                                resultadoFiltro = True
+                        
+                        if resultadoFiltro == False:
+                            print("❌ Não foi encontrado nenhum produto!")
+                    
+                    elif opcaoPreco == 3:
+                        for i in range(0, numProdutos, 1):
+                            if precosProduto[i] < filtroPreco:
+                                print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Preço: " + str(precosProduto[i]) + "€")
+                                resultadoFiltro = True
+                        
+                        if resultadoFiltro == False:
+                            print("❌ Não foi encontrado nenhum produto!")
                 else:
-                    if opcao == 3:
-                        print("Filtrar Preço:" + chr(13) + "1. Preço igual a: " + chr(13) + "2. Preço acima de: " + chr(13) + "3.  Preço abaixo de: ")
-                        opcaoPreco = int(input())
-
-                        # 22/11 - Se inserisse valor acima de 3 ele funcionava na mesma. Lógica corrigida.
-                        if opcaoPreco >= 1 and opcaoPreco <= 3:
-                            filtroPreco = verificarPreco()
-                            if opcaoPreco == 1:
-                                for i in range(0, numProdutos - 1 + 1, 1):
-                                    if precosProduto[i] == filtroPreco:
-                                        print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " |Preço  : " + "€" + str(precosProduto[i]))
-                                        resultadoFiltro = True
-                                if resultadoFiltro == False:
-                                    print("❌ Não foi encontrado nenhum produto!")
-                            else:
-                                if opcaoPreco == 2:
-                                    for i in range(0, numProdutos - 1 + 1, 1):
-                                        if precosProduto[i] > filtroPreco:
-                                            print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Preço  : " + "€" + str(precosProduto[i]))
-                                            resultadoFiltro = True
-                                    if resultadoFiltro == False:
-                                        print("❌ Não foi encontrado nenhum produto!")
-                                else:
-                                    if opcaoPreco == 3:
-                                        for i in range(0, numProdutos - 1 + 1, 1):
-
-                                            # 18/11 - Estava como a opção 1 e por isso não fazia o pretendido.
-                                            if precosProduto[i] < filtroPreco:
-                                                print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Preço  : " + "€" + str(precosProduto[i]))
-                                                resultadoFiltro = True
-                                        if resultadoFiltro == False:
-                                            print("❌ Não foi encontrado nenhum produto!")
-                        else:
-                            print("Opção inválida!")
-                    else:
-                        if opcao == 4:
-                            print("Filtrar Stock:" + chr(13) + "1. Stock igual a: " + chr(13) + "2. Stock acima de: " + chr(13) + "3.  Stock abaixo de: ")
-                            opcaoStock = int(input())
-
-                            # 22/11 - Se inserisse valor acima de 3 ele funcionava na mesma. Lógica corrigida.
-                            if opcaoStock >= 1 and opcaoStock <= 3:
-                                filtroStock = validarStock()
-                                if opcaoStock == 1:
-                                    for i in range(0, numProdutos - 1 + 1, 1):
-                                        if stock[i] == filtroStock:
-                                            print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Stock: " + str(stock[i]))
-                                            resultadoFiltro = True
-                                    if resultadoFiltro == False:
-                                        print("❌ Não foi encontrado nenhum produto!")
-                                else:
-                                    if opcaoStock == 2:
-                                        for i in range(0, numProdutos - 1 + 1, 1):
-                                            if stock[i] > filtroStock:
-                                                print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Stock: " + str(stock[i]))
-                                                resultadoFiltro = True
-                                        if resultadoFiltro == False:
-                                            print("❌ Não foi encontrado nenhum produto!")
-                                    else:
-                                        if opcaoStock == 3:
-                                            for i in range(0, numProdutos - 1 + 1, 1):
-                                                if stock[i] < filtroStock:
-                                                    print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Stock: " + str(stock[i]))
-                                                    resultadoFiltro = True
-                                            if resultadoFiltro == False:
-                                                print("❌ Não foi encontrado nenhum produto!")
-                                        else:
-                                            print("❌ Nenhum artigo encontrado com essa filtragem!")
-                            else:
-                                print("❌ Opção inválida!")
-                        else:
-                            if opcao == 0:
-                                print("Menu Principal")
-                            else:
-                                print("❌ Opção introduzida é inválida!")
+                    print("❌ Opção inválida!")
+            
+            # OPÇÃO 4: Filtrar por Stock
+            elif opcao == 4:
+                print("Filtrar Stock:")
+                print("1. Stock igual a")
+                print("2. Stock acima de")
+                print("3. Stock abaixo de")
+                opcaoStock = int(input())
+                
+                if opcaoStock >= 1 and opcaoStock <= 3:
+                    filtroStock = validarStock()
+                    
+                    if opcaoStock == 1:
+                        for i in range(0, numProdutos, 1):
+                            if stock[i] == filtroStock:
+                                print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Stock: " + str(stock[i]))
+                                resultadoFiltro = True
+                        
+                        if resultadoFiltro == False:
+                            print("❌ Não foi encontrado nenhum produto!")
+                    
+                    elif opcaoStock == 2:
+                        for i in range(0, numProdutos, 1):
+                            if stock[i] > filtroStock:
+                                print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Stock: " + str(stock[i]))
+                                resultadoFiltro = True
+                        
+                        if resultadoFiltro == False:
+                            print("❌ Não foi encontrado nenhum produto!")
+                    
+                    elif opcaoStock == 3:
+                        for i in range(0, numProdutos, 1):
+                            if stock[i] < filtroStock:
+                                print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Stock: " + str(stock[i]))
+                                resultadoFiltro = True
+                        
+                        if resultadoFiltro == False:
+                            print("❌ Não foi encontrado nenhum produto!")
+                else:
+                    print("❌ Opção inválida!")
+            
+            # OPÇÃO 0: Voltar
+            elif opcao == 0:
+                print("↩️ Menu Principal")
+            
+            else:
+                print("❌ Opção introduzida inválida!")
     else:
-        print("Catálogo Vazio. Impossível filtrar!")
+        print("❌ Catálogo Vazio. Impossível filtrar!")
+
+    
 
 def listarCatalogo(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
-    print("| Catálogo Atualizado | ")
+     #Lista todos os produtos do catálogo (21/12).
 
-    # Também posso fazer ao contrário, se for maior que -1 o que está no falso passa a verdade. Questionar professor.
-    if numProdutos > -1:
-
-        # até numProdutos -1 para percorremos os índices de 0 até ao último item adicionado, que está na posição numProdutos - 1
-        for i in range(0, numProdutos - 1 + 1, 1):
-
-            # Indice do array começa no 0, logo, usamos i + 1 para lista começar numerada em 1. NomeProduto[i] para aceder ao nome guardado no array na posição i
-            # 
-            # 25/10 - Coloquei "ID" por agora no i+1 para aparecer no output
-            print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Descrição: " + descricaoProduto[i] + " | Categoria: " + categoriaProduto[i] + " | Preço: " + str(precosProduto[i]) + "€" + " | Stock: " + str(stock[i]) + " | Disponível: " + disponibilidade[i])
-    else:
-        print("Catálogo Vazio")
-
-def novoStock(nomeProduto, stock, disponibilidade, numProdutos):
     if numProdutos > 0:
-        print("Qual o ID do produto que deseja adicionar Stock: ")
-        numItemEscolhido = int(input())
-
-        # Utilização de um ciclo 'While' em vez de um 'IF'.
-        # Isto impede que o programa termine se o utilizador errar o ID, obrigando-o a inserir um ID válido para continuar.
-        while numItemEscolhido < 1 or numItemEscolhido > numProdutos:
-            print("ID/Nº Artigo Inválido!")
-            print("Insira um ID entre 1 e " + str(numProdutos))
-            numItemEscolhido = int(input())
-        i = numItemEscolhido - 1
-        print("Está a alterar o stock do Produto: " + "Produto: " + nomeProduto[i] + " | Stock Atual: " + str(stock[i]))
-        quantidadeInserida = validarStock()
-        if quantidadeInserida > 0:
-            stock[i] = stock[i] + quantidadeInserida
-            if stock[i] > 0:
-                disponibilidade[i] = "S"
-            print("✅ Stock adicionado com sucesso!" + "Stock Atualizado: " + str(stock[i]))
-        else:
-            print("Stock inserido tem que ser superior a 0!")
+        print("\n🌻 ===== Catálogo de Produtos ===== 🌻")
+        
+        # Usar múltiplos prints (mais claro que um print com \n múltiplos)  
+        #  # Percorrer todos os produtos
+        for i in range(0, numProdutos, 1):
+            print("\n--- Produto " + str(i + 1) + " ---")
+            print("ID: " + str(i + 1))
+            print("Nome: " + nomeProduto[i])
+            print("Descrição: " + descricaoProduto[i])
+            print("Categoria: " + categoriaProduto[i])
+            print("Preço: " + str(precosProduto[i]) + "€")
+            print("Stock: " + str(stock[i]) + " unidades")
+            
+            # Mostrar estado de disponibilidade
+            if disponibilidade[i] == "S":
+                print("Estado: Disponível ✅")
+            else:
+                print("Estado: Indisponível ❌")
+            print("\n")
+        
+        print("\nTotal de produtos: " + str(numProdutos))
+        print("==================================\n")
     else:
-        print("Catálogo Vazio. Não existe stock!")
+        print("❌ O Catálogo está vazio! ❌")
+
+
+def adicionarStock(nomeProduto, stock, disponibilidade, numProdutos):
+    
+    # Nome mais descritivo (melhor prática) (21/12).
+    # Adiciona stock a produto existente (21/12).
+    
+    if numProdutos > 0:
+        print("\n📥 ===== Adicionar Stock ===== 📥")
+        print("\nInsira o ID do produto para adicionar stock: ")
+        idEscolhido = int(input())
+        
+        while idEscolhido < 1 or idEscolhido > numProdutos:
+            print("❌ ID inválido!")
+            print("Insira um ID entre 1 e " + str(numProdutos))
+            idEscolhido = int(input())
+        
+        i = idEscolhido - 1
+        
+        # Usar múltiplos prints (mais claro que um print com \n múltiplos)
+        print("\n--- Produto Selecionado ---")
+        print("Nome: " + nomeProduto[i])
+        print("Stock atual: " + str(stock[i]) + " unidades")
+        print("---------------------------")
+        
+        print("\nQuantidade a adicionar: ")
+        quantidade = int(input())
+        
+        while quantidade <= 0:
+            print("Erro: Quantidade tem que ser superior a 0!")
+            quantidade = int(input("Quantidade a adicionar: "))
+        
+        stockAntigo = stock[i]
+        stock[i] = stock[i] + quantidade
+        
+        print("\n✅ Stock atualizado com sucesso!")
+        print("Stock anterior: " + str(stockAntigo) + " unidades")
+        print("Quantidade adicionada: " + str(quantidade) + " unidades")
+        print("Novo stock: " + str(stock[i]) + " unidades")
+        
+        # Atualizar disponibilidade se estava esgotado
+        if stockAntigo == 0 and disponibilidade[i] == "N":
+            disponibilidade[i] = "S"
+            print("✅ Produto voltou a ficar disponível!")
+    else:
+        print("❌ Catálogo vazio!")
 
 def removerProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
 
@@ -382,59 +448,96 @@ def verificarDisponibilidade(opcaoOperacao):
     return disponibilidade
 
 def verificarEncomenda(stock, disponibilidade, numProdutos, nomeProduto, precosProduto):
-    encomenda = 0
+    
+    # Processa encomenda de produto (21/12).
+    # Melhorias de apresentação e validações.
+    
     if numProdutos > 0:
-        print("| Catálogo !")
-        for i in range(0, numProdutos - 1 + 1, 1):
+        # Usar múltiplos prints (mais claro que um print com \n múltiplos)
+        print("\n📋 ===== Catálogo para Encomenda ===== 📋")
+        
+        for i in range(0, numProdutos, 1):
             print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Preço: " + str(precosProduto[i]) + "€" + " | Stock: " + str(stock[i]))
-        print("Qual o nº do item/ID que deseja encomendar: ")
+        
+        print("\nQual o nº do item/ID que deseja encomendar: ")
         numItemEscolhido = int(input())
+        
         while numItemEscolhido < 1 or numItemEscolhido > numProdutos:
-            print("ID/Nº Artigo Inválido!")
-            numItemEscolhido = int(input())
+            print("❌ ID/Nº Artigo Inválido!")
+            numItemEscolhido = int(input("Insira ID válido: "))
+        
         i = numItemEscolhido - 1
+        
+        # Mostrar produto selecionado
+        print("\n--- Produto Selecionado ---")
+        print("Nome: " + nomeProduto[i])
+        print("Preço: " + str(precosProduto[i]) + "€")
+        print("Stock disponível: " + str(stock[i]) + " unidades")
+        print("---------------------------")
+        
         if stock[i] == 0:
-            print("❌ Sem stock!" + chr(13) + "Produto indisponível de momento!")
+            print("\n❌ Sem stock!")
+            print("Produto indisponível de momento!")
         else:
-            print("Insira a quantidade a encomendar: ")
-            encomenda = int(input())
-            while encomenda <= 0:
-                print("Quantidade tem que ser superior a 0!")
-                print("Insira a quantidade a encomendar: ")
-                encomenda = int(input())
-            if encomenda <= stock[i]:
-                stock[i] = stock[i] - encomenda
-                print("✅ Produto encomendado!")
-
-                # Isto previne que produtos esgotados apareçam como disponíveis.
-                if stock[i] == 0:
-                    disponibilidade[i] = "N"
-                    print("⚠️ Produto selecionado esgotou!")
+            if disponibilidade[i] == "N":
+                print("\n⚠️ Produto marcado como indisponível!")
+                print("Não é possível encomendar neste momento.")
             else:
-                print("❌ Produto Indisponivel/Sem Stock suficiente!")
+                print("\nInsira a quantidade a encomendar: ")
+                encomenda = int(input())
+                
+                while encomenda <= 0:
+                    print("Erro: Quantidade tem que ser superior a 0!")
+                    print("Insira a quantidade a encomendar: ")
+                    encomenda = int(input())
+                
+                if encomenda <= stock[i]:
+                    stock[i] = stock[i] - encomenda
+                    print("\n✅ Encomenda realizada com sucesso!")
+                    print("Quantidade encomendada: " + str(encomenda) + " unidades")
+                    print("Stock restante: " + str(stock[i]) + " unidades")
+                    
+                    # Atualizar disponibilidade se esgotou
+                    if stock[i] == 0:
+                        disponibilidade[i] = "N"
+                        print("⚠️ Produto esgotou! Marcado como indisponível.")
+                else:
+                    print("\n❌ Stock insuficiente!")
+                    print("Stock disponível: " + str(stock[i]) + " unidades")
+                    print("Quantidade solicitada: " + str(encomenda) + " unidades")
     else:
-        print("Catálogo Vazio. Não existe stock!")
+        print("❌ Catálogo vazio. Não existe stock!")
 
 def verificarEstatisticas(precosProduto, categoriaProduto, stock, disponibilidade, numProdutos):
-    # 21/11 - Funcionalidade da parte 2 do enunciado aplicada de forma parcial.
-    disponivel = 0
-    esgotado = 0
-    total = 0
+    
+    #Mostra estatísticas do catálogo (21/12).
+    
     if numProdutos > 0:
-
-        # Ao invés de percorrer a lista uma vez para contar os "Ativos", outra para os "Esgotados" e mais uma para o "Valor", usei um único ciclo.
-        for i in range(0, numProdutos - 1 + 1, 1):
-            if disponibilidade[i] == "S":
+        disponivel = 0
+        esgotado = 0
+        total = 0
+        
+        # Calcular estatísticas num único ciclo
+        for i in range(0, numProdutos, 1):
+            if disponibilidade[i] == "S" and stock[i] > 0:
                 disponivel = disponivel + 1
-            if stock[i] == 0 or disponibilidade[i] == "N":
-                esgotado = esgotado + 1
+            else:
+                if stock[i] == 0 or disponibilidade[i] == "N":
+                    esgotado = esgotado + 1
+            
             total = total + stock[i] * precosProduto[i]
-        print("Total de Itens: " + str(numProdutos))
+        
+        # Usar múltiplos prints (mais claro que um print com \n múltiplos)
+        print("\n📈 ===== Estatísticas do Catálogo ===== 📈")
+        print("\n--- Resumo Geral ---")
+        print("Total de Produtos registados: " + str(numProdutos))
         print("Produtos Disponíveis: " + str(disponivel))
-        print("Produtos Esgotados: " + str(esgotado))
-        print("Valor em Stock: " + str(total) + "€")
+        print("Produtos Esgotados/Indisponíveis: " + str(esgotado))
+        print("\n--- Valor em Stock ---")
+        print("Valor Total: " + str(total) + "€")
+        print("========================================\n")
     else:
-        print("Catálogo Vazio. Não é possível fornecer estatísticas")
+        print("❌ Catálogo vazio. Não é possível fornecer estatísticas.")
 
 def verificarPreco():
     # 7/11 - Função para validar preço inserido
@@ -540,7 +643,7 @@ while opcaoMenu != 0:
                         else:
                             if opcaoMenu == 7:
                                 # Função que simula a entrada de stock
-                                novoStock(nomeProduto, stock, disponibilidade, numProdutos)
+                                adicionarStock(nomeProduto, stock, disponibilidade, numProdutos)
                             else:
                                 if opcaoMenu == 8:
                                     # Funcionalidade extra da parte 2 enunciado
