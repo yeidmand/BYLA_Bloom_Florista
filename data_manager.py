@@ -55,10 +55,16 @@ def load_products():
         return pd.read_csv(FILE_PRODUCTS, sep=";", dtype= {
             "product_id": str,
             "name_product": str,
-            "stock_quantity": int,
-            "price_unit": float
+            "description": str,
+            "category": str,
+            "quantity_stock": int,
+            "price_unit": float,
+            "available": str
         })
-    return pd.DataFrame()
+    return pd.DataFrame(columns=[
+        "product_id", "name_product", "description", "category",
+        "quantity_stock", "price_unit", "available"
+    ])
 
 
 def save_products(df):
