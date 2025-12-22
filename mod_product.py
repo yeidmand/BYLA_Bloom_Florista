@@ -2,11 +2,9 @@
 
 import pandas as pd
 
-# V3.2: Funções de Input Válido (21/12)
-
 def lerInteiro(mensagem=""):
     
-    # Lê inteiro com proteção contra crashes - inserir texto em vez de número Inteiro (21/12).
+    # Lê inteiro com proteção contra crashes - inserir texto em vez de número Inteiro 
     while True:
         try:
             valor = int(input(mensagem))
@@ -17,7 +15,7 @@ def lerInteiro(mensagem=""):
 
 def lerFloat(mensagem=""):
     
-    # Lê float com proteção contra crashes - inserir texto em vez de número (21/12). 
+    # Lê float com proteção contra crashes - inserir texto em vez de número 
     while True:
         try:
             valor = float(input(mensagem))
@@ -25,31 +23,36 @@ def lerFloat(mensagem=""):
         except ValueError:
             print("❌ Erro: Insira apenas números!")
 
+
+# Função para validar texto não vazio (descrição, categoria, etc.)
+def validarTexto(mensagem):
+    print(mensagem)
+    texto = input()
+    while len(texto) == 0:
+        print("❌ Erro: Campo não pode estar vazio!")
+        print(mensagem)
+        texto = input()
+    return texto
+
+# Função para validar ID do produto
+def validarID(numProdutos):
+    idEscolhido = lerInteiro()
+    while idEscolhido < 1 or idEscolhido > numProdutos:
+        print("❌ ID inválido!")
+        print("Insira um ID entre 1 e " + str(numProdutos))
+        idEscolhido = lerInteiro()
+    return idEscolhido
+
+# Adiciona um novo produto ao catálogo 
 def adicionarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
-    
-    #Adiciona um novo produto ao catálogo (21/12).
-    # Melhorias de apresentação similares a alterarProduto.
-    
+        
     # Usar múltiplos prints (mais claro que um print com \n múltiplos)
     print("Adicionar Novo Produto\n")
     
     # Recolher dados utilizando funções de validação existentes
     nomeProduto.append(validarNome())
-    
-    print("Insira a descrição do produto: ")
-    descricao = input()
-    while len(descricao) == 0:
-        print("Erro: Descrição tem que ter mais que 1 carater!")
-        descricao = input("Insira a descrição: ")
-    descricaoProduto.append(descricao)
-    
-    print("Insira a categoria: ")
-    categoria = input()
-    while len(categoria) == 0:
-        print("Erro: Categoria tem que ter mais que 1 carater!")
-        categoria = input("Insira a categoria: ")
-    categoriaProduto.append(categoria)
-    
+    descricaoProduto.append(validarTexto("Insira a descrição do produto: "))
+    categoriaProduto.append(validarTexto("Insira a categoria: "))
     precosProduto.append(verificarPreco())
     stock.append(validarStock())
     disponibilidade.append(verificarDisponibilidade(1))
@@ -69,24 +72,16 @@ def adicionarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProd
 
 def alterarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
     # NOTA: O stock não é alterado aqui para garantir a integridade das opções 6 e 7 (Saídas/Entradas)
-    # Permite alterar dados de um produto (16/12)
+    # Permite alterar dados de um produto 
     opcaomenu = -1
 
     if numProdutos > 0:
         print("Insira o ID/Nº que pretende alterar: ")
-        numItemEscolhido = lerInteiro()
-        # V3.2: Utiliza função de input seguro para ler o número do item (21/12)
+        numItemEscolhido = validarID(numProdutos)
+        i = numItemEscolhido - 1 # Este Assign serve para não ultrapassar o fim da lista/Array
 
-        while numItemEscolhido < 1 or numItemEscolhido > numProdutos:
-            print("❌ ID/Nº Artigo Inválido!")
-            print("Insira um ID entre 1 e " + str(numProdutos))
-            numItemEscolhido = lerInteiro()
-            # V3.2: Utiliza função de input seguro para ler o número do item (21/12)
 
-        # Este Assign serve para não ultrapassar o fim da lista/Array
-        i = numItemEscolhido - 1
-
-        # Usar múltiplos prints (mais claro que um print com \n múltiplos) (16/12)
+        # Usar múltiplos prints (mais claro que um print com \n múltiplos) 
         print("\n--- Produto Selecionado ---")
         print("Nome: " + nomeProduto[i])
         print("Descrição: " + descricaoProduto[i])
@@ -107,32 +102,16 @@ def alterarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProdut
             print("0. Concluir Alterações")
 
             # Lê a opção do utilizador.
-            # V3.2: Utiliza função de input seguro para ler a opção do menu (21/12)
             opcaomenu = lerInteiro()  
 
-            # V3.1: Refatorado para elif (22/12) - Mesma lógica Flowgorithm, código mais limpo!
             if opcaomenu == 1:
                 nomeProduto[i] = validarNome()
                 print("Nome alterado com sucesso!")
             elif opcaomenu == 2:
-                print("Insira a nova Descrição: ")
-                novaDescricao = input()
-                # Nova validação para descrição não vazia
-                while len(novaDescricao) == 0:
-                    print("Erro: Descrição tem que ter mais que 1 carater!")
-                    print("Insira a nova Descrição: ")
-                    novaDescricao = input()
-                descricaoProduto[i] = novaDescricao
+                descricaoProduto[i] = validarTexto("Insira a nova Descrição: ")
                 print("Descrição alterada com sucesso!")
             elif opcaomenu == 3:
-                print("Escreva nova categoria: ")
-                novaCategoria = input()
-                # Validação para categoria não vazia
-                while len(novaCategoria) == 0:
-                    print("Erro: Categoria tem que ter mais que 1 carater!")
-                    print("Escreva nova categoria: ")
-                    novaCategoria = input()
-                categoriaProduto[i] = novaCategoria
+                categoriaProduto[i] = validarTexto("Escreva nova categoria: ")
                 print("Categoria alterada com sucesso!")
             elif opcaomenu == 4:
                 precosProduto[i] = verificarPreco()
@@ -150,7 +129,7 @@ def alterarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProdut
 
 def filtrarCatalogo(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
     
-    # Filtra produtos por múltiplos critérios (categoria, disponibilidade, preço, stock) (21/12).
+    # Filtra produtos por múltiplos critérios (categoria, disponibilidade, preço, stock) 
     
     opcao = -1
     
@@ -168,17 +147,12 @@ def filtrarCatalogo(nomeProduto, descricaoProduto, categoriaProduto, precosProdu
             print("0 - Menu Principal")
             opcao = lerInteiro("Escolha: ")
             
-            # V3.1: Menu principal refatorado para elif (21/12)
             # OPÇÃO 1: Filtrar por Categoria
             if opcao == 1:
-                print("Insira a categoria pela qual deseja filtrar: ")
-                filtroCategoria = input()
-                
-                while len(filtroCategoria) == 0:
-                    print("A categoria não pode ser vazia. Tente de novo: ")
-                    filtroCategoria = input()
+                filtroCategoria = validarTexto("Insira a categoria pela qual deseja filtrar: ")
                 
                 for i in range(0, numProdutos, 1):
+
                     if categoriaProduto[i] == filtroCategoria:
                         print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Categoria: " + categoriaProduto[i])
                         resultadoFiltro = True
@@ -212,9 +186,7 @@ def filtrarCatalogo(nomeProduto, descricaoProduto, categoriaProduto, precosProdu
                 print("2. Preço acima de")
                 print("3. Preço abaixo de")
                 opcaoPreco = lerInteiro()
-                # V3.2: Utiliza função de input seguro para ler o número do item (21/12)
-                
-                # V3.1: Submenu preço refatorado para elif (21/12)
+               
                 if opcaoPreco >= 1 and opcaoPreco <= 3:
                     filtroPreco = verificarPreco()
                     
@@ -255,7 +227,6 @@ def filtrarCatalogo(nomeProduto, descricaoProduto, categoriaProduto, precosProdu
                 print("3. Stock abaixo de")
                 opcaoStock = lerInteiro()
                 
-                # V3.1: Submenu stock refatorado para elif (22/12)
                 if opcaoStock >= 1 and opcaoStock <= 3:
                     filtroStock = validarStock()
                     
@@ -300,13 +271,13 @@ def filtrarCatalogo(nomeProduto, descricaoProduto, categoriaProduto, precosProdu
     
 
 def listarCatalogo(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
-     #Lista todos os produtos do catálogo (21/12).
+     # Lista todos os produtos do catálogo
 
     if numProdutos > 0:
         print("\n🌻 ===== Catálogo de Produtos ===== 🌻")
         
         # Usar múltiplos prints (mais claro que um print com \n múltiplos)  
-        #  # Percorrer todos os produtos
+        # Percorrer todos os produtos
         for i in range(0, numProdutos, 1):
             print("\n--- Produto " + str(i + 1) + " ---")
             print("ID: " + str(i + 1))
@@ -330,37 +301,25 @@ def listarCatalogo(nomeProduto, descricaoProduto, categoriaProduto, precosProdut
 
 
 def adicionarStock(nomeProduto, stock, disponibilidade, numProdutos):
-    
-    # Nome mais descritivo (melhor prática) (21/12).
-    # Adiciona stock a produto existente (21/12).
+    # Adiciona stock a produto existente 
     
     if numProdutos > 0:
         print("\n📥 ===== Adicionar Stock ===== 📥")
         print("\nInsira o ID do produto para adicionar stock: ")
-        idEscolhido = lerInteiro()
-        # V3.2: Utiliza função de input seguro para ler o número do item (21/12)
-        
-        while idEscolhido < 1 or idEscolhido > numProdutos:
-            print("❌ ID inválido!")
-            print("Insira um ID entre 1 e " + str(numProdutos))
-            idEscolhido = lerInteiro()
-            # V3.2: Utiliza função de input seguro para ler o número do item (21/12)
-        
+        idEscolhido = validarID(numProdutos)
         i = idEscolhido - 1
-        
+
         # Usar múltiplos prints (mais claro que um print com \n múltiplos)
         print("\n--- Produto Selecionado ---")
         print("Nome: " + nomeProduto[i])
         print("Stock atual: " + str(stock[i]) + " unidades")
         print("---------------------------")
         
-        print("\nQuantidade a adicionar: ")
         quantidade = lerInteiro("Quantidade a adicionar: ")
         
         while quantidade <= 0:
             print("Erro: Quantidade tem que ser superior a 0!")
             quantidade = lerInteiro("Quantidade a adicionar: ")
-            # V3.2: Utiliza função de input seguro para ler o número do item (21/12)
         
         stockAntigo = stock[i]
         stock[i] = stock[i] + quantidade
@@ -377,25 +336,14 @@ def adicionarStock(nomeProduto, stock, disponibilidade, numProdutos):
     else:
         print("❌ Catálogo vazio!")
 
+# Remove um produto do catálogo
 def removerProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
-
-    # Remove um produto do catálogo (20/12).
-    # Estrutura baseada em alterarProduto (reutilização de validação)
 
     if numProdutos > 0:
         print("Insira o ID do produto a remover: ")
-        idEscolhido = lerInteiro()
-        # V3.2: Utiliza função de input seguro para ler o número do item (21/12)
-        
-        # Validação de ID (similar a alterarProduto)
-        while idEscolhido < 1 or idEscolhido > numProdutos:
-            print("❌ ID inválido!")
-            print("Insira um ID entre 1 e " + str(numProdutos))
-            idEscolhido = lerInteiro()
-        # V3.2: Utiliza função de input seguro para ler o número do item (21/12)
-
+        idEscolhido = validarID(numProdutos)
         i = idEscolhido - 1
-        
+
         # Usar múltiplos prints (mais claro que um print com \n múltiplos)
         print("\n⚠️  Vai remover o seguinte produto:")
         print("--- Produto a Remover ---")
@@ -430,22 +378,19 @@ def removerProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProdut
     return numProdutos
 
 
+# Função que valida se o nome do produto não é vazio
 def validarNome():
     nome = ""
-
-    # 21/11 - Adicionada maior robustez após ter questionado o professor.
-    # 21/11 - Utilizar o len (da documentação oficial) para ler o tamanho do texto e não aceitar vazio.
     print("Insira nome do Produto: ")
     nome = input()
     while len(nome) == 0:
         print("Erro: Nome tem que ter mais que 1 carater!")
         print("Insira nome do Produto: ")
-        nome = input()
-    
+        nome = input() 
     return nome
 
 
-    # Função para validar stock (evitar negativos) - atualizada 21/12
+# Função para validar stock (evitar negativos) 
 def validarStock():
     print("Insira a quantidade de produto para stock: ")
     stock = lerInteiro()
@@ -455,22 +400,17 @@ def validarStock():
     return stock
 
 
+# Função que muda a pergunta consoante o parâmetro (1, 2, 3)
 def verificarDisponibilidade(opcaoOperacao):
-    
-    # Função que muda a pergunta consoante o parâmetro (1, 2, 3)
-    # V3.1: Refatorado para elif + aceitar minúsculas (22/12)
     
     disponibilidade = ""
 
-    # V3.1: Refatorado else/if → elif (21/12)
     if opcaoOperacao == 1:
         print("Informe se está disponível(S/N): ")
     elif opcaoOperacao == 2:
         print("Disponibilidade desejada (S - Disponível / N - Indisponível): ")
     elif opcaoOperacao == 3:
         print("⚠️ Tem a certeza que deseja remover o produto(S/N)?")
-
-    # V3.1: Aceitar minúsculas (21/12)
     disponibilidade = input().upper()  
     
     while disponibilidade != "S" and disponibilidade != "N":
@@ -481,7 +421,7 @@ def verificarDisponibilidade(opcaoOperacao):
 
 def verificarEncomenda(stock, disponibilidade, numProdutos, nomeProduto, precosProduto):
     
-    # Processa encomenda de produto (21/12).
+    # Processa encomenda de produto 
     # Melhorias de apresentação e validações.
     
     if numProdutos > 0:
@@ -517,13 +457,11 @@ def verificarEncomenda(stock, disponibilidade, numProdutos, nomeProduto, precosP
             else:
                 print("\nInsira a quantidade a encomendar: ")
                 encomenda = lerInteiro()
-                # V3.2: Utiliza função de input seguro para ler o número do item (21/12)
 
                 while encomenda <= 0:
                     print("Erro: Quantidade tem que ser superior a 0!")
                     print("Insira a quantidade a encomendar: ")
                     encomenda = lerInteiro()
-                    # V3.2: Utiliza função de input seguro para ler o número do item (21/12)
 
                 if encomenda <= stock[i]:
                     stock[i] = stock[i] - encomenda
@@ -542,9 +480,9 @@ def verificarEncomenda(stock, disponibilidade, numProdutos, nomeProduto, precosP
     else:
         print("❌ Catálogo vazio. Não existe stock!")
 
+
+# Função para mostrar estatísticas do catálogo
 def verificarEstatisticas(precosProduto, categoriaProduto, stock, disponibilidade, numProdutos):
-    
-    #Mostra estatísticas do catálogo (21/12).
     
     if numProdutos > 0:
         disponivel = 0
@@ -573,7 +511,7 @@ def verificarEstatisticas(precosProduto, categoriaProduto, stock, disponibilidad
     else:
         print("❌ Catálogo vazio. Não é possível fornecer estatísticas.")
 
-# Função para validar preço (evitar negativos) - atualizada 21/12
+# Função para validar preço (evitar negativos) 
 def verificarPreco():
     print("Insira o Preço: ")
     preco =lerFloat()
@@ -584,7 +522,7 @@ def verificarPreco():
 
 # Main
 # Arrays para armazenar produtos, os seus detalhes e preço
-# Mudei de arrays fixos para listas dinâmicas para não ter limite de 10 produtos (13/12)
+# Mudei de arrays fixos para listas dinâmicas para não ter limite de 10 produtos
 stock = [] 
 nomeProduto = [] 
 descricaoProduto = []
@@ -600,7 +538,7 @@ opcaoMenu = -1
 numProdutos = 3
 
 # Dados iniciais para testes - 3 produtos pré-definidos
-# Uso .append() para adicionar às listas vazias (13/12)
+# Uso .append() para adicionar às listas vazias 
 
 # Produto 1: Girassol
 nomeProduto.append("Girassol")
@@ -647,10 +585,8 @@ while opcaoMenu != 0:
     print("0. Sair 👋")
     print()
     
-    # V3.2: Utiliza função de input seguro para ler a opção do menu (21/12)
     opcaoMenu = lerInteiro("Escolha uma opção: ")
     
-    # V3.1: Refatorado para elif (22/12) - Mesma lógica Flowgorithm, código mais limpo
     if opcaoMenu == 1:
         # Chama função para criar o registo do item
         numProdutos = adicionarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos)
