@@ -1,6 +1,6 @@
-product_id;name_product;quantity_stock;price_unit
-2001;Flores variadas;250;3
-2002;Rosas;500;5
-2003;Lirios;150;12
-2004;Tuplipas;175;15
-2005;Margaridas;200;8
+product_id;name_product;quantity_stock;price_unit;available
+2001;Flores variadas;250;3.0;S
+2002;Rosas;500;5.0;S
+2003;Lirios;152;12.0;S
+2004;Tuplipas;175;15.0;S
+2005;Margaridas;200;8.0;S
