@@ -230,7 +230,8 @@ while MenuInitial:
                                     save_orders(orders_df)
 
                                     # Declara a anulação dos artigos
-                                    order_it.loc[order_it['order_id'] == userInput, 'status'] = 'canceled' 
+                                    order_it.loc[order_it['order_id'] == userInput, 'status'] = 'canceled'
+                                    order_it.loc[order_it['order_id'] == userInput, 'quantity_returned'] = order_it["quantity_ordered"]
                                     save_order_items(order_it)
 
                                     order_canceled = order_it.loc[ order_it['order_id'] == userInput, ["product_id", "quantity_ordered"] ]
