@@ -39,6 +39,7 @@ def EditOrder():
     validOption = False
     
     while not validOption:
+
         print("===Editar Pedido===")
         print("1. Editar nome e apelido do destinatário")
         print("2. Editar contacto do destinatário")
@@ -50,8 +51,10 @@ def EditOrder():
         print("7. Validar automaticamente a encomenda")
         print("8. Voltar ao menu anterior")
         choice = input("Selecione uma opção: ")
-        validOption = ut.validoption(choice, ['1', '2', '3', '4', '5', '6', '7', '8'])
-        if not validOption:
+        
+        if choice in ['1', '2', '3', '4', '5', '6', '7', '8']:
+            validOption = True
+        else:
             print("\nOpção inválida. Por favor, tente novamente.\n")
     return choice
      
@@ -64,6 +67,10 @@ while MenuInitial:
     order_it = load_order_items()
     products_df = load_products()
     order_events_df = load_order_events()
+
+    #Diccionario dos nomes dos produto por chave = product_id
+    products_name = dict(zip(products_df['product_id'], products_df['name_product']))
+
 
     if option == '1':
         
@@ -262,17 +269,25 @@ while MenuInitial:
                                     order_to_validate = orders_df[orders_df['order_id'] == userInput]
                                     is_valid, reason = ut.addressValidation(order_to_validate)
                                     if is_valid:
-                                        print("Morada válida.")
+                                        print("\n======================================")
+                                        print("===Morada válida===")
+                                        print("======================================\n")
+                                        
                                         is_valid, reason = ut.recipientValidation(order_to_validate)
                                         if is_valid:
-                                            print("Dados do destinatário válidos.")
+                                            print("=======================================")
+                                            print("===Dados do destinatário válidos===")
+                                            print("=======================================\n")
 
                                             missing_products = []
                                             insufficient_stock = []
                                             is_valid, reason, missing_products, insufficient_stock = ut.stockValidation(order_items_filtered, products_df)
 
                                             if is_valid:
-                                                print("Stock dos produtos válido.")
+                                                print("======================================")
+                                                print("===Stock dos protos válidos===")
+                                                print("======================================\n")
+                                                
                                                 orders_df.loc[orders_df['order_id'] == userInput, 'order_status'] = 'validated'
                                                 save_orders(orders_df)
                                                 order_it.loc[order_it['order_id'] == userInput, 'status'] = 'validated'
@@ -292,11 +307,16 @@ while MenuInitial:
                                                 editMenu = False
                                             else:
                                                 qty_prod = order_it[order_it['order_id'] == userInput].shape[0]
-                                                print(f"Produtos não disponíveis. Motivo: {reason}")
+                                                print(f"Encomenda inválida. Motivo: {reason}")
                                                 if missing_products:
-                                                    print(f"Produtos não disponíveis: {', '.join(missing_products)}")
+                                                    print(f"Produtos não disponíveis:\n"
+                                                          + "".join(f"SKU: {sku} " + "Produto: " + products_name[sku] + "\n" for sku in missing_products)
+                                                        )
                                                 if insufficient_stock:
-                                                    print(f"Produtos com stock insuficiente: {', '.join(insufficient_stock)}")
+                                                    print(
+                                                        "Produtos com stock insuficiente:\n"
+                                                         + "".join(f"SKU: {sku} " + "Produto: " + products_name[sku] + "\n" for sku in insufficient_stock)
+                                                        )
                                                 if qty_prod == len(missing_products):
                                                     print(f" A encomenda {userInput} tem de ser canceladapor indisponibilidade de todos os seus produtos.")
                                                     cancellation_reason = input("Insira o motivo da rejeição da encomenda: ")
@@ -328,33 +348,92 @@ while MenuInitial:
                                                     save_order_events(order_events_df)
 
                                                 elif qty_prod != len(missing_products):
-                                                    print("Deseja preparar a encomenda parcialmente? (s/n)")
-                                                    option_validation = input().strip().lower()
-                                                    if option_validation == 's':
-                                                        if insufficient_stock:
-                                                            complet_data_order = order_items_filtered.merge(products_df[["product_id", "quantity_stock", "available"]], on="product_id", how="left")
-                                                            
-                                                            for _, item in complet_data_order.iterrows():
-                                                                qty_ordered = item["quantity_ordered"]
-                                                                qty_stock = item["quantity_stock"]
-                                                                if item["product_id"] in missing_products:
-                                                                    order_it.loc[(order_it["order_id"] == userInput and order_it["product_id"] == item["product_id"]), "status"] = "canceled"
-                                                                    order_it.loc[(order_it["order_id"] == userInput and order_it["product_id"] == item["product_id"]), "quantity_returned"] = qty_ordered
+                                                    OpenMenu = True
+                                                    while OpenMenu:
+                                                    
+                                                        print("Deseja preparar a encomenda parcialmente? (s/n)")
+                                                        option_validation = input().strip().lower()
+                                                        if option_validation in ['s', 'n']:
+                                                            OpenMenu = False
+                                                            if option_validation == 's':
+                                                                if insufficient_stock:
+                                                                    print("======================================")
+                                                                    print("===Encomenda preparada parcialmente===")
+                                                                    print("======================================")
+                                                                    complet_data_order = order_items_filtered.merge(products_df[["product_id", "quantity_stock", "available"]], on="product_id", how="left")
+                                                                    
+                                                                    for _, item in complet_data_order.iterrows():
+                                                                        qty_ordered = item["quantity_ordered"]
+                                                                        qty_stock = item["quantity_stock"]
+                                                                        if item["product_id"] in missing_products:
+                                                                            order_it.loc[(order_it["order_id"] == userInput) & (order_it["product_id"] == item["product_id"]), "status"] = "canceled"
+                                                                            order_it.loc[(order_it["order_id"] == userInput & order_it["product_id"] == item["product_id"]), "quantity_returned"] = qty_ordered
+                                                                            save_order_items(order_it)
+                                                                            products_df.loc[products_df["product_id"] == item["product_id"], "quantity_stock"] += qty_ordered
+                                                                            save_products(products_df)
+                                                                        elif item["product_id"] in insufficient_stock:
+                                                                            order_it.loc[(order_it["order_id"] == userInput) & (order_it["product_id"] == item["product_id"]), "status"] = "partially shipped"
+                                                                            order_it.loc[(order_it["order_id"] == userInput) & (order_it["product_id"] == item["product_id"]), "quantity_ordered"] = qty_stock
+                                                                            order_it.loc[(order_it["order_id"] == userInput) & (order_it["product_id"] == item["product_id"]), "quantity_returned"] =  qty_ordered - qty_stock
+                                                                            save_order_items(order_it)
+                                                                            products_df.loc[products_df["product_id"] == item["product_id"], "quantity_stock"] = 0
+                                                                            products_df.loc[products_df["product_id"] == item["product_id"], "available"] = "N"
+                                                                            save_products(products_df)
+                                                                        else:
+                                                                            order_it.loc[(order_it["order_id"] == userInput) & (order_it["product_id"] == item["product_id"]), "status"] = "shipped"
+                                                                            products_df.loc[products_df["product_id"] == item["product_id"], "quantity_stock"] = qty_stock - qty_ordered
+                                                                            save_products(products_df)
+                                                                    orders_df.loc[orders_df['order_id'] == userInput, 'order_status'] = 'partially shipped'
+                                                                    save_orders(orders_df)
+
+                                                                    #Registo de Evento:
+                                                                    new_event = {
+                                                                        'event_id': 'EV' + dtime.datetime.now().strftime("%Y%m%d%H%M%S"),
+                                                                        'order_id': userInput,
+                                                                        'event_type': 'auto_validate_order',
+                                                                        'timestamp': dtime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                                                        'login': Manager,
+                                                                        'details': "Encomenda preparada parcialmente com sucesso."
+                                                                    }
+
+                                                                    order_events_df = pd.concat([order_events_df, pd.DataFrame([new_event])], ignore_index=True)
+                                                                    save_order_events(order_events_df)
+                                                                        
+                                                                    print("Encomenda preparada parcialmente com sucesso.")
+                                                                elif missing_products:
+                                                                    orders_df.loc[orders_df['order_id'] == userInput, "order_status"] = "partially shipped"
+                                                                    save_orders(orders_df)
+                                                                    order_it.loc[order_it['order_id'] == userInput, "status"] = "shipped"
                                                                     save_order_items(order_it)
-                                                                    products_df.loc[products_df["product_id"] == item["product_id"], "quantity_stock"] += qty_ordered
-                                                                    save_products(products_df)
-                                                                elif item["product_id"] in insufficient_stock:
-                                                                    order_it.loc[(order_it["order_id"] == userInput and order_it["product_id"] == item["product_id"]), "status"] = "partially shipped"
-                                                                    order_it.loc[(order_it["order_id"] == userInput and order_it["product_id"] == item["product_id"]), "quantity_ordered"] = qty_stock
-                                                                    order_it.loc[(order_it["order_id"] == userInput and order_it["product_id"] == item["product_id"]), "quantity_returned"] =  qty_ordered - qty_stock
-                                                                    save_order_items(order_it)
-                                                                    products_df.loc[products_df["product_id"] == item["product_id"], "quantity_stock"] = 0
-                                                                    products_df.loc[products_df["product_id"] == item["product_id"], "available"] = "N"
-                                                                    save_products(products_df)
-                                                                else:
-                                                                    order_it.loc[(order_it["order_id"] == userInput and order_it["product_id"] == item["product_id"]), "status"] = "shipped"
-                                                                    products_df.loc[products_df["product_id"] == item["product_id"], "quantity_stock"] = qty_stock - qty_ordered
-                                                                    save_products(products_df)
+                                                                    print("======================================")
+                                                                    print("===Encomenda preparada parcialmente===")
+                                                                    print("======================================")
+                                                                    
+
+                                                                    for sku in missing_products:
+                                                                        order_it.loc[(order_it["order_id"] == userInput) & (order_it["product_id"] == sku), "status"] = "canceled"
+                                                                        qty_ordered = order_it.loc[(order_it["order_id"] == userInput) & (order_it["product_id"] == sku), "quantity_ordered"]
+                                                                        products_df.loc[products_df["product_id"] == sku, "quantity_stock"] += qty_ordered
+                                                                        save_products(products_df)
+                                                                        save_order_items(order_it)
+                                                                        
+                                                                        
+                                                                    
+                                                                    #Registo de Evento:
+                                                                    new_event = {
+                                                                        'event_id': 'EV' + dtime.datetime.now().strftime("%Y%m%d%H%M%S"),
+                                                                        'order_id': userInput,
+                                                                        'event_type': 'auto_validate_order',
+                                                                        'timestamp': dtime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                                                        'login': Manager,
+                                                                        'details': "Encomenda preparada parcialmente com sucesso."
+                                                                    }
+
+                                                                    order_events_df = pd.concat([order_events_df, pd.DataFrame([new_event])], ignore_index=True)
+                                                                    save_order_events(order_events_df)
+                                                        else:
+                                                            print("Opção inválida. Tente novamente.")
+                                                    
                                         else:
                                             print(f"Dados do destinatário inválidos. Motivo: {reason}")
                                             print("Voltando ao menu de edição...")                            
@@ -395,18 +474,11 @@ while MenuInitial:
                                                 elif option_validation == 'n':
                                                     print("Voltando ao menu de edição...")
                                             else:
-                                                print("Opção inválida. Tente novamente.")
-                                                
+                                                print("Opção inválida. Tente novamente.")                                            
                                     
-
                                 else:
                                     print("Apenas O Supervisor Senior podem rejeitar encomendas.")
-                                    print("Voltando ao menu de edição...")                
-                                    
-                            
-                        
-                        
-                        
+                                    print("Voltando ao menu de edição...")
                         
                             elif editChoice == '8':
                                 editMenu = False

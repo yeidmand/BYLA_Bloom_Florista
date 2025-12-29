@@ -63,10 +63,6 @@ def showOrderStatus(df_orders): # Mostrar o estado de todos os pedidos
         print(f"ID: {row['order_id']} | Estado: {row['order_status']}")
     return
 
-# Validar se a opção escolhida está dentro das opções válidas
-def validoption(choice, valid_options):
-    return choice in valid_options
-
 # Mostrar os detalhes do destinatário de um pedido específico
 def showDetailsDestinatario(order_details):
     if order_details.empty:

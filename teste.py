@@ -1,5 +1,11 @@
 import pandas as pd
 import utils as ut
+import data_manager as dm
+
+f = dm.load_orders()
+print(f)
+
+
 
 # DataFrame de pedidos
 orders_df = pd.DataFrame([
