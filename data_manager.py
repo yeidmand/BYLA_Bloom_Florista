@@ -55,7 +55,8 @@ def load_products():
             "product_id": str,
             "name_product": str,
             "stock_quantity": int,
-            "price_unit": float
+            "price_unit": float,
+            "available": str
         })
     return pd.DataFrame()
 
