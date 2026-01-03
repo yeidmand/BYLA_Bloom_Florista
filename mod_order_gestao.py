@@ -79,7 +79,7 @@ while MenuInitial:
             pending_orders = orders_df[orders_df['order_status'] == 'pending']
             if pending_orders.empty:
                 print("======================================")
-                print("==Não existem pedidos pendentes===")
+                print("== Não existem pedidos pendentes ===")
                 print("======================================")
                 insideMenu = False
                 continue
@@ -261,7 +261,7 @@ while MenuInitial:
                                                 print("======================================\n")
                                                 
                                                 orders_df.loc[orders_df['order_id'] == userInput, 'order_status'] = 'validated'
-                                                order_it.loc[order_it['order_id'] == userInput, 'status'] = 'validated'
+                                                order_it.loc[order_it['order_id'] == userInput, 'status'] = 'shipped'
                                                 save_orders(orders_df)
                                                 save_order_items(order_it)
                                                 print("Encomenda validada automaticamente com sucesso.\n")
@@ -396,5 +396,56 @@ while MenuInitial:
     elif option == '6':
         MenuInitial = False
         print("A regressar ao menu principal...")
-    else:
-        pass
+        #Return
+
+    elif option == '2':
+        validated_orders = orders_df[orders_df['order_status'].isin(['validated', 'partially shipped'])].reset_index(drop=True)
+        print("\n======================================")
+        print("=== Encomendas Validadas ===")
+        print("======================================")
+
+        if validated_orders.empty:
+            print("\nNão existem encomendas validadas ou parcialmente enviadas.\n")
+        else:
+            i = 0
+            total_orders = len(validated_orders)
+            print("\n======================================")
+            print(f"=== Total de encomendas validadas: {total_orders}===")
+            print("======================================")
+
+
+            while i < total_orders:
+                order = validated_orders.iloc[i]
+
+                print("\n======================================")
+                print(f"ID: {order['order_id']} | Estado: {order['order_status']}")
+                print(f"Destinatário: {order['name']} | Contacto: {order['contact']}")
+                print(f"Morada: {order['address']}")
+                print(f"Código Postal: {order['ZP1']}-{order['ZP2']}")
+                print("======================================")
+
+
+                if i < total_orders - 1:
+                    # Ainda há próximas encomendas
+                    while True:
+                        print("Escolha uma das seguintes opções")
+                        print("1. Seguinte encomenda")
+                        print("2. Sair")
+                        resp = input("Opção: ").strip().lower()
+                        if resp == '1':
+                            i += 1      # passa ao próximo pedido
+                            break
+                        elif resp == '2':
+                            print("A regressar ao menu inicial...")
+                            i = total_orders   # força saída do while
+                            break
+                        else:
+                            print("Opção inválida. Escreva '1' para ver a seguiente encomenda\n ou '2' para sair.")
+                else:
+                    # Última encomenda
+                    input("Última encomenda. Prima ENTER para voltar ao menu inicial.")
+                    i = total_orders
+
+    elif option == '3':
+        canceled_orders = orders_df[orders_df['order_status'] == 'canceled'].reset_index(drop=True)
+        
