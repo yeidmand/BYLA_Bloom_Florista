@@ -55,7 +55,8 @@ def load_products():
             "product_id": str,
             "name_product": str,
             "stock_quantity": int,
-            "price_unit": float
+            "price_unit": float,
+            "available": str
         })
     return pd.DataFrame()
 
@@ -134,7 +135,9 @@ def load_order_items():
                 "product_id": str,
                 "quantity_ordered": int,
                 "price_unit": float,
-                "subtotal": float
+                "subtotal": float,
+                "status": str,
+                "quantity_returned": "Int64"
             }
         )
     return pd.DataFrame(

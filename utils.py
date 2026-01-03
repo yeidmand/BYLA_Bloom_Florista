@@ -1,59 +1,56 @@
 import pandas as pd
+import datetime as dtime
 
 df_zone = pd.read_csv("zp_zones.csv", sep=";", dtype=str)
 codes_list = df_zone['Codes'].tolist()
-
 
 # Mostrar os detalhes de um pedido específico, incluindo informações do pedido e itens associados.
 def showDetailsOrder(order_details, order_items_df, products_df):
     """
     Mostrar os detalhes de um pedido específico, incluindo informações do pedido e itens associados.
-    Args:
-        order_details (pd.DataFrame): DataFrame contendo os detalhes do pedido.
-        order_items_df (pd.DataFrame): DataFrame contendo os itens do pedido.
-        products_df (pd.DataFrame): DataFrame contendo os produtos disponíveis.
+    Mostra apenas os itens cujo status é diferente de 'canceled'.
     """
     if order_details.empty:
         print("Erro: Detalhes do pedido não encontrados.")
         return
 
-    # Parte de los detalles del pedido
-    print("=== Detalhes do Pedido ===")
-    details = {"Numero do Pedido": order_details.iloc[0]['order_id'],
-                "Nome do Cliente": order_details.iloc[0]['name'],
-                "Contacto": order_details.iloc[0]['contact'],
-                "Morada": order_details.iloc[0]['address'],
-                "Codigo Postal": f"{order_details.iloc[0]['ZP1']}-{order_details.iloc[0]['ZP2']}",
-                "Estado do Pedido": order_details.iloc[0]['order_status'],
-                }
+    # Detalhes do pedido
+    print("\n=== Detalhes do Pedido ===")
+    details = {
+        "Numero do Pedido": order_details.iloc[0]['order_id'],
+        "Nome do Cliente": order_details.iloc[0]['name'],
+        "Contacto": order_details.iloc[0]['contact'],
+        "Morada": order_details.iloc[0]['address'],
+        "Codigo Postal": f"{order_details.iloc[0]['ZP1']}-{order_details.iloc[0]['ZP2']}",
+        "Estado do Pedido": order_details.iloc[0]['order_status'],
+    }
     for key, value in details.items():
         print(f"{key}: {value}")
 
-    """
-    Parte dos itens do pedido
-    Mostrar os itens do pedido com os nomes dos produtos correspondentes.
-    Args:
-        order_items_df (pd.DataFrame): DataFrame contendo os itens do pedido.
-        products_df (pd.DataFrame): DataFrame contendo os produtos disponíveis.
-    O a função .merge() é usada para combinar os DataFrames com base no 'product_id'.
-    Neste caso, usamos o merge para adicionar o 'name_product' do DataFrame de produtos ao DataFrame de itens do pedido,`
-    com o obejtivo de ter um dataframe completo com todas as informações necessárias para exibir os detalhes dos itens do pedido.
-    """
+    # Filtrar itens não cancelados
+    if 'status' in order_items_df.columns:
+        order_items_df = order_items_df[order_items_df['status'] != 'canceled']
+
+    # Merge com produtos para ter o nome
     merged_items = order_items_df.merge(
         products_df[["product_id", "name_product"]],
         on='product_id',
         how='left'
     )
 
-    print("\n=== Itens do Pedido ===")
+    print("=== Itens do Pedido ===")
     if merged_items.empty:
-        print("Nenhum item encontrado para este pedido.")
+        print("Nenhum item encontrado para este pedido (todos os itens podem estar cancelados).")
     else:
-        # Iterar sobre os itens mesclados e exibir os detalhes
         for _, item in merged_items.iterrows():
             product_name = item['name_product'] if pd.notna(item['name_product']) else f"Produto ID: {item['product_id']} (Nome não encontrado)"
-            print(f"Produto: {product_name} | Quantidade: {item['quantity_ordered']} | Preço Unitário: {item['price_unit']}€ | Subtotal: {item['subtotal']}€")
-        print(f"---------------------------------------------------Total do Pedido: {merged_items['subtotal'].sum()}€")
+            print(
+                f"Produto: {product_name} | "
+                f"Quantidade: {item['quantity_ordered']} | "
+                f"Preço Unitário: {item['price_unit']}€ | "
+                f"Subtotal: {item['subtotal']}€"
+            )
+        print(f"---------------------------------------------------Total do Pedido: {merged_items['subtotal'].sum()}€\n")
     return
 
 # Mostrar o estado de todos os pedidos
@@ -62,10 +59,6 @@ def showOrderStatus(df_orders): # Mostrar o estado de todos os pedidos
     for _, row in df_orders.iterrows():
         print(f"ID: {row['order_id']} | Estado: {row['order_status']}")
     return
-
-# Validar se a opção escolhida está dentro das opções válidas
-def validoption(choice, valid_options):
-    return choice in valid_options
 
 # Mostrar os detalhes do destinatário de um pedido específico
 def showDetailsDestinatario(order_details):
@@ -124,17 +117,18 @@ def recipientValidation(order_details):
 # Validar o stock dos produtos de um pedido específico
 def stockValidation(order_items_df, products_df):
     merged_items = order_items_df.merge(
-        products_df[["product_id", "name_product", "quantity_stock"]],
+        products_df[["product_id", "name_product", "quantity_stock", "available"]],
         on='product_id',
         how='left'
     )
     stockValid = True
     reason = "Válido"
+    # Listas para armazenar produtos em falta e com stock insuficiente
     missing_products = []
     insufficient_stock = []
 
     for _, item in merged_items.iterrows():
-        if pd.isna(item['name_product']):
+        if item['available'] == "N":
             missing_products.append(item['product_id'])
         elif item['quantity_ordered'] > item['quantity_stock']:
             insufficient_stock.append(item['product_id'])
@@ -150,3 +144,50 @@ def stockValidation(order_items_df, products_df):
         reason = "Stock insuficiente para o(s) produto(s)."
 
     return stockValid, reason, missing_products, insufficient_stock
+
+# return Stock, funçao que recebe um df de order_it e adiciona os items cancelados a products_df
+def return_stock (order_items_df_canceled, products_df):
+   
+    for _, item in order_items_df_canceled.iterrows():
+        pid = item["product_id"]
+        ordered = int(item["quantity_ordered"])
+        
+        products_df.loc[products_df["product_id"] == pid, "quantity_stock"] += ordered
+        
+    return products_df
+
+#Função de rejeitar encomenda
+def reject_order(order_id, orders_df, order_it, products_df, order_events_df, manager, save_orders, save_order_items, save_products, save_order_events):
+    # Perguntar motivo
+    cancellation_reason = input("Insira o motivo da rejeição da encomenda: ")
+
+    # Atualizar encomenda
+    orders_df.loc[orders_df['order_id'] == order_id, 'order_reason'] = cancellation_reason
+    orders_df.loc[orders_df['order_id'] == order_id, 'order_status'] = 'canceled'
+    save_orders(orders_df)
+
+    # Atualizar artigos
+    order_it.loc[order_it['order_id'] == order_id, 'status'] = 'canceled'
+    order_it.loc[order_it['order_id'] == order_id, 'quantity_returned'] = order_it["quantity_ordered"]
+    save_order_items(order_it)
+
+    # Devolver stock
+    order_canceled = order_it.loc[order_it['order_id'] == order_id, ["product_id", "quantity_ordered"]]
+    products_df = return_stock(order_canceled, products_df)  # função que já tens em utils
+    save_products(products_df)
+
+    print("Encomenda rejeitada com sucesso.")
+
+    # Registar evento
+    new_event = {
+        'event_id': 'EV' + dtime.datetime.now().strftime("%Y%m%d%H%M%S"),
+        'order_id': order_id,
+        'event_type': 'reject_order',
+        'timestamp': dtime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        'login': manager,
+        'details': "Encomenda rejeitada pelo gestor."
+    }
+    order_events_df = pd.concat([order_events_df, pd.DataFrame([new_event])], ignore_index=True)
+    save_order_events(order_events_df)
+
+    return orders_df, order_it, products_df, order_events_df
