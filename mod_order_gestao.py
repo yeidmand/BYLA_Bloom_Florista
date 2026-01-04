@@ -6,410 +6,305 @@ from data_manager import load_orders, save_orders, load_products, save_products,
 import utils as ut
 import random as rd
 
+Manager = "SUPm" #ELIMINAR DEPOIS
 
-#def ModOrderGestao(Manager):
-Manager = "SUPm" #ATENCION ELIMNAR AL INTEGRAR
-if Manager == "SUPm":
-    isSupervisor = True
-else:
-    isSupervisor = False
+def ModOrderGestao(Manager):
+    
+    if Manager == "SUPm":
+        isSupervisor = True
+    else:
+        isSupervisor = False
 
-def initOrderManagementMenu():
-        ValidOption = False
+    def initOrderManagementMenu():
+            ValidOption = False
 
-        while ValidOption == False:
+            while ValidOption == False:
 
-            print("\n=== Gestão de Pedidos ===")
-            print("1. Ver Pedidos Pendentes")
-            print("2. Ver Pedidos Validados")
-            print("3. Ver pedidos cancelados")
-            print("4. Atribuir estafeta")
-            print("5. Filtrar pedidos")
-            print("6. Voltar ao menu principal")
+                print("\n=== Gestão de Pedidos ===")
+                print("1. Ver Pedidos Pendentes")
+                print("2. Ver Pedidos Validados")
+                print("3. Ver pedidos cancelados")
+                print("4. Atribuir estafeta")
+                print("5. Filtrar pedidos")
+                print("6. Voltar ao menu principal")
+                choice = input("Selecione uma opção: ")
+                if choice in ['1', '2', '3', '4', '5', '6']:
+                    ValidOption = True
+                else:
+                    print("Opção inválida. Por favor, tente novamente.")    
+
+
+            return choice
+
+    #Menu Editar Pedidos
+    def EditOrder(IdOrder):
+        validOption = False
+        
+        while not validOption:
+
+            print(f"===Editar Pedido: {IdOrder} ===")
+            print("1. Editar nome e apelido do destinatário")
+            print("2. Editar contacto do destinatário")
+            print("3. Editar morada do destinatário")
+            print("4. Editar código postal do destinatário")
+            print("5. Voltar ao menu anterior")
+            print("===Validação de Encomendas===")
+            print("6. Rejeitar encomenda")
+            print("7. Validar automaticamente a encomenda")
+            print("8. Voltar ao menu anterior")
             choice = input("Selecione uma opção: ")
-            if choice in ['1', '2', '3', '4', '5', '6']:
-                ValidOption = True
+            
+            if choice in ['1', '2', '3', '4', '5', '6', '7', '8']:
+                validOption = True
             else:
-                print("Opção inválida. Por favor, tente novamente.")    
-
-
+                print("\nOpção inválida. Por favor, tente novamente.\n")
         return choice
 
-#Menu Editar Pedidos
-def EditOrder(IdOrder):
-    validOption = False
-    
-    while not validOption:
-
-        print(f"===Editar Pedido: {IdOrder} ===")
-        print("1. Editar nome e apelido do destinatário")
-        print("2. Editar contacto do destinatário")
-        print("3. Editar morada do destinatário")
-        print("4. Editar código postal do destinatário")
-        print("5. Voltar ao menu anterior")
-        print("===Validação de Encomendas===")
-        print("6. Rejeitar encomenda")
-        print("7. Validar automaticamente a encomenda")
-        print("8. Voltar ao menu anterior")
-        choice = input("Selecione uma opção: ")
-        
-        if choice in ['1', '2', '3', '4', '5', '6', '7', '8']:
-            validOption = True
-        else:
-            print("\nOpção inválida. Por favor, tente novamente.\n")
-    return choice
-
-#Filtrar por zona
-def MenuFilter():
-    validOption = True
-    while validOption:
-        print("== Menu Filtrar Encomendas por Zona ==")
-        print("="*50 + "\n")
-        print("Escolha uma das seguintes opções para ver Encomendas por Zona")
-        print("1. Centro")
-        print("2. Norte")
-        print("3. Sul")
-        print("4. Este")
-        print("5. Oeste")
-        print("6. Fora do limite")
-        print("7. Voltar ao menu anterior")
-        option = input("Opção: ").strip()
-        
-        if option in ['1', '2', '3', '4', '5', '6', '7']:
-            validOption = False
-            return option
-        else:
-            print("Opção inválida. Por favor, tente novamente.")
-
-# Extração de csv como Data Frame #
-df_zone = pd.read_csv("zp_zones.csv", sep=";", dtype=str)
-df_user_worker = load_user_work_profil()
-orders_df = load_orders()
-order_it = load_order_items()
-products_df = load_products()
-order_events_df = load_order_events()
-#----------------------------------#
-
-# INICIO DE PORTAL #
-MenuInitial = True
-
-while MenuInitial:
-
-    option = initOrderManagementMenu()
-    #Diccionario dos nomes dos produto por chave = product_id
-    products_name = dict(zip(products_df['product_id'], products_df['name_product']))
-
-    if option == '1':
-        
-        insideMenu = True
-        while insideMenu:
-            pending_orders = orders_df[orders_df['order_status'] == 'pending']
-            if pending_orders.empty:
-                print("======================================")
-                print("== Não existem pedidos pendentes ===")
-                print("======================================")
-                insideMenu = False
-                continue
+    #Filtrar por zona
+    def MenuFilter():
+        validOption = True
+        while validOption:
+            print("== Menu Filtrar Encomendas por Zona ==")
+            print("="*50 + "\n")
+            print("Escolha uma das seguintes opções para ver Encomendas por Zona")
+            print("1. Centro")
+            print("2. Norte")
+            print("3. Sul")
+            print("4. Este")
+            print("5. Oeste")
+            print("6. Fora do limite")
+            print("7. Voltar ao menu anterior")
+            option = input("Opção: ").strip()
+            
+            if option in ['1', '2', '3', '4', '5', '6', '7']:
+                validOption = False
+                return option
             else:
-                pending_id = pending_orders['order_id'].tolist()
-                ut.showOrderStatus(pending_orders)
+                print("Opção inválida. Por favor, tente novamente.")
 
-                print("Insira o ID do pedido para ver detalhes ou editar")
-                print("Ou insira 'voltar' para regressar ao menu anterior")
+    # Extração de csv como Data Frame #
+    df_zone = pd.read_csv("zp_zones.csv", sep=";", dtype=str)
+    df_user_worker = load_user_work_profil()
+    orders_df = load_orders()
+    order_it = load_order_items()
+    products_df = load_products()
+    order_events_df = load_order_events()
+    #----------------------------------#
 
-                userInput = input("ID do pedido (ou 'voltar'): ")
-                userInput = userInput.strip().upper()
+    # INICIO DE PORTAL #
+    MenuInitial = True
 
-                if userInput.strip().lower() == 'voltar':
+    while MenuInitial:
+
+        option = initOrderManagementMenu()
+        #Diccionario dos nomes dos produto por chave = product_id
+        products_name = dict(zip(products_df['product_id'], products_df['name_product']))
+
+        if option == '1':
+            
+            insideMenu = True
+            while insideMenu:
+                pending_orders = orders_df[orders_df['order_status'] == 'pending']
+                if pending_orders.empty:
+                    print("======================================")
+                    print("== Não existem pedidos pendentes ===")
+                    print("======================================")
                     insideMenu = False
                     continue
-                
+                else:
+                    pending_id = pending_orders['order_id'].tolist()
+                    ut.showOrderStatus(pending_orders)
 
-                elif userInput in pending_id:            
+                    print("Insira o ID do pedido para ver detalhes ou editar")
+                    print("Ou insira 'voltar' para regressar ao menu anterior")
 
-                    insideMenu = False
+                    userInput = input("ID do pedido (ou 'voltar'): ")
+                    userInput = userInput.strip().upper()
 
-                    order_details = pending_orders[pending_orders['order_id'] == userInput]
+                    if userInput.strip().lower() == 'voltar':
+                        insideMenu = False
+                        continue
                     
-                    order_items_filtered = order_it[order_it['order_id'] == userInput]
 
-                    if not order_details.empty:
-                        ut.showDetailsOrder(order_details, order_items_filtered, products_df)
+                    elif userInput in pending_id:            
+
                         insideMenu = False
 
-                        editMenu = True
-                        while editMenu:
-                            editChoice = EditOrder(userInput)
-                            if editChoice == '1':
-                                new_name = input("Insira o novo nome e apelido do destinatário: ")
+                        order_details = pending_orders[pending_orders['order_id'] == userInput]
+                        
+                        order_items_filtered = order_it[order_it['order_id'] == userInput]
 
-                                orders_df.loc[orders_df['order_id'] == userInput, 'name'] = new_name
-                                save_orders(orders_df)
+                        if not order_details.empty:
+                            ut.showDetailsOrder(order_details, order_items_filtered, products_df)
+                            insideMenu = False
 
-                                print("Nome e apelido atualizados com sucesso.")                        
-                                update_order = orders_df[orders_df['order_id'] == userInput]
-                                ut.showDetailsDestinatario(update_order)
-                                
-                                #Registrar evento
-                                new_event = {
-                                            'event_id': 'EV' + dtime.datetime.now().strftime("%Y%m%d%H%M%S"),
-                                            'order_id': userInput,
-                                            'event_type': 'edit_recipient_name',
-                                            'staptime_1': dtime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),  # ← tua coluna
-                                            'staptime_2': '',          
-                                            'login': Manager,
-                                            'details': f"Nome do destinatário alterado para: {new_name}",
-                                            'latitude': '',             
-                                            'longitude': '',       
-                                            }
-                                order_events_df = pd.concat([order_events_df, pd.DataFrame([new_event])], ignore_index=True)
-                                save_order_events(order_events_df)
-                                print("Deseja continuar a editar este pedido? (s/n)")
-                                cont_edit = input().strip().lower()
-                                if cont_edit != 's':
+                            editMenu = True
+                            while editMenu:
+                                editChoice = EditOrder(userInput)
+                                if editChoice == '1':
+                                    new_name = input("Insira o novo nome e apelido do destinatário: ")
+
+                                    orders_df.loc[orders_df['order_id'] == userInput, 'name'] = new_name
+                                    save_orders(orders_df)
+
+                                    print("Nome e apelido atualizados com sucesso.")                        
+                                    update_order = orders_df[orders_df['order_id'] == userInput]
+                                    ut.showDetailsDestinatario(update_order)
+                                    
+                                    #Registrar evento
+                                    new_event = {
+                                                'event_id': 'EV' + dtime.datetime.now().strftime("%Y%m%d%H%M%S"),
+                                                'order_id': userInput,
+                                                'event_type': 'edit_recipient_name',
+                                                'staptime_1': dtime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),  # ← tua coluna
+                                                'staptime_2': '',          
+                                                'login': Manager,
+                                                'details': f"Nome do destinatário alterado para: {new_name}",
+                                                'latitude': '',             
+                                                'longitude': '',       
+                                                }
+                                    order_events_df = pd.concat([order_events_df, pd.DataFrame([new_event])], ignore_index=True)
+                                    save_order_events(order_events_df)
+                                    print("Deseja continuar a editar este pedido? (s/n)")
+                                    cont_edit = input().strip().lower()
+                                    if cont_edit != 's':
+                                        editMenu = False
+
+                                elif editChoice == '2':
+                                    new_contact = input("Insira o novo contacto do destinatário: ")
+
+                                    orders_df.loc[orders_df['order_id'] == userInput, 'contact'] = new_contact
+                                    save_orders(orders_df)
+
+                                    print("Contacto atualizado com sucesso.")                        
+                                    update_order = orders_df[orders_df['order_id'] == userInput]
+                                    ut.showDetailsDestinatario(update_order)
+                                    #Registrar evento
+                                    # Adicionar nova linha ao DataFrame de eventos
+                                    new_event = {
+                                                'event_id': 'EV' + dtime.datetime.now().strftime("%Y%m%d%H%M%S"),
+                                                'order_id': userInput,
+                                                'event_type': 'edit_recipient_name',
+                                                'staptime_1': dtime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),  # ← tua coluna
+                                                'staptime_2': '',          
+                                                'login': Manager,
+                                                'details': f"Contacto do destinatário alterado para: {new_contact}",
+                                                'latitude': '',             
+                                                'longitude': '',       
+                                                }
+                                    order_events_df = pd.concat([order_events_df, pd.DataFrame([new_event])], ignore_index=True)
+                                    save_order_events(order_events_df)
+
+                                    print("Deseja continuar a editar este pedido? (s/n)")
+                                    cont_edit = input().strip().lower()
+                                    if cont_edit != 's':
+                                        editMenu = False
+
+                                elif editChoice == '3':
+                                    new_address = input("Insira a nova morada do destinatário: ")
+
+                                    orders_df.loc[orders_df['order_id'] == userInput, 'address'] = new_address
+                                    save_orders(orders_df)
+
+                                    print("Morada atualizada com sucesso.")                        
+                                    update_order = orders_df[orders_df['order_id'] == userInput]
+                                    ut.showDetailsDestinatario(update_order)
+
+                                    #Registrar evento
+                                    # Adicionar nova linha ao DataFrame de eventos
+                                    new_event = {
+                                                'event_id': 'EV' + dtime.datetime.now().strftime("%Y%m%d%H%M%S"),
+                                                'order_id': userInput,
+                                                'event_type': 'edit_recipient_name',
+                                                'staptime_1': dtime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),  # ← tua coluna
+                                                'staptime_2': '',          
+                                                'login': Manager,
+                                                'details': f"Morada do destinatário alterada para: {new_address}",
+                                                'latitude': '',             
+                                                'longitude': '',       
+                                                }
+                                    order_events_df = pd.concat([order_events_df, pd.DataFrame([new_event])], ignore_index=True)
+                                    save_order_events(order_events_df)
+
+                                    print("Deseja continuar a editar este pedido? (s/n)")
+                                    cont_edit = input().strip().lower()
+                                    if cont_edit != 's':
+                                        editMenu = False
+
+                                elif editChoice == '4':
+                                    new_ZP1 = input("Insira o novo código postal (parte 1) do destinatário: ")
+                                    new_ZP2 = input("Insira o novo código postal (parte 2) do destinatário: ")
+
+                                    orders_df.loc[orders_df['order_id'] == userInput, 'ZP1'] = new_ZP1
+                                    orders_df.loc[orders_df['order_id'] == userInput, 'ZP2'] = new_ZP2
+                                    save_orders(orders_df)
+
+                                    print("Código postal atualizado com sucesso.")                        
+                                    update_order = orders_df[orders_df['order_id'] == userInput]
+                                    ut.showDetailsDestinatario(update_order)
+
+                                    #Registrar evento
+                                    # Adicionar nova linha ao DataFrame de eventos
+                                    new_event = {
+                                                'event_id': 'EV' + dtime.datetime.now().strftime("%Y%m%d%H%M%S"),
+                                                'order_id': userInput,
+                                                'event_type': 'edit_recipient_name',
+                                                'staptime_1': dtime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),  # ← tua coluna
+                                                'staptime_2': '',          
+                                                'login': Manager,
+                                                'details': f"Código postal do destinatário alterado para: {new_ZP1}-{new_ZP2}",
+                                                'latitude': '',             
+                                                'longitude': '',       
+                                                }
+                                    order_events_df = pd.concat([order_events_df, pd.DataFrame([new_event])], ignore_index=True)
+                                    save_order_events(order_events_df)
+                                    
+                                    print("Deseja continuar a editar este pedido? (s/n)")
+                                    cont_edit = input().strip().lower()
+                                    if cont_edit != 's':
+                                        editMenu = False
+
+                                elif editChoice == '5':
                                     editMenu = False
+                                    print("A regressar ao menu de pedidos pendentes...")
 
-                            elif editChoice == '2':
-                                new_contact = input("Insira o novo contacto do destinatário: ")
+                                elif editChoice == '6':
 
-                                orders_df.loc[orders_df['order_id'] == userInput, 'contact'] = new_contact
-                                save_orders(orders_df)
-
-                                print("Contacto atualizado com sucesso.")                        
-                                update_order = orders_df[orders_df['order_id'] == userInput]
-                                ut.showDetailsDestinatario(update_order)
-                                #Registrar evento
-                                # Adicionar nova linha ao DataFrame de eventos
-                                new_event = {
-                                            'event_id': 'EV' + dtime.datetime.now().strftime("%Y%m%d%H%M%S"),
-                                            'order_id': userInput,
-                                            'event_type': 'edit_recipient_name',
-                                            'staptime_1': dtime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),  # ← tua coluna
-                                            'staptime_2': '',          
-                                            'login': Manager,
-                                            'details': f"Contacto do destinatário alterado para: {new_contact}",
-                                            'latitude': '',             
-                                            'longitude': '',       
-                                            }
-                                order_events_df = pd.concat([order_events_df, pd.DataFrame([new_event])], ignore_index=True)
-                                save_order_events(order_events_df)
-
-                                print("Deseja continuar a editar este pedido? (s/n)")
-                                cont_edit = input().strip().lower()
-                                if cont_edit != 's':
-                                    editMenu = False
-
-                            elif editChoice == '3':
-                                new_address = input("Insira a nova morada do destinatário: ")
-
-                                orders_df.loc[orders_df['order_id'] == userInput, 'address'] = new_address
-                                save_orders(orders_df)
-
-                                print("Morada atualizada com sucesso.")                        
-                                update_order = orders_df[orders_df['order_id'] == userInput]
-                                ut.showDetailsDestinatario(update_order)
-
-                                #Registrar evento
-                                # Adicionar nova linha ao DataFrame de eventos
-                                new_event = {
-                                            'event_id': 'EV' + dtime.datetime.now().strftime("%Y%m%d%H%M%S"),
-                                            'order_id': userInput,
-                                            'event_type': 'edit_recipient_name',
-                                            'staptime_1': dtime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),  # ← tua coluna
-                                            'staptime_2': '',          
-                                            'login': Manager,
-                                            'details': f"Morada do destinatário alterada para: {new_address}",
-                                            'latitude': '',             
-                                            'longitude': '',       
-                                            }
-                                order_events_df = pd.concat([order_events_df, pd.DataFrame([new_event])], ignore_index=True)
-                                save_order_events(order_events_df)
-
-                                print("Deseja continuar a editar este pedido? (s/n)")
-                                cont_edit = input().strip().lower()
-                                if cont_edit != 's':
-                                    editMenu = False
-
-                            elif editChoice == '4':
-                                new_ZP1 = input("Insira o novo código postal (parte 1) do destinatário: ")
-                                new_ZP2 = input("Insira o novo código postal (parte 2) do destinatário: ")
-
-                                orders_df.loc[orders_df['order_id'] == userInput, 'ZP1'] = new_ZP1
-                                orders_df.loc[orders_df['order_id'] == userInput, 'ZP2'] = new_ZP2
-                                save_orders(orders_df)
-
-                                print("Código postal atualizado com sucesso.")                        
-                                update_order = orders_df[orders_df['order_id'] == userInput]
-                                ut.showDetailsDestinatario(update_order)
-
-                                #Registrar evento
-                                # Adicionar nova linha ao DataFrame de eventos
-                                new_event = {
-                                            'event_id': 'EV' + dtime.datetime.now().strftime("%Y%m%d%H%M%S"),
-                                            'order_id': userInput,
-                                            'event_type': 'edit_recipient_name',
-                                            'staptime_1': dtime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),  # ← tua coluna
-                                            'staptime_2': '',          
-                                            'login': Manager,
-                                            'details': f"Código postal do destinatário alterado para: {new_ZP1}-{new_ZP2}",
-                                            'latitude': '',             
-                                            'longitude': '',       
-                                            }
-                                order_events_df = pd.concat([order_events_df, pd.DataFrame([new_event])], ignore_index=True)
-                                save_order_events(order_events_df)
-                                
-                                print("Deseja continuar a editar este pedido? (s/n)")
-                                cont_edit = input().strip().lower()
-                                if cont_edit != 's':
-                                    editMenu = False
-
-                            elif editChoice == '5':
-                                editMenu = False
-                                print("A regressar ao menu de pedidos pendentes...")
-
-                            elif editChoice == '6':
-
-                                if isSupervisor:
-                                    orders_df, order_it, products_df, order_events_df = ut.reject_order(userInput, orders_df, order_it, products_df, order_events_df, Manager, save_orders, save_order_items, save_products, save_order_events)
-                                    editMenu = False
-                                else:
-                                    print("Apenas O Supervisor Senior podem rejeitar encomendas.")
-                                    editMenu = False
-
-                            elif editChoice == '7':
-                                # Validar automaticamente a encomenda
-                                if isSupervisor:
-                                    order_to_validate = orders_df[orders_df['order_id'] == userInput]
-                                    is_valid, reason = ut.addressValidation(order_to_validate)
-                                    if is_valid:
-                                        print("\n======================================")
-                                        print("===Morada válida===")
-                                        print("======================================\n")
-                                        
-                                        is_valid, reason = ut.recipientValidation(order_to_validate)
-                                        if is_valid:
-                                            print("=======================================")
-                                            print("===Dados do destinatário válidos===")
-                                            print("=======================================\n")
-
-                                            missing_products = ut.stockValidation(order_items_filtered, products_df)
-
-                                            if not missing_products:
-                                                print("======================================")
-                                                print("===Stock da Enocmenda válidos===")
-                                                print("======================================\n")
-                                                
-                                                orders_df.loc[orders_df['order_id'] == userInput, 'order_status'] = 'validated'
-                                                order_it.loc[order_it['order_id'] == userInput, 'status'] = 'shipped'
-                                                save_orders(orders_df)
-                                                save_order_items(order_it)
-                                                print("Encomenda validada automaticamente com sucesso.\n")
-
-                                                #Registrar evento
-                                                new_event = {
-                                                            'event_id': 'EV' + dtime.datetime.now().strftime("%Y%m%d%H%M%S"),
-                                                            'order_id': userInput,
-                                                            'event_type': 'edit_recipient_name',
-                                                            'staptime_1': dtime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),  # ← tua coluna
-                                                            'staptime_2': '',          
-                                                            'login': Manager,
-                                                            'details': "Encomenda validada automaticamente pelo sistema.",
-                                                            'latitude': '',             
-                                                            'longitude': '',       
-                                                            }
-                                                order_events_df = pd.concat([order_events_df, pd.DataFrame([new_event])], ignore_index=True)
-                                                save_order_events(order_events_df)
-                                                editMenu = False
-                                            else:
-                                                qty_prod = order_it[order_it['order_id'] == userInput].shape[0]
-                                                print("Encomenda inválida.")
-                                                print(f"Produtos não disponíveis:\n"
-                                                          + "".join(f"SKU: {sku} " + "Produto: " + products_name[sku] + "\n" for sku in missing_products)
-                                                        )
-                                                if qty_prod == len(missing_products):
-                                                    print("A encomenda deve ser cancelada. Todos os productos estão indisponíveis.")
-                                                    orders_df, order_it, products_df, order_events_df = ut.reject_order(userInput, orders_df, order_it, products_df, order_events_df, Manager, save_orders, save_order_items, save_products, save_order_events)
-                                                    print("Encomenda rejeitada com sucesso.")
-
-                                                else:
-                                                    OpenMenu = True
-                                                    while OpenMenu:
-                                                    
-                                                        print("Deseja preparar a encomenda parcialmente? (s/n)")
-                                                        option_validation = input().strip().lower()
-                                                        if option_validation in ['s', 'n']:
-                                                            OpenMenu = False
-                                                            if option_validation == 's':
-                                                                OpenMenu = False 
-                                                                editMenu = False 
-                                                                insideMenu = False
-                                                                #Registo de status da encoemenda
-                                                                orders_df.loc[orders_df['order_id'] == userInput, "order_status"] = "partially shipped"
-                                                                save_orders(orders_df)
-                                                                # Registo por defeito do estatus do envío dos artigos
-                                                                order_it.loc[order_it['order_id'] == userInput, "status"] = "shipped"
-                                                                save_order_items(order_it)
-
-                                                                print("======================================")
-                                                                print("===Encomenda preparada parcialmente===")
-                                                                print("======================================")                                                                    
-
-                                                                for sku in missing_products:
-                                                                    # Atulizamos o status dos artigos no disponíveis na encomenda
-                                                                    order_it.loc[(order_it["order_id"] == userInput) & (order_it["product_id"] == sku), "status"] = "canceled"
-
-                                                                    #Quantidade de artigos no disponíveis encomendadas
-                                                                    quantity_ordered = order_it.loc[(order_it["order_id"] == userInput) & (order_it["product_id"] == sku), "quantity_ordered"].iloc[0]
-                                                                    order_it.loc[(order_it["order_id"] == userInput) & (order_it["product_id"] == sku), "quantity_returned"] = quantity_ordered
-
-                                                                    # Retorno dessa quantidade ao stock ####IMPORTANTE#### ####A DEFINIR####
-                                                                    products_df.loc[products_df["product_id"] == sku, "quantity_stock"] += quantity_ordered
-                                                                    save_products(products_df)
-                                                                    save_order_items(order_it)
-                                                                        
-                                                                                                                                            
-                                                                #Registo de Evento:
-                                                                new_event = {
-                                                                            'event_id': 'EV' + dtime.datetime.now().strftime("%Y%m%d%H%M%S"),
-                                                                            'order_id': userInput,
-                                                                            'event_type': 'edit_recipient_name',
-                                                                            'staptime_1': dtime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),  # ← tua coluna
-                                                                            'staptime_2': '',          
-                                                                            'login': Manager,
-                                                                            'details': "Encomenda preparada parcialmente com sucesso.",
-                                                                            'latitude': '',             
-                                                                            'longitude': '',       
-                                                                            }
-
-                                                                order_events_df = pd.concat([order_events_df, pd.DataFrame([new_event])], ignore_index=True)
-                                                                save_order_events(order_events_df)
-                                                        else:
-                                                            print("Opção inválida. Tente novamente.")
-                                                    
-                                        else:
-                                            print(f"Dados do destinatário inválidos. Motivo: {reason}")
-                                            print("Voltando ao menu de edição...")                            
-                                            save_order_items(order_it)
+                                    if isSupervisor:
+                                        orders_df, order_it, products_df, order_events_df = ut.reject_order(userInput, orders_df, order_it, products_df, order_events_df, Manager, save_orders, save_order_items, save_products, save_order_events)
+                                        editMenu = False
                                     else:
-                                        print(f"Morada inválida. Motivo: {reason}")
-                                        OpenMenu = True
-                                        while OpenMenu:
-                                            option_validation = input("Deseja editar a morada do destinatário? (s/n): ").strip().lower()
-                                            if option_validation in ['s', 'n']:
-                                                OpenMenu = False
-                                                if option_validation == 's':
-                                                    new_address = input("Insira a nova morada do destinatário: ")
-                                                    zip1, zip2 = input("Insira o novo código postal (formato: 4750-123): ").split("-")
-                                                    zip1 = zip1.strip()
-                                                    zip2 = zip2.strip()
+                                        print("Apenas O Supervisor Senior podem rejeitar encomendas.")
+                                        editMenu = False
+
+                                elif editChoice == '7':
+                                    # Validar automaticamente a encomenda
+                                    if isSupervisor:
+                                        order_to_validate = orders_df[orders_df['order_id'] == userInput]
+                                        is_valid, reason = ut.addressValidation(order_to_validate)
+                                        if is_valid:
+                                            print("\n======================================")
+                                            print("===Morada válida===")
+                                            print("======================================\n")
+                                            
+                                            is_valid, reason = ut.recipientValidation(order_to_validate)
+                                            if is_valid:
+                                                print("=======================================")
+                                                print("===Dados do destinatário válidos===")
+                                                print("=======================================\n")
+
+                                                missing_products = ut.stockValidation(order_items_filtered, products_df)
+
+                                                if not missing_products:
+                                                    print("======================================")
+                                                    print("===Stock da Enocmenda válidos===")
+                                                    print("======================================\n")
                                                     
-                                                    orders_df.loc[orders_df['order_id'] == userInput, 'address'] = new_address
-                                                    orders_df.loc[orders_df['order_id'] == userInput, 'ZP1'] = zip1
-                                                    orders_df.loc[orders_df['order_id'] == userInput, 'ZP2'] = zip2
+                                                    orders_df.loc[orders_df['order_id'] == userInput, 'order_status'] = 'validated'
+                                                    order_it.loc[order_it['order_id'] == userInput, 'status'] = 'shipped'
                                                     save_orders(orders_df)
-                                                    print("Morada atualizada com sucesso.")                        
-                                                    update_order = orders_df[orders_df['order_id'] == userInput]
-                                                    ut.showDetailsDestinatario(update_order)
+                                                    save_order_items(order_it)
+                                                    print("Encomenda validada automaticamente com sucesso.\n")
 
                                                     #Registrar evento
                                                     new_event = {
@@ -419,237 +314,345 @@ while MenuInitial:
                                                                 'staptime_1': dtime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),  # ← tua coluna
                                                                 'staptime_2': '',          
                                                                 'login': Manager,
-                                                                'details': f"Morada do destinatário alterada para: {new_address}",
+                                                                'details': "Encomenda validada automaticamente pelo sistema.",
                                                                 'latitude': '',             
                                                                 'longitude': '',       
                                                                 }
                                                     order_events_df = pd.concat([order_events_df, pd.DataFrame([new_event])], ignore_index=True)
                                                     save_order_events(order_events_df)
-                                                    print("Voltando ao menu de edição...")
-                                                elif option_validation == 'n':
-                                                    print("Voltando ao menu de edição...")
+                                                    editMenu = False
+                                                else:
+                                                    qty_prod = order_it[order_it['order_id'] == userInput].shape[0]
+                                                    print("Encomenda inválida.")
+                                                    print(f"Produtos não disponíveis:\n"
+                                                            + "".join(f"SKU: {sku} " + "Produto: " + products_name[sku] + "\n" for sku in missing_products)
+                                                            )
+                                                    if qty_prod == len(missing_products):
+                                                        print("A encomenda deve ser cancelada. Todos os productos estão indisponíveis.")
+                                                        orders_df, order_it, products_df, order_events_df = ut.reject_order(userInput, orders_df, order_it, products_df, order_events_df, Manager, save_orders, save_order_items, save_products, save_order_events)
+                                                        print("Encomenda rejeitada com sucesso.")
+
+                                                    else:
+                                                        OpenMenu = True
+                                                        while OpenMenu:
+                                                        
+                                                            print("Deseja preparar a encomenda parcialmente? (s/n)")
+                                                            option_validation = input().strip().lower()
+                                                            if option_validation in ['s', 'n']:
+                                                                OpenMenu = False
+                                                                if option_validation == 's':
+                                                                    OpenMenu = False 
+                                                                    editMenu = False 
+                                                                    insideMenu = False
+                                                                    #Registo de status da encoemenda
+                                                                    orders_df.loc[orders_df['order_id'] == userInput, "order_status"] = "partially shipped"
+                                                                    save_orders(orders_df)
+                                                                    # Registo por defeito do estatus do envío dos artigos
+                                                                    order_it.loc[order_it['order_id'] == userInput, "status"] = "shipped"
+                                                                    save_order_items(order_it)
+
+                                                                    print("======================================")
+                                                                    print("===Encomenda preparada parcialmente===")
+                                                                    print("======================================")                                                                    
+
+                                                                    for sku in missing_products:
+                                                                        # Atulizamos o status dos artigos no disponíveis na encomenda
+                                                                        order_it.loc[(order_it["order_id"] == userInput) & (order_it["product_id"] == sku), "status"] = "canceled"
+
+                                                                        #Quantidade de artigos no disponíveis encomendadas
+                                                                        quantity_ordered = order_it.loc[(order_it["order_id"] == userInput) & (order_it["product_id"] == sku), "quantity_ordered"].iloc[0]
+                                                                        order_it.loc[(order_it["order_id"] == userInput) & (order_it["product_id"] == sku), "quantity_returned"] = quantity_ordered
+
+                                                                        # Retorno dessa quantidade ao stock ####IMPORTANTE#### ####A DEFINIR####
+                                                                        products_df.loc[products_df["product_id"] == sku, "quantity_stock"] += quantity_ordered
+                                                                        save_products(products_df)
+                                                                        save_order_items(order_it)
+                                                                            
+                                                                                                                                                
+                                                                    #Registo de Evento:
+                                                                    new_event = {
+                                                                                'event_id': 'EV' + dtime.datetime.now().strftime("%Y%m%d%H%M%S"),
+                                                                                'order_id': userInput,
+                                                                                'event_type': 'edit_recipient_name',
+                                                                                'staptime_1': dtime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),  # ← tua coluna
+                                                                                'staptime_2': '',          
+                                                                                'login': Manager,
+                                                                                'details': "Encomenda preparada parcialmente com sucesso.",
+                                                                                'latitude': '',             
+                                                                                'longitude': '',       
+                                                                                }
+
+                                                                    order_events_df = pd.concat([order_events_df, pd.DataFrame([new_event])], ignore_index=True)
+                                                                    save_order_events(order_events_df)
+                                                            else:
+                                                                print("Opção inválida. Tente novamente.")
+                                                        
                                             else:
-                                                print("Opção inválida. Tente novamente.")                                            
-                                    
-                                else:
-                                    print("Apenas O Supervisor Senior podem rejeitar encomendas.")
-                                    print("Voltando ao menu de edição...")
-                        
-                            elif editChoice == '8':
-                                editMenu = False
-                                print("A regressar ao menu de pedidos pendentes...")
-                else:
-                    print("Pedido não encontrado.")
-        
-    elif option == '6':
-        MenuInitial = False
-        print("A regressar ao menu principal...")
-        #Return
+                                                print(f"Dados do destinatário inválidos. Motivo: {reason}")
+                                                print("Voltando ao menu de edição...")                            
+                                                save_order_items(order_it)
+                                        else:
+                                            print(f"Morada inválida. Motivo: {reason}")
+                                            OpenMenu = True
+                                            while OpenMenu:
+                                                option_validation = input("Deseja editar a morada do destinatário? (s/n): ").strip().lower()
+                                                if option_validation in ['s', 'n']:
+                                                    OpenMenu = False
+                                                    if option_validation == 's':
+                                                        new_address = input("Insira a nova morada do destinatário: ")
+                                                        zip1, zip2 = input("Insira o novo código postal (formato: 4750-123): ").split("-")
+                                                        zip1 = zip1.strip()
+                                                        zip2 = zip2.strip()
+                                                        
+                                                        orders_df.loc[orders_df['order_id'] == userInput, 'address'] = new_address
+                                                        orders_df.loc[orders_df['order_id'] == userInput, 'ZP1'] = zip1
+                                                        orders_df.loc[orders_df['order_id'] == userInput, 'ZP2'] = zip2
+                                                        save_orders(orders_df)
+                                                        print("Morada atualizada com sucesso.")                        
+                                                        update_order = orders_df[orders_df['order_id'] == userInput]
+                                                        ut.showDetailsDestinatario(update_order)
 
-    elif option == '2':
-        validated_orders = orders_df[orders_df['order_status'].isin(['validated', 'partially shipped'])].reset_index(drop=True)
-        print("\n======================================")
-        print("=== Encomendas Validadas ===")
-        print("======================================")
+                                                        #Registrar evento
+                                                        new_event = {
+                                                                    'event_id': 'EV' + dtime.datetime.now().strftime("%Y%m%d%H%M%S"),
+                                                                    'order_id': userInput,
+                                                                    'event_type': 'edit_recipient_name',
+                                                                    'staptime_1': dtime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),  # ← tua coluna
+                                                                    'staptime_2': '',          
+                                                                    'login': Manager,
+                                                                    'details': f"Morada do destinatário alterada para: {new_address}",
+                                                                    'latitude': '',             
+                                                                    'longitude': '',       
+                                                                    }
+                                                        order_events_df = pd.concat([order_events_df, pd.DataFrame([new_event])], ignore_index=True)
+                                                        save_order_events(order_events_df)
+                                                        print("Voltando ao menu de edição...")
+                                                    elif option_validation == 'n':
+                                                        print("Voltando ao menu de edição...")
+                                                else:
+                                                    print("Opção inválida. Tente novamente.")                                            
+                                        
+                                    else:
+                                        print("Apenas O Supervisor Senior podem rejeitar encomendas.")
+                                        print("Voltando ao menu de edição...")
+                            
+                                elif editChoice == '8':
+                                    editMenu = False
+                                    print("A regressar ao menu de pedidos pendentes...")
+                    else:
+                        print("Pedido não encontrado.")
+            
+        elif option == '6':
+            MenuInitial = False
+            print("A regressar ao menu principal...")
+            return
 
-        if validated_orders.empty:
-            print("\nNão existem encomendas validadas ou parcialmente enviadas.\n")
-        else:
-            i = 0
-            total_orders = len(validated_orders)
+        elif option == '2':
+            validated_orders = orders_df[orders_df['order_status'].isin(['validated', 'partially shipped'])].reset_index(drop=True)
             print("\n======================================")
-            print(f"= Total de encomendas validadas: {total_orders} =")
+            print("=== Encomendas Validadas ===")
             print("======================================")
 
-
-            while i < total_orders:
-                order = validated_orders.iloc[i]
-
+            if validated_orders.empty:
+                print("\nNão existem encomendas validadas ou parcialmente enviadas.\n")
+            else:
+                i = 0
+                total_orders = len(validated_orders)
                 print("\n======================================")
-                print(f"ID: {order['order_id']} | Estado: {order['order_status']}")
-                print(f"Destinatário: {order['name']} | Contacto: {order['contact']}")
-                print(f"Morada: {order['address']}")
-                print(f"Código Postal: {order['ZP1']}-{order['ZP2']}")
+                print(f"= Total de encomendas validadas: {total_orders} =")
                 print("======================================")
 
 
-                if i < total_orders - 1:
-                    # Ainda há próximas encomendas
-                    while True:
-                        print("Escolha uma das seguintes opções")
-                        print("1. Seguinte encomenda")
-                        print("2. Sair")
-                        resp = input("Opção: ").strip().lower()
-                        if resp == '1':
-                            i += 1      # passa ao próximo pedido
-                            break
-                        elif resp == '2':
-                            print("A regressar ao menu inicial...")
-                            i = total_orders   # força saída do while
-                            break
-                        else:
-                            print("Opção inválida. Escreva '1' para ver a seguiente encomenda\n ou '2' para sair.")
-                else:
-                    # Última encomenda
-                    input("Última encomenda. Prima ENTER para voltar ao menu inicial.")
-                    i = total_orders
+                while i < total_orders:
+                    order = validated_orders.iloc[i]
 
-    elif option == '3':
-        # Mostrar pedidos cancelados
-        canceled_orders = orders_df[orders_df['order_status'] == 'canceled'].reset_index(drop=True)
-
-        print("\n======================================")
-        print("=== Encomendas Canceladas ===")
-        print("======================================")
-
-        if canceled_orders.empty:
-            print("\nNão existem encomendas canceladas.\n")
-        else:
-            i = 0
-            total_orders = len(canceled_orders)
-            print("\n======================================")
-            print(f"= Total de encomendas canceladas: {total_orders} =")
-            print("======================================")
-
-
-            while i < total_orders:
-                order = canceled_orders.iloc[i]
-
-                print("\n======================================")
-                print(f"ID: {order['order_id']} | Motivo de cancelamento: {order['order_reason']}")
-                print(f"Destinatário: {order['name']} | Contacto: {order['contact']}")
-                print(f"Morada: {order['address']}")
-                print(f"Código Postal: {order['ZP1']}-{order['ZP2']}")
-                print("======================================")
-
-
-                if i < total_orders - 1:
-                    # Ainda há próximas encomendas
-                    while True:
-                        print("Escolha uma das seguintes opções")
-                        print("1. Seguinte encomenda")
-                        print("2. Sair")
-                        resp = input("Opção: ").strip().lower()
-                        if resp == '1':
-                            i += 1      # passa ao próximo pedido
-                            break
-                        elif resp == '2':
-                            print("A regressar ao menu inicial...")
-                            i = total_orders   # força saída do while
-                            break
-                        else:
-                            print("Opção inválida. Escreva '1' para ver a seguiente encomenda\n ou '2' para sair.")
-                else:
-                    # Última encomenda
-                    input("Última encomenda. Prima ENTER para voltar ao menu inicial.")
-                    i = total_orders
-
-    elif option == '4':
-        """Atribuir estafeta a encomendas não assignadas"""
-        validated_orders = orders_df[orders_df['order_status'].isin(['validated', 'partially shipped'])].reset_index(drop=True)
-        
-        if validated_orders.empty:
-            print("\n✅ Não existem encomendas validadas ou parcialmente enviadas.\n")
-            continue
-        
-        # Filtrar encomendas SEM estafeta atribuído
-        unassigned_orders = validated_orders[
-            validated_orders['id_worker'].isna() | 
-            (validated_orders['id_worker'].astype(str).str.strip() == '') | 
-            (validated_orders['id_worker'].astype(str).str.lower() == 'nan')
-        ].reset_index(drop=True)
-        
-        if unassigned_orders.empty:
-            print("\n✅ Não existem encomendas pendentes por asignar estafeta.\n")
-            continue
-        
-        i = 0
-        total_orders = len(unassigned_orders)
-        
-        while i < total_orders:
-            order = unassigned_orders.iloc[i]
-            
-            print("\n======================================")
-            ut.showDetailsDestinatario(order)
-            print("======================================\n")
-            
-            print("Opções:")
-            print("1. Atribuir estafeta automaticamente")
-            print("2. Próxima encomenda")
-            print("3. Sair")
-            resp = input("Opção: ").strip()
-            
-            if resp == '1':
-                estafeta, zone = ut.code_zone(int(order['ZP1']), df_zone, df_user_worker)
-                orders_df.loc[orders_df['order_id'] == order['order_id'], 'id_worker'] = estafeta
-                save_orders(orders_df)
-                print(f"✅ Estafeta {estafeta} ({zone}) atribuído à encomenda {order['order_id']}")
-                i += 1
-                
-            elif resp == '2':
-                i += 1
-                
-            elif resp == '3':
-                print("A regressar ao menu inicial...")
-                i = total_orders
-                
-            else:
-                print("Opção inválida. Escolha 1, 2 ou 3.")
-
-    elif option == '5':
-        """Filtrar encomendas por zona"""
-        validated_orders = orders_df[orders_df['order_status'].isin(['validated', 'partially shipped'])].reset_index(drop=True)
-        
-        if validated_orders.empty:
-            print("\n✅ Não existem encomendas validadas ou parcialmente enviadas.\n")
-            continue
-        
-        # Filtrar encomendas COM estafeta assignado
-        assigned_orders = validated_orders[
-            (validated_orders['id_worker'].notna()) & 
-            (validated_orders['id_worker'].astype(str).str.strip() != '') & 
-            (validated_orders['id_worker'].astype(str).str.lower() != 'nan')
-        ].reset_index(drop=True)
-        
-        if assigned_orders.empty:
-            print("\n✅ Não existem encomendas com estafeta assignado.")
-            print("Antes de filtrar por zona, é necessário assignar estafeta a alguma encomenda.")
-            continue
-        
-        print("==================================================")
-        option_filter = MenuFilter()
-        print("==================================================")
-        
-        # Voltar ao menu se escolher opção 7
-        if option_filter == '7':
-            continue
-        
-        estafetas_df = df_user_worker[~df_user_worker['dutyArea'].str.startswith('Gestor')]
-        
-        # Mapa de zonas
-        zones_map = {
-            '1': ('Center', 'Centro'),
-            '2': ('North', 'Norte'),
-            '3': ('South', 'Sul'),
-            '4': ('East', 'Este'),
-            '5': ('West', 'Oeste'),
-            '6': ('Fora do limite', 'Fora do limite')
-        }
-        
-        if option_filter in zones_map:
-            zone_key, zone_name = zones_map[option_filter]
-            zone_estafetas = estafetas_df[estafetas_df['dutyArea'] == zone_key]
-            zone_orders = pd.merge(assigned_orders, zone_estafetas, on='id_worker', how='inner')
-            
-            print(f"\n{'='*50}")
-            print(f"Encomendas para entrega: {zone_name}")
-            print(f"{'='*50}\n")
-            
-            if zone_orders.empty:
-                print(f"❌ Não há pedidos preparadas para entrega em {zone_name}.")
-            else:
-                print(f"✅ Total de encomendas em {zone_name}: {len(zone_orders)}\n")
-                for _, order in zone_orders.iterrows():
+                    print("\n======================================")
+                    print(f"ID: {order['order_id']} | Estado: {order['order_status']}")
+                    print(f"Destinatário: {order['name']} | Contacto: {order['contact']}")
+                    print(f"Morada: {order['address']}")
+                    print(f"Código Postal: {order['ZP1']}-{order['ZP2']}")
                     print("======================================")
-                    ut.showDetailsDestinatario(order)
-                    print("======================================\n")
+
+
+                    if i < total_orders - 1:
+                        # Ainda há próximas encomendas
+                        while True:
+                            print("Escolha uma das seguintes opções")
+                            print("1. Seguinte encomenda")
+                            print("2. Sair")
+                            resp = input("Opção: ").strip().lower()
+                            if resp == '1':
+                                i += 1      # passa ao próximo pedido
+                                break
+                            elif resp == '2':
+                                print("A regressar ao menu inicial...")
+                                i = total_orders   # força saída do while
+                                break
+                            else:
+                                print("Opção inválida. Escreva '1' para ver a seguiente encomenda\n ou '2' para sair.")
+                    else:
+                        # Última encomenda
+                        input("Última encomenda. Prima ENTER para voltar ao menu inicial.")
+                        i = total_orders
+
+        elif option == '3':
+            # Mostrar pedidos cancelados
+            canceled_orders = orders_df[orders_df['order_status'] == 'canceled'].reset_index(drop=True)
+
+            print("\n======================================")
+            print("=== Encomendas Canceladas ===")
+            print("======================================")
+
+            if canceled_orders.empty:
+                print("\nNão existem encomendas canceladas.\n")
+            else:
+                i = 0
+                total_orders = len(canceled_orders)
+                print("\n======================================")
+                print(f"= Total de encomendas canceladas: {total_orders} =")
+                print("======================================")
+
+
+                while i < total_orders:
+                    order = canceled_orders.iloc[i]
+
+                    print("\n======================================")
+                    print(f"ID: {order['order_id']} | Motivo de cancelamento: {order['order_reason']}")
+                    print(f"Destinatário: {order['name']} | Contacto: {order['contact']}")
+                    print(f"Morada: {order['address']}")
+                    print(f"Código Postal: {order['ZP1']}-{order['ZP2']}")
+                    print("======================================")
+
+
+                    if i < total_orders - 1:
+                        # Ainda há próximas encomendas
+                        while True:
+                            print("Escolha uma das seguintes opções")
+                            print("1. Seguinte encomenda")
+                            print("2. Sair")
+                            resp = input("Opção: ").strip().lower()
+                            if resp == '1':
+                                i += 1      # passa ao próximo pedido
+                                break
+                            elif resp == '2':
+                                print("A regressar ao menu inicial...")
+                                i = total_orders   # força saída do while
+                                break
+                            else:
+                                print("Opção inválida. Escreva '1' para ver a seguiente encomenda\n ou '2' para sair.")
+                    else:
+                        # Última encomenda
+                        input("Última encomenda. Prima ENTER para voltar ao menu inicial.")
+                        i = total_orders
+
+        elif option == '4':
+            """Atribuir estafeta a encomendas não assignadas"""
+            validated_orders = orders_df[orders_df['order_status'].isin(['validated', 'partially shipped'])].reset_index(drop=True)
+            
+            if validated_orders.empty:
+                print("\n✅ Não existem encomendas validadas ou parcialmente enviadas.\n")
+                continue
+            
+            # Filtrar encomendas SEM estafeta atribuído
+            unassigned_orders = validated_orders[
+                validated_orders['id_worker'].isna() | 
+                (validated_orders['id_worker'].astype(str).str.strip() == '') | 
+                (validated_orders['id_worker'].astype(str).str.lower() == 'nan')
+            ].reset_index(drop=True)
+            
+            if unassigned_orders.empty:
+                print("\n✅ Não existem encomendas pendentes por asignar estafeta.\n")
+                continue
+            
+            i = 0
+            total_orders = len(unassigned_orders)
+            
+            while i < total_orders:
+                order = unassigned_orders.iloc[i]
+                
+                print("\n======================================")
+                ut.showDetailsDestinatario(order)
+                print("======================================\n")
+                
+                print("Opções:")
+                print("1. Atribuir estafeta automaticamente")
+                print("2. Próxima encomenda")
+                print("3. Sair")
+                resp = input("Opção: ").strip()
+                
+                if resp == '1':
+                    estafeta, zone = ut.code_zone(int(order['ZP1']), df_zone, df_user_worker)
+                    orders_df.loc[orders_df['order_id'] == order['order_id'], 'id_worker'] = estafeta
+                    save_orders(orders_df)
+                    print(f"✅ Estafeta {estafeta} ({zone}) atribuído à encomenda {order['order_id']}")
+                    i += 1
+                    
+                elif resp == '2':
+                    i += 1
+                    
+                elif resp == '3':
+                    print("A regressar ao menu inicial...")
+                    i = total_orders
+                    
+                else:
+                    print("Opção inválida. Escolha 1, 2 ou 3.")
+
+        elif option == '5':
+            """Filtrar encomendas por zona"""
+            validated_orders = orders_df[orders_df['order_status'].isin(['validated', 'partially shipped'])].reset_index(drop=True)
+            
+            if validated_orders.empty:
+                print("\n✅ Não existem encomendas validadas ou parcialmente enviadas.\n")
+                continue
+            
+            # Filtrar encomendas COM estafeta assignado
+            assigned_orders = validated_orders[
+                (validated_orders['id_worker'].notna()) & 
+                (validated_orders['id_worker'].astype(str).str.strip() != '') & 
+                (validated_orders['id_worker'].astype(str).str.lower() != 'nan')
+            ].reset_index(drop=True)
+            
+            if assigned_orders.empty:
+                print("\n✅ Não existem encomendas com estafeta assignado.")
+                print("Antes de filtrar por zona, é necessário assignar estafeta a alguma encomenda.")
+                continue
+            
+            print("==================================================")
+            option_filter = MenuFilter()
+            print("==================================================")
+            
+            # Voltar ao menu se escolher opção 7
+            if option_filter == '7':
+                continue
+            
+            estafetas_df = df_user_worker[~df_user_worker['dutyArea'].str.startswith('Gestor')]
+            
+            # Mapa de zonas
+            zones_map = {
+                '1': ('Center', 'Centro'),
+                '2': ('North', 'Norte'),
+                '3': ('South', 'Sul'),
+                '4': ('East', 'Este'),
+                '5': ('West', 'Oeste'),
+                '6': ('Fora do limite', 'Fora do limite')
+            }
+            
+            if option_filter in zones_map:
+                zone_key, zone_name = zones_map[option_filter]
+                zone_estafetas = estafetas_df[estafetas_df['dutyArea'] == zone_key]
+                zone_orders = pd.merge(assigned_orders, zone_estafetas, on='id_worker', how='inner')
+                
+                print(f"\n{'='*50}")
+                print(f"Encomendas para entrega: {zone_name}")
+                print(f"{'='*50}\n")
+                
+                if zone_orders.empty:
+                    print(f"❌ Não há pedidos preparadas para entrega em {zone_name}.")
+                else:
+                    print(f"✅ Total de encomendas em {zone_name}: {len(zone_orders)}\n")
+                    for _, order in zone_orders.iterrows():
+                        print("======================================")
+                        ut.showDetailsDestinatario(order)
+                        print("======================================\n")
+
+ModOrderGestao(Manager)
