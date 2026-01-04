@@ -1,23 +1,26 @@
 import os
 import sys
 
+# --- IMPORT MODULES (Defensive Import) ---
 try:
-    import mod_client
+    import mod_client           # Login & Client Portal
 except ImportError:
-    print("❌ Critical Error: Missing file 'mod_client.py'")
     mod_client = None
 
 try:
-    import mod_delivery
+    import mod_delivery         # Estafeta Module
 except ImportError:
-    print("❌ Critical Error: Missing file 'mod_delivery.py'")
     mod_delivery = None
 
 try:
-    import mod_order_gestao
+    import mod_order_gestao     # Order Management Module
 except ImportError:
-    print("❌ Critical Error: Missing file 'mod_order_gestao.py'")
     mod_order_gestao = None
+
+try:
+    import mod_product          # Product Module
+except ImportError:
+    mod_product = None
 
 
 def clear():
@@ -48,7 +51,7 @@ def main():
         # =================================================================
         elif choice == '1':
             if not mod_client:
-                print("\n⚠️ Cannot run: 'mod_client.py' is missing.")
+                print("\n⚠️ Error: 'mod_client.py' is missing.")
                 input("Enter to return...")
                 continue
 
@@ -58,57 +61,44 @@ def main():
             print("   n: No (Register)")
             is_reg = input("👉 Select (y/n): ").lower().strip()
 
-            # --- A. (NEW USER) ---
+            # --- A. NEW USER (REGISTER) ---
             if is_reg == 'n':
-                print("\n[System] Opening Registration...")
-                
-                # CHECK 1:  'run_client_portal' is existed?
+                print("\n[System] Opening Registration (Param: Empty)...")
                 if hasattr(mod_client, 'run_client_portal'):
                     try:
-                        mod_client.run_client_portal("")
+                        # Logic: Pass empty string "" for new users
+                        mod_client.run_client_portal("") 
                     except Exception as e:
-                        print(f"❌ Runtime Error in mod_client: {e}")
-                else:
-                    print("⚠️ Error: Function 'run_client_portal' NOT FOUND in mod_client.py")
+                        print(f"❌ Error in mod_client: {e}")
                 
                 print("[System] Portal closed.") 
                 input("Press Enter...")
 
-            # --- B. (LOGIN) ---
+            # --- B. REGISTERED USER (LOGIN) ---
             elif is_reg == 'y':
                 print("\n🔐 --- SECURE LOGIN ---")
-                
-                # CHECK 2:  'execute_login' is existed ?
                 if hasattr(mod_client, 'execute_login'):
-                    try:
-                        user_session = mod_client.execute_login()
-                    except Exception as e:
-                        print(f"❌ Runtime Error in Login: {e}")
-                        user_session = None
+                    user_session = mod_client.execute_login() # Returns dict
                 else:
-                    print("⚠️ Error: Function 'execute_login' NOT FOUND in mod_client.py")
                     user_session = None
 
-                # Process the LOGIN results
+                # LOGIN SUCCESS -> CLIENT ROLE
                 if user_session and user_session.get('role') == 'client':
                     client_id = user_session['id']
                     print(f"\n✅ Welcome back, {user_session.get('name', 'Client')}!")
                     
-                    # CHECK 3: Gọi lại Portal với ID
+                    # Logic: Pass client_id for registered users
                     if hasattr(mod_client, 'run_client_portal'):
-                        try:
-                            mod_client.run_client_portal(client_id)
-                        except Exception as e:
-                            print(f"❌ Runtime Error inside Client Menu: {e}")
-                    else:
-                        print("⚠️ Error: Function 'run_client_portal' missing.")
+                        mod_client.run_client_portal(client_id)
                     
+                    
+                    print("[System] Portal closed.")
                     input("Press Enter to return...")
                 elif user_session:
                     print("\n❌ Access Denied: This account is not a Client.")
                     input("Press Enter...")
                 else:
-                    print("\n❌ Login failed or cancelled.")
+                    print("\n❌ Login failed.")
                     input("Press Enter...")
 
         # =================================================================
@@ -116,18 +106,12 @@ def main():
         # =================================================================
         elif choice == '2':
             if not mod_client:
-                print("\n⚠️ Cannot login: 'mod_client.py' is missing.")
+                print("\n⚠️ Error: Login module missing.")
                 input("Enter to return...")
                 continue
 
             print("\n🔐 --- STAFF LOGIN ---")
-            
-            # CHECK Login
-            if hasattr(mod_client, 'execute_login'):
-                user_session = mod_client.execute_login()
-            else:
-                print("⚠️ Error: Function 'execute_login' NOT FOUND.")
-                user_session = None
+            user_session = mod_client.execute_login()
             
             if user_session:
                 user_id = user_session['id']
@@ -135,39 +119,48 @@ def main():
                 
                 print(f"\n✅ Access Granted: {user_role.upper()}")
                 
-                # --- SHIPPER (ESTAFETA) ---
+                # --- A. SHIPPER (ESTAFETA) ---
                 if user_role == 'estafeta':
+                    # Logic: Receives id_worker
                     if mod_delivery and hasattr(mod_delivery, 'main_delivery'):
-                        try:
-                            mod_delivery.main_delivery(user_id)
-                        except Exception as e:
-                            print(f"❌ Error inside Shipper Module: {e}")
+                        mod_delivery.main_delivery(user_id)
                     else:
-                        print("⚠️ Error: Function 'main_delivery' missing in mod_delivery.py")
+                        print("⚠️ Error: mod_delivery or function missing.")
 
-                # --- MANAGER  ---
+                # --- B. MANAGER (GESTAO) ---
                 elif user_role == 'manager':
-                    
-                    if mod_order_gestao and hasattr(mod_order_gestao, 'ModOrderGestao'):
-                        try:
-                            mod_order_gestao.ModOrderGestao(user_id)
-                        except Exception as e:
-                            print(f"❌ Error inside Manager Module: {e}")
-                    else:
-                        print("⚠️ Error: Function 'ModOrderGestao' missing in mod_order_gestao.py")
+                    while True:
+                        print("\n--- MANAGER MENU ---")
+                        print("1. Order Management (Gestão de Pedidos)")
+                        print("2. Product Management (Gestão de Produtos)")
+                        print("0. Back")
+                        m_choice = input("👉 Select: ")
+
+                        if m_choice == '1':
+                            # Logic: Receives id_worker
+                            if mod_order_gestao and hasattr(mod_order_gestao, 'ModOrderGestao'):
+                                mod_order_gestao.ModOrderGestao(user_id)
+                            else:
+                                print("⚠️ Error: Order module missing.")
+
+                        elif m_choice == '2':
+                            # Logic: NO PARAMETERS for Product
+                            if mod_product and hasattr(mod_product, 'main_product'):
+                                mod_product.main_product() 
+                            else:
+                                print("⚠️ Error: Product module missing.")
+                        
+                        elif m_choice == '0':
+                            break
                 
                 else:
-                    print(f"❌ Role '{user_role}' is not supported yet.")
+                    print(f"❌ Role '{user_role}' not supported.")
                 
                 input("Press Enter to return...")
-
             else:
-                print("\n❌ Login failed!")
+                print("\n❌ Login failed.")
                 input("Press Enter...")
 
-        # =================================================================
-        # INVALID
-        # =================================================================
         else:
             print("\n❌ Invalid selection.")
             input("Press Enter...")
