@@ -66,30 +66,61 @@ def showOrderStatus(df_orders): # Mostrar o estado de todos os pedidos
 
 # Mostrar os detalhes do destinatário de um pedido específico
 def showDetailsDestinatario(order_details):
-    """Mostrar os detalhes do destinatário de um pedido específico"""
+    """
+    Mostra os detalhes do destinatário de um pedido específico.
     
-    # Se receber uma Series, converter para DataFrame
+    Parâmetros:
+    - order_details: DataFrame ou Series com os dados da encomenda
+    
+    Notas:
+    - Se receber Series, converte para DataFrame automaticamente
+    - Mostra informação de forma formatada e legível
+    - Sem erros, apenas validação simples
+    """
+      
+    # Se receber uma Series (uma linha de dados), converter para DataFrame
+    # Series: ordem = {name: "João", contact: "961234567", ...}
     if isinstance(order_details, pd.Series):
         order_details = pd.DataFrame([order_details])
     
-    # Se DataFrame vazio, retornar
+    # Se DataFrame vazio, não há dados para mostrar
     if order_details.empty:
-        print("Erro: Detalhes do pedido não encontrados.")
+        print("\n")
+        print("─" * 70)
+        print("❌ ERRO: Detalhes do pedido não encontrados".center(70))
+        print("─" * 70)
+        print()
         return
     
-    # Garantir que temos a primeira linha
+    # Garantir que temos a primeira linha (caso tenha múltiplas)
+    # iloc[0] = primeira linha (índice 0)
     row = order_details.iloc[0]
+    # Extrair os valores necessários
+    # row['name'] = acessa a coluna 'name' da linha
+    nome = row['name']
+    contacto = row['contact']
+    morada = row['address']
+    zp1 = row['ZP1']
+    zp2 = row['ZP2']
     
-    print("=== Detalhes do Destinatário ===")
-    details = {
-        "Nome do Destinatário": row['name'],
-        "Contacto": row['contact'],
-        "Morada": row['address'],
-        "Codigo Postal": f"{row['ZP1']}-{row['ZP2']}"
-    }
+    # Formatar código postal com hífen
+    # Exemplo: "4700" + "103" → "4700-103"
+    codigo_postal = f"{zp1}-{zp2}"
+
+    print("\n")
+    print("─" * 70)    
+    print("👤 DETALHES DO DESTINATÁRIO".center(70))
+    print("─" * 70)
     
-    for key, value in details.items():
-        print(f"{key}: {value}")
+    # Mostrar cada detalhe com emoji e formatação
+    print()
+    print(f"  👤 Nome:              {nome}")
+    print(f"  📱 Contacto:          {contacto}")
+    print(f"  🏠 Morada:            {morada}")
+    print(f"  📮 Código Postal:     {codigo_postal}")
+    print()
+    print("─" * 70)
+    print()
     
     return
 
