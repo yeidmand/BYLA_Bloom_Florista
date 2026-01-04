@@ -828,4 +828,4 @@ def ModOrderGestao(Manager):
 if __name__ == "__main__":
     print("🚀 Módulo de Gestão de Pedidos Carregado")
     print("Chame: ModOrderGestao(manager_id)")
-ModOrderGestao('SUPm')
+    ModOrderGestao('SUPm')
