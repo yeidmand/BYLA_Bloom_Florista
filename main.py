@@ -1,29 +1,13 @@
 import os
 import sys
 
-# --- IMPORT MODULES (Defensive Import) ---
-try:
-    import mod_client           # Login & Client Portal
-except ImportError:
-    mod_client = None
-
-try:
-    import mod_delivery         # Estafeta Module
-except ImportError:
-    mod_delivery = None
-
-try:
-    import mod_order_gestao     # Order Management Module
-except ImportError:
-    mod_order_gestao = None
-
-try:
-    import mod_product          # Product Module
-except ImportError:
-    mod_product = None
-
+import mod_client           # Login & Client Portal
+import mod_delivery         # Courier Portal
+import mod_order_gestao     # Order Management
+import mod_product          # Product Management
 
 def clear():
+    """Clear terminal screen"""
     os.system('cls' if os.name == 'nt' else 'clear')
 
 def main():
@@ -43,74 +27,56 @@ def main():
         # 0. EXIT
         # =================================================================
         if choice == '0':
-            print("\n👋 Goodbye! See you next time.")
+            print("\n👋 Goodbye!")
             break
 
         # =================================================================
-        # 1. CLIENT AREA
+        # 1. CLIENT AREA (CUSTOMER)
         # =================================================================
         elif choice == '1':
-            if not mod_client:
-                print("\n⚠️ Error: 'mod_client.py' is missing.")
-                input("Enter to return...")
-                continue
-
             print("\n" + "-"*30)
             print("❓ Are you already registered?")
             print("   y: Yes (Login)")
-            print("   n: No (Register)")
+            print("   n: No (New Customer)")
             is_reg = input("👉 Select (y/n): ").lower().strip()
 
-            # --- A. NEW USER (REGISTER) ---
+            # --- CASE A: NOT REGISTERED -> Call with empty ID "" ---
             if is_reg == 'n':
-                print("\n[System] Opening Registration (Param: Empty)...")
-                if hasattr(mod_client, 'run_client_portal'):
-                    try:
-                        # Logic: Pass empty string "" for new users
-                        mod_client.run_client_portal("") 
-                    except Exception as e:
-                        print(f"❌ Error in mod_client: {e}")
+                print("\n[System] Opening Client Portal (New User)...")
+                # "Not registered -> call customer function with empty id_client"
+                mod_client.run_client_portal("") 
                 
                 print("[System] Portal closed.") 
                 input("Press Enter...")
 
-            # --- B. REGISTERED USER (LOGIN) ---
+            # --- CASE B: REGISTERED -> Verify Pass -> Call with ID ---
             elif is_reg == 'y':
-                print("\n🔐 --- SECURE LOGIN ---")
-                if hasattr(mod_client, 'execute_login'):
-                    user_session = mod_client.execute_login() # Returns dict
-                else:
-                    user_session = None
+                print("\n🔐 --- CLIENT LOGIN ---")
+                
+                # "Registered -> verify password & phone -> get id_client"
+                # (Def execute_login of mod_client do the checking pass/phone)
+                user_session = mod_client.execute_login()
 
-                # LOGIN SUCCESS -> CLIENT ROLE
                 if user_session and user_session.get('role') == 'client':
                     client_id = user_session['id']
                     print(f"\n✅ Welcome back, {user_session.get('name', 'Client')}!")
                     
-                    # Logic: Pass client_id for registered users
-                    if hasattr(mod_client, 'run_client_portal'):
-                        mod_client.run_client_portal(client_id)
-                    
+                    # "Call customer function" (with ID)
+                    mod_client.run_client_portal(client_id)
                     
                     print("[System] Portal closed.")
-                    input("Press Enter to return...")
-                elif user_session:
-                    print("\n❌ Access Denied: This account is not a Client.")
                     input("Press Enter...")
                 else:
-                    print("\n❌ Login failed.")
+                    print("\n❌ Login failed or Account is not a Client.")
                     input("Press Enter...")
 
         # =================================================================
-        # 2. STAFF AREA
+        # 2. STAFF AREA (SHIPPER / MANAGER)
         # =================================================================
         elif choice == '2':
-            if not mod_client:
-                print("\n⚠️ Error: Login module missing.")
-                input("Enter to return...")
-                continue
-
             print("\n🔐 --- STAFF LOGIN ---")
+            
+            # 1. Call Login to take Role
             user_session = mod_client.execute_login()
             
             if user_session:
@@ -118,45 +84,39 @@ def main():
                 user_role = user_session['role']
                 
                 print(f"\n✅ Access Granted: {user_role.upper()}")
-                
-                # --- A. SHIPPER (ESTAFETA) ---
-                if user_role == 'estafeta':
-                    # Logic: Receives id_worker
-                    if mod_delivery and hasattr(mod_delivery, 'main_delivery'):
-                        mod_delivery.main_delivery(user_id)
-                    else:
-                        print("⚠️ Error: mod_delivery or function missing.")
 
-                # --- B. MANAGER (GESTAO) ---
+                # --- SHIPPER (COURIER) ---
+                if user_role == 'estafeta':
+                    # "Call courier function (for now just print...)"
+                    
+                    print(f"🚀 Launching Courier Portal for ID: {user_id}")
+                    mod_delivery.main_delivery(user_id)
+
+                # --- MANAGER ---
                 elif user_role == 'manager':
+                    # "Check which manager -> call correct portal"
+        
                     while True:
-                        print("\n--- MANAGER MENU ---")
+                        print("\n📊 --- MANAGER DASHBOARD ---")
                         print("1. Order Management (Gestão de Pedidos)")
                         print("2. Product Management (Gestão de Produtos)")
-                        print("0. Back")
+                        print("0. Log out")
                         m_choice = input("👉 Select: ")
 
                         if m_choice == '1':
-                            # Logic: Receives id_worker
-                            if mod_order_gestao and hasattr(mod_order_gestao, 'ModOrderGestao'):
-                                mod_order_gestao.ModOrderGestao(user_id)
-                            else:
-                                print("⚠️ Error: Order module missing.")
-
+                            mod_order_gestao.ModOrderGestao(user_id)
                         elif m_choice == '2':
-                            # Logic: NO PARAMETERS for Product
-                            if mod_product and hasattr(mod_product, 'main_product'):
-                                mod_product.main_product() 
-                            else:
-                                print("⚠️ Error: Product module missing.")
-                        
+                            mod_product.main_product()
                         elif m_choice == '0':
                             break
+                        else:
+                            print("❌ Invalid option.")
                 
                 else:
-                    print(f"❌ Role '{user_role}' not supported.")
+                    print(f"❌ Unknown Role: {user_role}")
                 
                 input("Press Enter to return...")
+
             else:
                 print("\n❌ Login failed.")
                 input("Press Enter...")
