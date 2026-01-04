@@ -1,129 +1,145 @@
 import os
 import sys
 import time
+import pandas as pd
 
-# ---DATABASE TEST
-VALID_IDS = {
-    "client":   ["101", "102", "103"],      
-    "estafeta": ["E01", "worker1"],          
-    "manager":  ["SUPm", "admin", "M01"]     
-}
+
+FILE_CLIENTS = "login_client.csv"
+FILE_STAFF = "user_work_profil.csv"
+
 
 def clear():
-    """Limpar o ecrã"""
     os.system('cls' if os.name == 'nt' else 'clear')
 
-def mock_portal(name):
-    while True:
-        clear()
-        print(f"✨ BEM-VINDO AO PORTAL: {name.upper()} ✨")
-        print("="*40)
-        print("1. Simular Trabalho")
-        print("0. Sair e Voltar ao Menu Principal")
-        print("="*40)
-        op = input("Opção: ")
-        if op == '0':
-            print(f"👋 A sair do {name}...")
-            time.sleep(1)
-            break 
-        elif op == '1':
-            print("🔨 A trabalhar... (Simulação)")
-            input("Enter para continuar...")
+# =============================================================================
+# CHECK DATABASE 
+# =============================================================================
+def verify_login_csv(user_role_choice):
 
-# --- LOGIC CHECK ID  ---
-def verify_credentials(role_required):
-    """
-    Kiểm tra ID dựa trên danh sách VALID_IDS ở trên.
-    """
-    print(f"\n🔐 A verificar credenciais para: {role_required.upper()}...")
+    print(f"\n🔐 A verificar credenciais para: {user_role_choice.upper()}...")
     
-    
-    user_id = input("👤 ID Utilizador: ").strip()
-    
+    user_id = input("👤 ID: ").strip()
+    password = input("🔑 Password: ").strip()
 
-    password = input("🔑 Palavra-passe: ").strip()
+    try:
+        # --- 1.(CLIENT) ---
+        if user_role_choice == 'client':
+            if not os.path.exists(FILE_CLIENTS):
+                print(f"❌ Erro: Ficheiro {FILE_CLIENTS} não existe.")
+                return None
+            
+            
+            df = pd.read_csv(FILE_CLIENTS, sep=';', dtype=str)
+            
+            
+            match = df[ (df['id_client'].str.strip() == user_id) & (df['password'].str.strip() == password) ]
+            
+            if not match.empty:
+                
+                name = match.iloc[0]['name']
+                print(f"✅ Sucesso! Bem-vindo, {name}")
+                time.sleep(1)
+                return {"id": user_id, "name": name}
 
-    # --- LOGIC CHECK DATABASE ---
+        # --- 2.  (STAFF) ---
+        elif user_role_choice in ['estafeta', 'manager']:
+            if not os.path.exists(FILE_STAFF):
+                print(f"❌ Erro: Ficheiro {FILE_STAFF} não existe.")
+                return None
 
-    allowed_list = VALID_IDS.get(role_required, [])
+        
+            df = pd.read_csv(FILE_STAFF, sep=';', dtype=str)
+            
     
-    if user_id in allowed_list:
-        print("✅ Credenciais Válidas!")
+            match = df[ (df['id_worker'].str.strip() == user_id) & (df['password'].str.strip() == password) ]
+            
+            if not match.empty:
+        
+                duty_area = match.iloc[0]['dutyArea'].strip()
+                
+                # --- VALIDATIONS---
+            
+                if user_role_choice == 'manager':
+                    if "Gestor" in duty_area: 
+                        print(f"✅ Login Gestor Aceite! ({duty_area})")
+                        time.sleep(1)
+                        return {"id": user_id, "name": f"Gestor {user_id}"}
+                    else:
+                        print(f"❌ Erro: O ID '{user_id}' é de Estafeta, não de Gestor.")
+                        time.sleep(2)
+                        return None
+                
+                
+                if user_role_choice == 'estafeta':
+                    if "Gestor" not in duty_area: 
+                        print(f"✅ Login Estafeta Aceite! (Zona: {duty_area})")
+                        time.sleep(1)
+                        return {"id": user_id, "name": f"Estafeta {user_id}"}
+                    else:
+                        print(f"❌ Erro: O ID '{user_id}' é de Gestor, não de Estafeta.")
+                        time.sleep(2)
+                        return None
+
+        print("❌ Login Falhou (ID ou Password incorretos).")
         time.sleep(1)
-        return user_id
-    else:
-        print(f"❌ Erro: O ID '{user_id}' não é válido ou não tem permissão de {role_required}.")
-        print(f"   (Dica para teste: Tente usar {allowed_list})")
-        time.sleep(2)
         return None
 
-# --- 4. MAIN FLOW ---
+    except Exception as e:
+        print(f"❌ Erro de Sistema (CSV): {e}")
+        return None
+
+# =============================================================================
+# SIMULATION PORTAL (avoid crashing)
+# =============================================================================
+def mock_portal(portal_name, user_info):
+    while True:
+        clear()
+        print(f"✨ PORTAL: {portal_name} ✨")
+        print(f"👤 User: {user_info['name']} | ID: {user_info['id']}")
+        print("="*40)
+        print("1. Entrar (Simulação)")
+        print("0. Sair (Logout)")
+        print("="*40)
+        op = input("Opção: ")
+        if op == '0': break
+        if op == '1': 
+            print("... A trabalhar ...")
+            time.sleep(1)
+
+# =============================================================================
+# MAIN
+# =============================================================================
 def main():
     while True:
         clear()
-        print("="*60)
-        print("🌸  BYLA BLOOM FLORISTA - MAIN SYSTEM  🌸")
-        print("="*60)
-        print("1. Área Cliente (Customer)")
-        print("2. Área Staff (Estafeta / Gestor)")
+        print("=== BYLA BLOOM FLORISTA ===")
+        print("1. Cliente")
+        print("2. Staff")
         print("0. Sair")
-        print("-" * 60)
-        
-        choice = input("👉 Selecione Opção: ").strip()
-        
-        if choice == '0':
-            print("\n👋 Adeus!")
-            break
+        op = input("Opção: ")
 
-        # --- CLIENT ---
-        elif choice == '1':
-        
-            print("\n" + "-"*30)
-            print("❓ Já tem registo?")
-            print("   y: Sim (Login)")
-            print("   n: Não (Novo Registo)")
-            is_reg = input("👉 (y/n): ").lower().strip()
+        if op == '0': break
 
-            if is_reg == 'n':
-                mock_portal("Cliente (Novo)")
-            elif is_reg == 'y':
-                client_id = verify_credentials("client") # Check list ["101", "102"]
-                if client_id:
-                    mock_portal(f"Cliente {client_id}")
+        # --- CLIENTE ---
+        elif op == '1':
+            print("\n1. Login\n2. Registar")
+            sub = input(">> ")
+            if sub == '1':
+                user = verify_login_csv('client')
+                if user: mock_portal("ÁREA CLIENTE", user)
+            elif sub == '2':
+                mock_portal("NOVO REGISTO", {"id": "NEW", "name": "Visitante"})
 
         # --- STAFF ---
-        elif choice == '2':
-            print("\n🔐 --- STAFF ACCESS ---")
-            print("1. Estafeta (Courier)")
-            print("2. Gestor (Manager)")
-            print("0. Voltar")
-            staff_choice = input("👉 Selecione Cargo: ")
-
-            if staff_choice == '1':
-                worker_id = verify_credentials("estafeta") # Check list ["E01"]
-                if worker_id:
-                    mock_portal(f"Estafeta {worker_id}")
-
-            elif staff_choice == '2':
-                manager_id = verify_credentials("manager") # Check list ["SUPm"]
-                if manager_id:
-                    # Manager Menu
-                    while True:
-                        clear()
-                        print(f"📊 GESTOR: {manager_id}")
-                        print("1. Orders")
-                        print("2. Products")
-                        print("0. Logout")
-                        op = input("Opção: ")
-                        if op == '1': mock_portal("Orders")
-                        elif op == '2': mock_portal("Products")
-                        elif op == '0': break
-
-            elif staff_choice == '0':
-                continue
-        else:
-            print("Opção inválida.")
-            time.sleep(1)
+        elif op == '2':
+            print("\n1. Estafeta\n2. Gestor")
+            sub = input(">> ")
+            if sub == '1':
+                user = verify_login_csv('estafeta')
+                if user: mock_portal("PORTAL ESTAFETA", user)
+            elif sub == '2':
+                user = verify_login_csv('manager')
+                if user: mock_portal("PORTAL GESTOR", user)
 
 if __name__ == "__main__":
     main()
