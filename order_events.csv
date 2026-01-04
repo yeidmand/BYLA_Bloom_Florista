@@ -1,2 +1,2 @@
-event_id;order_id;event_type;staptime_1;staptime_2;login;details;latitude;longitude;
+event_id;order_id;event_type;staptime_1;staptime_2;login;details;latitude;longitude
 EVT01;PT01;pending;2025-12-12 10:15:00;;SUPm;teste;;
