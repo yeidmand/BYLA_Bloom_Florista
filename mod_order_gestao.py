@@ -14,8 +14,6 @@ if Manager == "SUPm":
 else:
     isSupervisor = False
 
-df_zone = pd.read_csv("zp_zones.csv", sep=";", dtype=str)
-
 def initOrderManagementMenu():
         ValidOption = False
 
@@ -60,20 +58,46 @@ def EditOrder(IdOrder):
         else:
             print("\nOpção inválida. Por favor, tente novamente.\n")
     return choice
-     
+
+#Filtrar por zona
+def MenuFilter():
+    validOption = True
+    while validOption:
+        print("== Menu Filtrar Encomendas por Zona ==")
+        print("="*50 + "\n")
+        print("Escolha uma das seguintes opções para ver Encomendas por Zona")
+        print("1. Centro")
+        print("2. Norte")
+        print("3. Sul")
+        print("4. Este")
+        print("5. Oeste")
+        print("6. Fora do limite")
+        print("7. Voltar ao menu anterior")
+        option = input("Opção: ").strip()
+        
+        if option in ['1', '2', '3', '4', '5', '6', '7']:
+            validOption = False
+            return option
+        else:
+            print("Opção inválida. Por favor, tente novamente.")
+
+# Extração de csv como Data Frame #
+df_zone = pd.read_csv("zp_zones.csv", sep=";", dtype=str)
+df_user_worker = load_user_work_profil()
+orders_df = load_orders()
+order_it = load_order_items()
+products_df = load_products()
+order_events_df = load_order_events()
+#----------------------------------#
+
+# INICIO DE PORTAL #
 MenuInitial = True
 
 while MenuInitial:
 
     option = initOrderManagementMenu()
-    orders_df = load_orders()
-    order_it = load_order_items()
-    products_df = load_products()
-    order_events_df = load_order_events()
-
     #Diccionario dos nomes dos produto por chave = product_id
     products_name = dict(zip(products_df['product_id'], products_df['name_product']))
-
 
     if option == '1':
         
@@ -521,85 +545,111 @@ while MenuInitial:
                     i = total_orders
 
     elif option == '4':
-
+        """Atribuir estafeta a encomendas não assignadas"""
         validated_orders = orders_df[orders_df['order_status'].isin(['validated', 'partially shipped'])].reset_index(drop=True)
-
+        
         if validated_orders.empty:
-            print("\nNão existem encomendas validadas ou parcialmente enviadas.\n")
+            print("\n✅ Não existem encomendas validadas ou parcialmente enviadas.\n")
             continue
-
-        i = 0
-        total_orders = len(validated_orders)
-
-        # Filtrar só as que NÃO têm estafeta atribuído
-        unassigned_orders = validated_orders[validated_orders['id_worker'].isna() | (validated_orders['id_worker'].str.strip() == '') | (validated_orders['id_worker'].str.lower() == 'nan')].reset_index(drop=True)
-
+        
+        # Filtrar encomendas SEM estafeta atribuído
+        unassigned_orders = validated_orders[
+            validated_orders['id_worker'].isna() | 
+            (validated_orders['id_worker'].astype(str).str.strip() == '') | 
+            (validated_orders['id_worker'].astype(str).str.lower() == 'nan')
+        ].reset_index(drop=True)
+        
         if unassigned_orders.empty:
             print("\n✅ Não existem encomendas pendentes por asignar estafeta.\n")
             continue
-
+        
         i = 0
         total_orders = len(unassigned_orders)
-
+        
         while i < total_orders:
             order = unassigned_orders.iloc[i]
-
+            
             print("\n======================================")
-            print(f"ID: {order['order_id']}")
-            print(f"Destinatário: {order['name']} | Contacto: {order['contact']}")
-            print(f"Morada: {order['address']}")
-            print(f"Código Postal: {order['ZP1']}-{order['ZP2']}")
+            ut.showDetailsDestinatario(order)
             print("======================================\n")
-
-            if i < total_orders - 1:
-                # Não é a última
-                while True:
-                    print("\nOpções:")
-                    print("1. Atribuir estafeta automaticamente")
-                    print("2. Próxima encomenda")
-                    print("3. Sair")
-                    resp = input("Opção: ").strip()
-
-                    if resp == '1':
-                        df_user_worker = load_user_work_profil()
-                        estafeta, zone = ut.code_zone(int(order['ZP1']), df_zone, df_user_worker)
-                        
-                        orders_df.loc[orders_df['order_id'] == order['order_id'], 'id_worker'] = estafeta
-                        save_orders(orders_df)
-                        
-                        print(f"✅ Estafeta {estafeta} ({zone}) atribuído à encomenda {order['order_id']}")
-                        i += 1
-                        break
-
-                    elif resp == '2':
-                        i += 1
-                        break
-
-                    elif resp == '3':
-                        print("A regressar ao menu inicial...")
-                        i = total_orders
-                        break
-
-                    else:
-                        print("Opção inválida. Escolha 1, 2 ou 3.")
-
+            
+            print("Opções:")
+            print("1. Atribuir estafeta automaticamente")
+            print("2. Próxima encomenda")
+            print("3. Sair")
+            resp = input("Opção: ").strip()
+            
+            if resp == '1':
+                estafeta, zone = ut.code_zone(int(order['ZP1']), df_zone, df_user_worker)
+                orders_df.loc[orders_df['order_id'] == order['order_id'], 'id_worker'] = estafeta
+                save_orders(orders_df)
+                print(f"✅ Estafeta {estafeta} ({zone}) atribuído à encomenda {order['order_id']}")
+                i += 1
+                
+            elif resp == '2':
+                i += 1
+                
+            elif resp == '3':
+                print("A regressar ao menu inicial...")
+                i = total_orders
+                
             else:
-                # É a última encomenda
-                while True:
-                    print("\nEscolha uma das seguintes opções:")
-                    print("1. Atribuir estafeta automaticamente")
-                    resp = input("2. Sair").strip()
+                print("Opção inválida. Escolha 1, 2 ou 3.")
 
-                    if resp == '1':
-                        df_user_worker = load_user_work_profil()
-                        estafeta, zone = ut.code_zone(int(order['ZP1']), df_zone, df_user_worker)
-                        
-                        orders_df.loc[orders_df['order_id'] == order['order_id'], 'id_worker'] = estafeta
-                        save_orders(orders_df)
-                        
-                        print(f"✅ Estafeta {estafeta} ({zone}) atribuído à encomenda {order['order_id']}")
-                    elif resp == '2':
-                        break
-                    else:
-                        print("Opção inválida. Escolha 1 ou 2.")
+    elif option == '5':
+        """Filtrar encomendas por zona"""
+        validated_orders = orders_df[orders_df['order_status'].isin(['validated', 'partially shipped'])].reset_index(drop=True)
         
+        if validated_orders.empty:
+            print("\n✅ Não existem encomendas validadas ou parcialmente enviadas.\n")
+            continue
+        
+        # Filtrar encomendas COM estafeta assignado
+        assigned_orders = validated_orders[
+            (validated_orders['id_worker'].notna()) & 
+            (validated_orders['id_worker'].astype(str).str.strip() != '') & 
+            (validated_orders['id_worker'].astype(str).str.lower() != 'nan')
+        ].reset_index(drop=True)
+        
+        if assigned_orders.empty:
+            print("\n✅ Não existem encomendas com estafeta assignado.")
+            print("Antes de filtrar por zona, é necessário assignar estafeta a alguma encomenda.")
+            continue
+        
+        print("==================================================")
+        option_filter = MenuFilter()
+        print("==================================================")
+        
+        # Voltar ao menu se escolher opção 7
+        if option_filter == '7':
+            continue
+        
+        estafetas_df = df_user_worker[~df_user_worker['dutyArea'].str.startswith('Gestor')]
+        
+        # Mapa de zonas
+        zones_map = {
+            '1': ('Center', 'Centro'),
+            '2': ('North', 'Norte'),
+            '3': ('South', 'Sul'),
+            '4': ('East', 'Este'),
+            '5': ('West', 'Oeste'),
+            '6': ('Fora do limite', 'Fora do limite')
+        }
+        
+        if option_filter in zones_map:
+            zone_key, zone_name = zones_map[option_filter]
+            zone_estafetas = estafetas_df[estafetas_df['dutyArea'] == zone_key]
+            zone_orders = pd.merge(assigned_orders, zone_estafetas, on='id_worker', how='inner')
+            
+            print(f"\n{'='*50}")
+            print(f"Encomendas para entrega: {zone_name}")
+            print(f"{'='*50}\n")
+            
+            if zone_orders.empty:
+                print(f"❌ Não há pedidos preparadas para entrega em {zone_name}.")
+            else:
+                print(f"✅ Total de encomendas em {zone_name}: {len(zone_orders)}\n")
+                for _, order in zone_orders.iterrows():
+                    print("======================================")
+                    ut.showDetailsDestinatario(order)
+                    print("======================================\n")

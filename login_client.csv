@@ -1,3 +1,4 @@
 id_client;name;contact;password;address;ZP1;ZP2
-;Joao Pereira;961219231;client1;Travessia Amelia Rodrigues 152;4700;103
-;Maria Fernandes;930153233;client2;Rua Antonio Fonseca 743;4720;336
+CL001;Joao Pereira;961219231;client1;Travessia Amelia Rodrigues 152;4700;103
+CL005;Maria Fernandes;930153233;client2;Rua Antonio Fonseca 743;4720;336
+Cl004;Jorge Reu;987562418;client3;Rua Herculano 79;4720;580

@@ -66,19 +66,32 @@ def showOrderStatus(df_orders): # Mostrar o estado de todos os pedidos
 
 # Mostrar os detalhes do destinatário de um pedido específico
 def showDetailsDestinatario(order_details):
+    """Mostrar os detalhes do destinatário de um pedido específico"""
+    
+    # Se receber uma Series, converter para DataFrame
+    if isinstance(order_details, pd.Series):
+        order_details = pd.DataFrame([order_details])
+    
+    # Se DataFrame vazio, retornar
     if order_details.empty:
         print("Erro: Detalhes do pedido não encontrados.")
         return
-
-    print("\n=== Detalhes do Destinatário ===")
-    details = {"Nome do Destinatário": order_details.iloc[0]['name'],
-                "Contacto": order_details.iloc[0]['contact'],
-                "Morada": order_details.iloc[0]['address'],
-                "Codigo Postal": f"{order_details.iloc[0]['ZP1']}-{order_details.iloc[0]['ZP2']}",
-                }
+    
+    # Garantir que temos a primeira linha
+    row = order_details.iloc[0]
+    
+    print("=== Detalhes do Destinatário ===")
+    details = {
+        "Nome do Destinatário": row['name'],
+        "Contacto": row['contact'],
+        "Morada": row['address'],
+        "Codigo Postal": f"{row['ZP1']}-{row['ZP2']}"
+    }
+    
     for key, value in details.items():
         print(f"{key}: {value}")
-    return 
+    
+    return
 
 # Validar o endereço de um pedido específico
 def addressValidation(order_details):
@@ -182,10 +195,22 @@ def reject_order(order_id, orders_df, order_it, products_df, order_events_df, ma
     return orders_df, order_it, products_df, order_events_df
 
 # Zona do código postal e estafeta random
-def code_zone(ZP1, df_zones, df_user_workers):  
-    if ZP1 in df_zones['Codes'].values:  
-        zone = df_zones.loc[df_zones['Codes'] == ZP1, 'Zone'].iloc[0]
-        estafetas = df_user_workers[df_user_workers['dutyArea'] == zone]["id_worker"].tolist()
+def code_zone(ZP1, df_zones, df_user_workers):
+    """
+    Atribuir estafeta baseado no código postal (ZP1)
+    """
+    # Converter ZP1 para string e remover espaços
+    ZP1_str = str(ZP1).strip()
+    
+    # Converter Codes para string também (garantir)
+    if df_zones['Codes'].dtype != 'object':
+        df_zones['Codes'] = df_zones['Codes'].astype(str)
+    
+    # Procurar o código postal
+    if ZP1_str in df_zones['Codes'].values:
+        zone = df_zones.loc[df_zones['Codes'] == ZP1_str, 'Zone'].iloc[0]
+        estafetas = df_user_workers[df_user_workers['dutyArea'] == zone]['id_worker'].tolist()
+        
         if estafetas:
             estafeta = rd.choice(estafetas)
         else:
