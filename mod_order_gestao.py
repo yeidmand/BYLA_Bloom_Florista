@@ -654,5 +654,3 @@ def ModOrderGestao(Manager):
                         print("======================================")
                         ut.showDetailsDestinatario(order)
                         print("======================================\n")
-
-ModOrderGestao(Manager)
