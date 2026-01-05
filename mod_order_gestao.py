@@ -810,7 +810,8 @@ def ModOrderGestao(Manager):
                         ut.showDetailsDestinatario(pedido)
                         print("─" * 70)
                         print()
-        
+                    input("Prima ENTER para voltar ao menu...")
+            
         # ═══════════════════════════════════════════════════════════════
         # OPÇÃO 6: VOLTAR
         # ═══════════════════════════════════════════════════════════════

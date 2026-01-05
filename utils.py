@@ -15,21 +15,35 @@ def showDetailsOrder(order_details, order_items_df, products_df):
     Mostra apenas os itens cujo status é diferente de 'canceled'.
     """
     if order_details.empty:
-        print("Erro: Detalhes do pedido não encontrados.")
+        print("\n")
+        print("─" * 80)
+        print("❌ ERRO: Detalhes do pedido não encontrados".center(80))
+        print("─" * 80)
+        print()
         return
 
     # Detalhes do pedido
-    print("\n=== Detalhes do Pedido ===")
-    details = {
-        "Numero do Pedido": order_details.iloc[0]['order_id'],
-        "Nome do Cliente": order_details.iloc[0]['name'],
-        "Contacto": order_details.iloc[0]['contact'],
-        "Morada": order_details.iloc[0]['address'],
-        "Codigo Postal": f"{order_details.iloc[0]['ZP1']}-{order_details.iloc[0]['ZP2']}",
-        "Estado do Pedido": order_details.iloc[0]['order_status'],
-    }
-    for key, value in details.items():
-        print(f"{key}: {value}")
+    row = order_details.iloc[0]
+    
+    numero_pedido = row['order_id']
+    nome_cliente = row['name']
+    contacto = row['contact']
+    morada = row['address']
+    codigo_postal = f"{row['ZP1']}-{row['ZP2']}"
+    estado_pedido = row['order_status']
+    
+    print("\n")
+    print("─" * 80)
+    print("📋 DETALHES DO PEDIDO".center(80))
+    print("─" * 80)
+    print()
+    print(f"  🔢 Número do Pedido:    {numero_pedido}")
+    print(f"  👤 Cliente:             {nome_cliente}")
+    print(f"  📱 Contacto:            {contacto}")
+    print(f"  🏠 Morada:              {morada}")
+    print(f"  📮 Código Postal:       {codigo_postal}")
+    print(f"  📊 Estado do Pedido:    {estado_pedido}")
+    print()
 
     # Filtrar itens não cancelados
     if 'status' in order_items_df.columns:
@@ -42,19 +56,27 @@ def showDetailsOrder(order_details, order_items_df, products_df):
         how='left'
     )
 
-    print("=== Itens do Pedido ===")
+    print("─" * 80)
+    print("📦 ITENS DO PEDIDO".center(80))
+    print("─" * 80)
+    print()
+    
     if merged_items.empty:
-        print("Nenhum item encontrado para este pedido (todos os itens podem estar cancelados).")
+        print("  ⚠️  Nenhum item encontrado (todos os itens podem estar cancelados)")
+        print()
     else:
-        for _, item in merged_items.iterrows():
+        for idx, item in merged_items.iterrows():
             product_name = item['name_product'] if pd.notna(item['name_product']) else f"Produto ID: {item['product_id']} (Nome não encontrado)"
-            print(
-                f"Produto: {product_name} | "
-                f"Quantidade: {item['quantity_ordered']} | "
-                f"Preço Unitário: {item['price_unit']}€ | "
-                f"Subtotal: {item['subtotal']}€"
-            )
-        print(f"---------------------------------------------------Total do Pedido: {merged_items['subtotal'].sum()}€\n")
+            print(f"  📦 {product_name}")
+            print(f"     └─ Quantidade: {item['quantity_ordered']} | Preço Unit.: {item['price_unit']}€ | Subtotal: {item['subtotal']}€")
+        
+        total = merged_items['subtotal'].sum()
+        print()
+        print("─" * 80)
+        print(f"  💰 TOTAL DO PEDIDO: {total}€".ljust(79))
+        print("─" * 80)
+        print()
+    
     return
 
 # Mostrar o estado de todos os pedidos
