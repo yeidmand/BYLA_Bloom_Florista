@@ -1,4 +1,21 @@
 id_client;name;contact;password;address;ZP1;ZP2
-CL001;Joao Pereira;961219231;client1;Travessia Amelia Rodrigues 152;4700;103
-CL005;Maria Fernandes;930153233;client2;Rua Antonio Fonseca 743;4720;336
-Cl004;Jorge Reu;987562418;client3;Rua Herculano 79;4720;580
+CL001;João Pereira;961219231;client1;Travessia Amelia Rodrigues 152;4700;103
+CL002;Maria Fernandes;930153233;client2;Rua Antonio Fonseca 743;4720;336
+CL003;Jorge Reu;987562418;client3;Rua Herculano 79;4720;580
+CL004;Carlos Santos;962345678;client4;Avenida Central 500;4710;200
+CL005;Sofia Oliveira;931234567;client5;Rua dos Anjinhos 45;4750;450
+CL006;Ana Silva;968765432;client6;Rua da Paz 123;4740;210
+CL007;Miguel Costa;937654321;client7;Avenida da Liberdade 456;4700;520
+CL008;Fernanda Gomes;961112233;client8;Rua do Comércio 789;4730;315
+CL009;Paulo Oliveira;930445566;client9;Travessa Santa Maria 234;4720;401
+CL010;Rita Martins;967778899;client10;Rua da República 567;4700;145
+CL011;Nuno Alves;932223344;client11;Avenida da Indústria 890;4760;280
+CL012;Joana Costa;969334455;client12;Rua do Parque 321;4710;365
+CL013;Rui Gomes;935445566;client13;Travessia da Feira 654;4740;190
+CL014;Cristina Silva;968556677;client14;Rua da Saúde 987;4700;250
+CL015;Bruno Martins;931667788;client15;Avenida do Comércio 1123;4720;375
+CL016;Margarida Alves;967778899;client16;Rua do Mercado 456;4750;420
+CL017;Tiago Oliveira;930889900;client17;Travessia da Igreja 789;4710;290
+CL018;Vanessa Costa;966001122;client18;Rua da Estação 234;4730;410
+CL019;Gonçalo Silva;933112233;client19;Avenida da Praça 567;4700;155
+CL020;Patrícia Gomes;969223344;client20;Rua do Porto 890;4720;360

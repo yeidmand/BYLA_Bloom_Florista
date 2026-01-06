@@ -2,6 +2,9 @@ import os
 import time
 import pandas as pd
 import mod_complaint
+from mod_order_gestao import ModOrderGestao
+from mod_delivery import main_delivery
+
 
 
 FILE_CLIENTS = "login_client.csv"
@@ -32,7 +35,7 @@ def verify_login_csv(user_role_choice):
             df = pd.read_csv(FILE_CLIENTS, sep=';', dtype=str)
             
             
-            match = df[ (df['id_client'].str.strip() == user_id) & (df['password'].str.strip() == password) ]
+            match = df[ (df['contact'].str.strip() == user_id) & (df['password'].str.strip() == password) ] #Verificamos o contacto e a password
             
             if not match.empty:
                 
@@ -55,15 +58,33 @@ def verify_login_csv(user_role_choice):
             
             if not match.empty:
         
-                duty_area = match.iloc[0]['dutyArea'].strip()
-                
+                duty_area = match.iloc[0]['dutyArea'].lower().strip()
+                print(duty_area)
                 # --- VALIDATIONS---
             
                 if user_role_choice == 'manager':
-                    if "Gestor" in duty_area: 
-                        print(f"✅ Login Gestor Aceite! ({duty_area})")
-                        time.sleep(1)
-                        return {"id": user_id, "name": f"Gestor {user_id}"}
+                    if "gestor" in duty_area:
+                        # Verificação do gestor especifico
+                        if "encomenda" in duty_area:
+                            print(f"✅ Login Gestor de Encomendas Aceite!")
+                            time.sleep(1)
+                            return {"id": user_id, "módulo": "Encomendas"}
+                        elif "produto" in duty_area:
+                            print(f"✅ Login Gestor de Productos Aceite! ({duty_area})")
+                            time.sleep(1)
+                            return {"id": user_id, "módulo": "Produtos"}
+                        elif "estafeta" in duty_area:
+                            print(f"✅ Login Gestor de Estafeta Aceite! ({duty_area})")
+                            time.sleep(1)
+                            return {"id": user_id, "módulo": "Estafeta"}
+                        elif "reclamações" in duty_area:
+                            print(f"✅ Login Gestor de Reclamações Aceite! ({duty_area})")
+                            time.sleep(1)
+                            return {"id": user_id, "módulo": "Reclamações"}
+                        else:
+                            print(f"❌ Erro: O ID '{user_id}' é de Gestor desconhecido.")
+                            time.sleep(2)
+                            return None                       
                     else:
                         print(f"❌ Erro: O ID '{user_id}' é de Estafeta, não de Gestor.")
                         time.sleep(2)
@@ -71,10 +92,10 @@ def verify_login_csv(user_role_choice):
                 
                 
                 if user_role_choice == 'estafeta':
-                    if "Gestor" not in duty_area: 
+                    if "gestor" not in duty_area: 
                         print(f"✅ Login Estafeta Aceite! (Zona: {duty_area})")
                         time.sleep(1)
-                        return {"id": user_id, "name": f"Estafeta {user_id}"}
+                        return {"id": user_id}
                     else:
                         print(f"❌ Erro: O ID '{user_id}' é de Gestor, não de Estafeta.")
                         time.sleep(2)
@@ -96,7 +117,9 @@ def mock_portal(portal_name, user_info):
     while True:
         clear()
         print(f"✨ PORTAL: {portal_name} ✨")
-        print(f"👤 User: {user_info['name']} | ID: {user_info['id']}")
+        if portal_name == "ÁREA CLIENTE": #Isto SÒ Mostrar no se for Cliente
+            print(f"👤 Cliente: {user_info['name']} | ID: {user_info['id']}")
+        
         print("="*40)
         print("1. Entrar (Simulação)")
         print("0. Sair (Logout)")
@@ -105,8 +128,16 @@ def mock_portal(portal_name, user_info):
 
         if op == '0': break
         if op == '1': 
+        op = input("Opção: ").strip()
+        
+        if op == '0': 
+            return op
+        elif op == '1':
             print("... A trabalhar ...")
             time.sleep(1)
+            return op
+        else:
+            print("❌ Opção inválida! Escolha 0 ou 1.")
 
 # =============================================================================
 # MAIN
@@ -153,8 +184,23 @@ def main():
                         elif action == '0':
                             break
 
+                if user: 
+                    op_in = mock_portal("ÁREA CLIENTE", user)
+                    if op_in == '0': 
+                        break
+                    elif op_in == '1':
+                        print("....Função PORTAL CLIENTE....") #MODIFICAR UMA VEZ EXISTA A FUNÇÂO PORTAL CLIENTE ex. mod_cliente(user['id'])
+                        time.sleep(1)
+                        break
+                else:
+                    break
+
+
             elif sub == '2':
-                mock_portal("NOVO REGISTO", {"id": "NEW", "name": "Visitante"})
+                print("...ABRIR PORTAL CLIENTE PARA NOVO REGISTO...") #MODIFICAR UMA VEZ EXISTA A FUNÇÂO PORTAL CLIENTE ex. mod_cliente("")
+                time.sleep(1)
+                break
+
 
         # --- STAFF ---
         elif op == '2':
@@ -165,9 +211,46 @@ def main():
                 user = verify_login_csv('estafeta')
                 if user: mock_portal("PORTAL ESTAFETA", user)
 
+                if user: 
+                    op_in = mock_portal("PORTAL ESTAFETA", user)
+                    if op_in == '0': 
+                        break
+                    elif op_in == '1':
+                        print("....Função PORTAL ESTAFETA....") #ESTAFETA
+                        main_delivery(user['id'])
+                        time.sleep(1)
+                        break
+                else:   
+                    break
+
             elif sub == '2':
                 user = verify_login_csv('manager')
-                if user: mock_portal("PORTAL GESTOR", user)
+                if user: 
+                    op_in = mock_portal("PORTAL GESTOR", user)
+                    if op_in == '0': 
+                        break
+                    elif op_in == '1':
+                        if user['módulo'] == 'Encomendas':
+                            print("....Função PORTAL GESTOR DE ENCOMENDAS....")
+                            ModOrderGestao(user['id'])                             # GESTOR DE ENCOMENDAS
+                            time.sleep(1)
+                            break
+                        elif user['módulo'] == 'Produtos':
+                            print("....Função PORTAL GESTOR DE PRODUTOS....") # MODIFICAR UMA VEZ EXISTA ex. mod_product()
+                            time.sleep(1)
+                            break
+                        elif user['módulo'] == 'Estafeta':
+                            print("....Função PORTAL GESTOR DE ESTAFETA....")
+                            main_delivery(user['id'])
+                            time.sleep(1)
+                            break
+                        elif user['módulo'] == 'Reclamações':
+                            print("....Função PORTAL GESTOR DE RECLAMAÇÕES....") # MODIFICAR UMA VEZ EXISTA ex. mod_reclamacoes()
+                else:
+                    break
+        else:
+            print("❌ Opção inválida! Escolha 0, 1 ou 2.")
+
 
 if __name__ == "__main__":
     main()
