@@ -1,15 +1,16 @@
 """
 ╔═════════════════════════════════════════════════════════════════════════════╗
-║                    MOD_ORDER_GESTAO                                          ║
-║                                                                               ║
-║  Melhorias aplicadas:                                                        ║
-║  ✓ Estética melhorada (outputs mais agradáveis)                              ║
-║  ✓ Cores e formatação (emojis e separadores)                                  ║
-║  ✓ Inputs mais personalizados                                                ║
-║  ✓ Função centralizada para registar eventos                                 ║
-║  ✓ Lógica original mantida intacta                                          ║
-║  ✓ Sem try-except (validações simples)                                       ║
-║                                                                               ║
+║                    MOD_ORDER_GESTAO                                          
+║                                                                               
+║  06/01 Atulizações Feitas:                                                        
+║  ✓ Estética melhorada (outputs mais agradáveis)                              
+║  ✓ Cores e formatação (emojis e separadores)                                  
+║  ✓ Inputs mais personalizados                                               
+║  ✓ Função centralizada para registar eventos                                 
+║  ✓ Lógica original mantida intacta                                          
+║  ✓ Sem try-except (validações simples)
+║  ✓ Reimplemetação de função para partilly shipped                            
+║                                                                               
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
 
@@ -24,6 +25,7 @@ from data_manager import (
 )
 import utils as ut
 import random as rd
+import time
 
 
 # ════════════════════════════════════════════════════════════════════════════════
@@ -473,6 +475,7 @@ def ModOrderGestao(Manager):
                                     order_events_df, Manager, save_orders, save_order_items,
                                     save_products, save_order_events
                                 )
+                                print("\n✅ Encomenda rejeitada com sucesso.\n")
                                 editando = False
                             else:
                                 print("\n❌ Apenas o Supervisor pode rejeitar encomendas.\n")
@@ -526,16 +529,103 @@ def ModOrderGestao(Manager):
                                             editando = False
                                         
                                         else:
-                                            print("❌ Alguns produtos não estão disponíveis\n")
-                                            editando = False
+                                            qty_prod = order_it[order_it['order_id'] == user_input].shape[0]
+                                            print("─"*55)
+                                            print("❌ Encomenda inválida. Existem produtos não disponíveis.\n")
+                                            print("═"*55)
+                                            print(f"📦 ITEN(S) NÃO DISPONÍVEI(S):".center())
+                                            print("═"*55)
+                                            print("\n")
+                                            print("".join(f"  SKU: {sku} | Produto: {products_name.get(sku, 'Desconhecido')}\n"
+                                                                for sku in produtos_faltantes))
+                                            print("─"*55)
+
+                                                # Se TODOS os produtos da encomenda estão indisponíveis → cancelar encomenda
+                                            if qty_prod == len(produtos_faltantes):
+                                                print(f"\n⚠️ A encomenda {user_input} deve ser cancelada. Todos os produtos estão indisponíveis.\n")
+
+
+                                                    # Usa a tua função utilitária de rejeição
+                                                orders_df, order_it, products_df, order_events_df = ut.reject_order(
+                                                    user_input,
+                                                    orders_df,
+                                                    order_it,
+                                                    products_df,
+                                                    order_events_df,
+                                                    Manager,
+                                                    save_orders,
+                                                    save_order_items,
+                                                    save_products,
+                                                    save_order_events
+                                                    )
+                                                print("\n✅ Encomenda rejeitada com sucesso.\n")
+
+                                                # Caso contrário → preparar parcialmente (cancelar só os indisponíveis)
+                                            else:
+                                                OpenMenu = True
+                                                while OpenMenu:
+                                                    option_validation = input("Preparar parcialmente mesmo assim? (s/n): ").strip().lower()
+
+                                                    if option_validation in ['s', 'n']:
+                                                        OpenMenu = False
+
+                                                        if option_validation == 's':
+                                                            editando = False
+
+                                                            # Atualizar estado da encomenda
+                                                            orders_df.loc[orders_df['order_id'] == user_input, "order_status"] = "partially shipped"
+                                                            save_orders(orders_df)
+
+                                                            # Por defeito, marcar todos os artigos como 'shipped'
+                                                            order_it.loc[order_it['order_id'] == user_input, "status"] = "shipped"
+                                                            save_order_items(order_it)
+                                                            
+                                                            print("\n✅ Encomenda preparada parcialmente.\n")
+
+                                                            for sku in produtos_faltantes:
+                                                                # Atualizar status dos artigos não disponíveis
+                                                                mask = (order_it["order_id"] == user_input) & (order_it["product_id"] == sku)
+
+                                                                order_it.loc[mask, "status"] = "canceled"
+
+                                                                # Quantidade encomendada desse artigo
+                                                                quantity_ordered = order_it.loc[mask, "quantity_ordered"].iloc[0]
+                                                                order_it.loc[mask, "quantity_returned"] = quantity_ordered
+
+                                                                # Devolver quantidade ao stock
+                                                                products_df.loc[products_df["product_id"] == sku, "quantity_stock"] += quantity_ordered
+
+                                                                save_products(products_df)
+                                                                save_order_items(order_it)
+
+                                                                # Registar evento
+                                                                evento = registar_evento(
+                                                                    user_input,
+                                                                    "partial_validate",
+                                                                    "Pedido parcialmente validado",
+                                                                    Manager)
+                                                                
+                                                                order_events_df = pd.concat(
+                                                                    [order_events_df, pd.DataFrame([evento])],ignore_index=True)
+                                                                save_order_events(order_events_df)
+
+                                                        elif option_validation == 'n':
+                                                            print("\n↩️  A voltar ao menu de Edição e Validação...\n")
+                                                            
+                                                        else:
+                                                            print("❌ Opção inválida. Tente novamente (s/n).")
                                     
                                     else:
                                         print(f"❌ Dados inválidos: {motivo_dest}\n")
-                                        editando = False
+                                        continuar = input("\n❓ Deseja continuar editando? (s/n): ").strip().lower()
+                                        if continuar != 's':
+                                            editando = False
                                 
                                 else:
                                     print(f"❌ Morada inválida: {motivo_morada}\n")
-                                    editando = False
+                                    continuar = input("\n❓ Deseja continuar editando? (s/n): ").strip().lower()
+                                    if continuar != 's':
+                                        editando = False
                             
                             else:
                                 print("\n❌ Apenas o Supervisor pode validar encomendas.\n")
