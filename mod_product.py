@@ -714,7 +714,8 @@ def verificarEncomenda(nomeProduto, descricaoProduto, categoriaProduto, precosPr
     else:
         print("❌ Catálogo vazio. Não existe stock!")
 
-# Funções de Consulta e Listagem        
+# Funções de Consulta e Listagem
+
 
 def filtrarCatalogo(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
     
@@ -884,7 +885,7 @@ def listarCatalogo(nomeProduto, descricaoProduto, categoriaProduto, precosProdut
             print("\n")
         
         print("\nTotal de produtos: " + str(numProdutos))
-        print("==================================\n")
+        print("\n")
     else:
         print("❌ O Catálogo está vazio! ❌")
 
@@ -908,13 +909,85 @@ def verificarEstatisticas(precosProduto, categoriaProduto, stock, disponibilidad
         
         # Usar múltiplos prints (mais claro que um print com \n múltiplos)
         print("\n📈 ===== Estatísticas do Catálogo ===== 📈")
-        print("\n--- Resumo Geral ---")
+        print("\nResumo Geral")
         print("Total de Produtos registados: " + str(numProdutos))
         print("Produtos Disponíveis: " + str(disponivel))
         print("Produtos Esgotados/Indisponíveis: " + str(esgotado))
-        print("\n--- Valor em Stock ---")
+        print("\nValor em Stock")
         print("Valor Total: " + str(total) + "€")
-        print("========================================\n")
+    print("\n")
+    
+    print("\n TOP 5 Categorias ")
+    
+    # Ler CSV para ter acesso aos dados completos
+    if os.path.exists("catalogo.csv"):
+            try:
+                df = pd.read_csv("catalogo.csv")
+                
+                listaCategorias = []
+                listaQuantidades = []
+                
+                # Contar produtos por categoria
+                for i in range(len(df)):
+                    categoriaAtual = df['categoria'][i]
+                    
+                    categoriaExiste = False
+                    posicao = -1
+                    
+                    for j in range(len(listaCategorias)):
+                        if listaCategorias[j] == categoriaAtual:
+                            categoriaExiste = True
+                            posicao = j
+                            break
+                    
+                    if categoriaExiste:
+                        listaQuantidades[posicao] = listaQuantidades[posicao] + 1
+                    else:
+                        listaCategorias.append(categoriaAtual)
+                        listaQuantidades.append(1)
+                
+                # Ordenar listas
+                for i in range(len(listaQuantidades)):
+                    for j in range(i + 1, len(listaQuantidades)):
+                        if listaQuantidades[j] > listaQuantidades[i]:
+                            tempQtd = listaQuantidades[i]
+                            listaQuantidades[i] = listaQuantidades[j]
+                            listaQuantidades[j] = tempQtd
+                            
+                            tempCat = listaCategorias[i]
+                            listaCategorias[i] = listaCategorias[j]
+                            listaCategorias[j] = tempCat
+                
+                # Mostrar TOP 5
+                limite = 5
+                if len(listaCategorias) < 5:
+                    limite = len(listaCategorias)
+                
+                for i in range(limite):
+                    print(str(i + 1) + ". " + listaCategorias[i] + ": " + str(listaQuantidades[i]) + " produto(s)")
+                
+                
+                # ADICIONAR: PREÇO MÉDIO POR CATEGORIA (enunciado exige!)
+                print("\nPreço Médio por Categoria")
+                
+                for i in range(len(listaCategorias)):
+                    categoria = listaCategorias[i]
+                    
+                    somaPrecos = 0
+                    contador = 0
+                    
+                    for j in range(len(df)):
+                        if df['categoria'][j] == categoria:
+                            somaPrecos = somaPrecos + df['preco'][j]
+                            contador = contador + 1
+                    
+                    precoMedio = somaPrecos / contador
+                    print(categoria + ": " + str(round(precoMedio, 2)) + "€")
+                
+            except:
+                print("❌ Erro ao calcular estatísticas avançadas!")
+        
+            print("\n")
     else:
         print("❌ Catálogo vazio. Não é possível fornecer estatísticas.")
 
