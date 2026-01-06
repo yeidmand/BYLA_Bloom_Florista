@@ -1,8 +1,166 @@
-#Luís 
+#Luís - mod_product.py - Gestão de Produtos Byla Bloom
 
+#Imports
 import os
 import pandas as pd 
 
+# Funções de Validação e Input
+
+def lerInteiro(mensagem=""):
+    
+    # Lê inteiro com proteção contra crashes - inserir texto em vez de número Inteiro 
+    while True:
+        try:
+            valor = int(input(mensagem))
+            return valor
+        except ValueError:
+            print("❌ Erro: Insira apenas números inteiros!")
+
+def lerFloat(mensagem=""):
+    
+    # Lê float com proteção contra crashes - inserir texto em vez de número 
+    while True:
+        try:
+            valor = float(input(mensagem))
+            return valor
+        except ValueError:
+            print("❌ Erro: Insira apenas números!")
+
+def validarTexto(mensagem):
+    print(mensagem)
+    texto = input()
+    while len(texto) == 0:
+        print("❌ Erro: Campo não pode estar vazio!")
+        print(mensagem)
+        texto = input()
+    return texto
+
+def validarNome():
+    nome = ""
+    print("Insira nome do Produto: ")
+    nome = input()
+    while len(nome) == 0:
+        print("Erro: Nome tem que ter mais que 1 carater!")
+        print("Insira nome do Produto: ")
+        nome = input() 
+    return nome
+
+
+def validarStock():
+    print("Insira a quantidade de produto para stock: ")
+    stock = lerInteiro()
+    while stock < 0:
+        print("Erro: O stock do produto não pode ser negativo! Volte a inserir, por favor!")
+        stock = lerInteiro()
+    return stock
+
+def verificarPreco():
+    print("Insira o Preço: ")
+    preco =lerFloat()
+    while preco < 0:
+        print("Erro: O Preço do produto não pode ser negativo! Volte a inserir, por favor!")
+        preco =lerFloat()
+    return preco
+
+def verificarDisponibilidade(opcaoOperacao):
+    
+    disponibilidade = ""
+
+    if opcaoOperacao == 1:
+        print("Informe se está disponível(S/N): ")
+    elif opcaoOperacao == 2:
+        print("Disponibilidade desejada (S - Disponível / N - Indisponível): ")
+    elif opcaoOperacao == 3:
+        print("⚠️ Tem a certeza que deseja remover o produto(S/N)?")
+    disponibilidade = input().upper()  
+    
+    while disponibilidade != "S" and disponibilidade != "N":
+        print("Erro: Opção inválida. Insira apenas 'S' ou 'N': ")
+        disponibilidade = input().upper()
+    
+    return disponibilidade
+
+# Função para validar ID do produto
+def validarID(numProdutos):
+    idEscolhido = lerInteiro()
+    while idEscolhido < 1 or idEscolhido > numProdutos:
+        print("❌ ID inválido!")
+        print("Insira um ID entre 1 e " + str(numProdutos))
+        idEscolhido = lerInteiro()
+    return idEscolhido
+
+
+# Funções de Leitura/Escrita CSV 
+
+def guardarProdutosCSV(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade):
+    # Criar IDs automáticos: 1, 2, 3, ... conforme número de produtos - (Faltava isto na parte do Flowgorithm)
+    ids = list(range(1, len(nomeProduto) + 1))
+    
+    # Converter disponibilidade S/N para true/false (conforme enunciado)
+    ativo = []
+    # Percorre cada elemento e converte: S -> "true", N -> "false"
+    for i in disponibilidade:
+        if i == "S":
+            ativo.append("true")
+        else:
+            ativo.append("false")
+    
+    # Criar dicionário com estrutura do catalogo.csv (Seguindo o enunciado) - Preparar dados dos produtos para estrutura CSV
+    dados_produtos = {
+        "idItem": ids,
+        "tipo": ["produto"] * len(nomeProduto),
+        "nome": nomeProduto,
+        "descricao": descricaoProduto,
+        "categoria": categoriaProduto,
+        "preco": precosProduto,
+        "stock": stock,
+        "ativo": ativo
+    }
+    
+    # Criar DataFrame do Pandas (Seguindo o enunciado)
+    df = pd.DataFrame(dados_produtos)
+    
+    # Guardar em CSV
+    df.to_csv("catalogo.csv", index=False)
+    print("✅ Produtos guardados em catalogo.csv!")
+
+
+def lerProdutosCSV(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade):
+    # Verificar se ficheiro existe antes de tentar ler
+    if not os.path.exists("catalogo.csv"):
+        print("⚠️ Ficheiro catalogo.csv não foi encontrado.")
+        print("📝 A iniciar com produtos padrão (primeira execução).")
+        return 0
+    
+    try:
+        df = pd.read_csv("catalogo.csv")
+        
+        # Carregar dados para as listas
+        for i in range(len(df)):
+            nomeProduto.append(df["nome"][i])
+            descricaoProduto.append(df["descricao"][i])
+            categoriaProduto.append(df["categoria"][i])
+            precosProduto.append(df["preco"][i])
+            stock.append(df["stock"][i])
+            
+            # Converter ativo true/false para S/N
+            ativo_str = str(df["ativo"][i]).lower()
+            if ativo_str == "true":
+                disponibilidade.append("S")
+            else:
+                disponibilidade.append("N")
+        
+        numProdutos = len(nomeProduto)
+        print(f"✅ {numProdutos} produtos carregados do ficheiro catalogo.csv!")
+        return numProdutos
+    # Seguindo o exemplo do professor para capturar erros
+    except:
+        print("❌ Erro ao carregar catálogo!")
+        print("📝 A iniciar com produtos padrão.")
+        return 0
+
+
+# Funções de Integração (para outros módulos)
 
 # Função para validar stock disponível de um produto (USADO POR: Yeidman (Gestão Encomendas))
 def validarStockDisponivel(idItem, quantidade):
@@ -265,7 +423,6 @@ def listarProdutosDisponiveis():
         return pd.DataFrame()
 
 
-
 def obterDetalhesProduto(idItem):
     # Verificar se ficheiro existe  
     if not os.path.exists("catalogo.csv"):
@@ -318,114 +475,7 @@ def obterDetalhesProduto(idItem):
         print("❌ Erro ao obter detalhes do produto!")
         return None
 
-def lerInteiro(mensagem=""):
-    
-    # Lê inteiro com proteção contra crashes - inserir texto em vez de número Inteiro 
-    while True:
-        try:
-            valor = int(input(mensagem))
-            return valor
-        except ValueError:
-            print("❌ Erro: Insira apenas números inteiros!")
-
-
-def lerFloat(mensagem=""):
-    
-    # Lê float com proteção contra crashes - inserir texto em vez de número 
-    while True:
-        try:
-            valor = float(input(mensagem))
-            return valor
-        except ValueError:
-            print("❌ Erro: Insira apenas números!")
-
-
-# Função para validar texto não vazio (descrição, categoria, etc.)
-def validarTexto(mensagem):
-    print(mensagem)
-    texto = input()
-    while len(texto) == 0:
-        print("❌ Erro: Campo não pode estar vazio!")
-        print(mensagem)
-        texto = input()
-    return texto
-
-# Função para validar ID do produto
-def validarID(numProdutos):
-    idEscolhido = lerInteiro()
-    while idEscolhido < 1 or idEscolhido > numProdutos:
-        print("❌ ID inválido!")
-        print("Insira um ID entre 1 e " + str(numProdutos))
-        idEscolhido = lerInteiro()
-    return idEscolhido
-
-# Função para guardar produtos no ficheiro CSV
-def guardarProdutosCSV(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade):
-    # Criar IDs automáticos: 1, 2, 3, ... conforme número de produtos - (Faltava isto na parte do Flowgorithm)
-    ids = list(range(1, len(nomeProduto) + 1))
-    
-    # Converter disponibilidade S/N para true/false (conforme enunciado)
-    ativo = []
-    # Percorre cada elemento e converte: S -> "true", N -> "false"
-    for i in disponibilidade:
-        if i == "S":
-            ativo.append("true")
-        else:
-            ativo.append("false")
-    
-    # Criar dicionário com estrutura do catalogo.csv (Seguindo o enunciado) - Preparar dados dos produtos para estrutura CSV
-    dados_produtos = {
-        "idItem": ids,
-        "tipo": ["produto"] * len(nomeProduto),
-        "nome": nomeProduto,
-        "descricao": descricaoProduto,
-        "categoria": categoriaProduto,
-        "preco": precosProduto,
-        "stock": stock,
-        "ativo": ativo
-    }
-    
-    # Criar DataFrame do Pandas (Seguindo o enunciado)
-    df = pd.DataFrame(dados_produtos)
-    
-    # Guardar em CSV
-    df.to_csv("catalogo.csv", index=False)
-    print("✅ Produtos guardados em catalogo.csv!")
-
-    # Função para ler produtos do ficheiro CSV
-def lerProdutosCSV(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade):
-    # Verificar se ficheiro existe antes de tentar ler
-    if not os.path.exists("catalogo.csv"):
-        print("⚠️ Ficheiro catalogo.csv não foi encontrado.")
-        print("📝 A iniciar com produtos padrão (primeira execução).")
-        return 0
-    
-    try:
-        df = pd.read_csv("catalogo.csv")
-        
-        # Carregar dados para as listas
-        for i in range(len(df)):
-            nomeProduto.append(df["nome"][i])
-            descricaoProduto.append(df["descricao"][i])
-            categoriaProduto.append(df["categoria"][i])
-            precosProduto.append(df["preco"][i])
-            stock.append(df["stock"][i])
-            
-            # Converter ativo true/false para S/N
-            ativo_str = str(df["ativo"][i]).lower()
-            if ativo_str == "true":
-                disponibilidade.append("S")
-            else:
-                disponibilidade.append("N")
-        
-        numProdutos = len(nomeProduto)
-        print(f"✅ {numProdutos} produtos carregados do ficheiro catalogo.csv!")
-        return numProdutos
-    # Seguindo o exemplo do professor para capturar erros
-    except:
-        print("❌ Erro ao carregar catálogo!")
-        print("📝 A iniciar com produtos padrão.")
-        return 0
+# Funções de Gestão de Produtos 
 
 # Adiciona um novo produto ao catálogo 
 def adicionarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
@@ -514,6 +564,157 @@ def alterarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProdut
                 print("Opção inválida!")
     else:
         print("O Catálogo está vazio!")
+
+def adicionarStock(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
+    # Adiciona stock a produto existente 
+    
+    if numProdutos > 0:
+        print("\n📥 ===== Adicionar Stock ===== 📥")
+        print("\nInsira o ID do produto para adicionar stock: ")
+        idEscolhido = validarID(numProdutos)
+        i = idEscolhido - 1
+
+        # Usar múltiplos prints (mais claro que um print com \n múltiplos)
+        print("\n--- Produto Selecionado ---")
+        print("Nome: " + nomeProduto[i])
+        print("Stock atual: " + str(stock[i]) + " unidades")
+        print("---------------------------")
+        
+        quantidade = lerInteiro("Quantidade a adicionar: ")
+        
+        while quantidade <= 0:
+            print("Erro: Quantidade tem que ser superior a 0!")
+            quantidade = lerInteiro("Quantidade a adicionar: ")
+        
+        stockAntigo = stock[i]
+        stock[i] = stock[i] + quantidade
+        
+        print("\n✅ Stock atualizado com sucesso!")
+        print("Stock anterior: " + str(stockAntigo) + " unidades")
+        print("Quantidade adicionada: " + str(quantidade) + " unidades")
+        print("Novo stock: " + str(stock[i]) + " unidades")
+        
+        # Atualizar disponibilidade se estava esgotado
+        if stockAntigo == 0 and disponibilidade[i] == "N":
+            disponibilidade[i] = "S"
+            print("✅ Produto voltou a ficar disponível!")
+
+        # Guardar alterações no ficheiro CSV
+        guardarProdutosCSV(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade)
+    else:
+        print("❌ Catálogo vazio!")
+
+# Remove um produto do catálogo
+def removerProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
+
+    if numProdutos > 0:
+        print("Insira o ID do produto a remover: ")
+        idEscolhido = validarID(numProdutos)
+        i = idEscolhido - 1
+
+        # Usar múltiplos prints (mais claro que um print com \n múltiplos)
+        print("\n⚠️  Vai remover o seguinte produto:")
+        print("--- Produto a Remover ---")
+        print("ID: " + str(idEscolhido))
+        print("Nome: " + nomeProduto[i])
+        print("Descrição: " + descricaoProduto[i])
+        print("Categoria: " + categoriaProduto[i])
+        print("Preço: " + str(precosProduto[i]) + "€")
+        print("Stock: " + str(stock[i]) + " unidades")
+        print("-------------------------\n")
+        
+        # Pedir confirmação
+        print("Tem a certeza que deseja remover? (S/N): ")
+        confirmacao = input()
+        
+        if confirmacao.upper() == "S":
+            # Remover de todas as listas usando .pop()
+            nomeProduto.pop(i)
+            descricaoProduto.pop(i)
+            categoriaProduto.pop(i)
+            precosProduto.pop(i)
+            stock.pop(i)
+            disponibilidade.pop(i)
+            
+            print("🗑️  Produto removido com sucesso!")
+            numProdutos = numProdutos - 1
+
+            # Guardar alterações no ficheiro CSV
+            guardarProdutosCSV(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade)
+        else:
+            print("Operação cancelada.")
+    else:
+        print("❌ O Catálogo está vazio!")
+    
+    return numProdutos
+
+
+
+def verificarEncomenda(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
+    
+    # Processa encomenda de produto 
+    # Melhorias de apresentação e validações.
+    
+    if numProdutos > 0:
+        # Usar múltiplos prints (mais claro que um print com \n múltiplos)
+        print("\n📋 ===== Catálogo para Encomenda ===== 📋")
+        
+        for i in range(0, numProdutos, 1):
+            print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Preço: " + str(precosProduto[i]) + "€" + " | Stock: " + str(stock[i]))
+        
+        print("\nQual o nº do item/ID que deseja encomendar: ")
+        numItemEscolhido = lerInteiro()
+        
+        while numItemEscolhido < 1 or numItemEscolhido > numProdutos:
+            print("❌ ID/Nº Artigo Inválido!")
+            numItemEscolhido = lerInteiro("Insira ID válido: ")
+        
+        i = numItemEscolhido - 1
+        
+        # Mostrar produto selecionado
+        print("\n--- Produto Selecionado ---")
+        print("Nome: " + nomeProduto[i])
+        print("Preço: " + str(precosProduto[i]) + "€")
+        print("Stock disponível: " + str(stock[i]) + " unidades")
+        print("---------------------------")
+        
+        if stock[i] == 0:
+            print("\n❌ Sem stock!")
+            print("Produto indisponível de momento!")
+        else:
+            if disponibilidade[i] == "N":
+                print("\n⚠️ Produto marcado como indisponível!")
+                print("Não é possível encomendar neste momento.")
+            else:
+                print("\nInsira a quantidade a encomendar: ")
+                encomenda = lerInteiro()
+
+                while encomenda <= 0:
+                    print("Erro: Quantidade tem que ser superior a 0!")
+                    print("Insira a quantidade a encomendar: ")
+                    encomenda = lerInteiro()
+
+                if encomenda <= stock[i]:
+                    stock[i] = stock[i] - encomenda
+                    print("\n✅ Encomenda realizada com sucesso!")
+                    print("Quantidade encomendada: " + str(encomenda) + " unidades")
+                    print("Stock restante: " + str(stock[i]) + " unidades")
+                    
+                    # Atualizar disponibilidade se esgotou
+                    if stock[i] == 0:
+                        disponibilidade[i] = "N"
+                        print("⚠️ Produto esgotou! Marcado como indisponível.")
+
+                    # Guardar alterações no ficheiro CSV
+                    guardarProdutosCSV(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade)
+                else:
+                    print("\n❌ Stock insuficiente!")
+                    print("Stock disponível: " + str(stock[i]) + " unidades")
+                    print("Quantidade solicitada: " + str(encomenda) + " unidades")
+    else:
+        print("❌ Catálogo vazio. Não existe stock!")
+
+# Funções de Consulta e Listagem
 
 
 def filtrarCatalogo(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
@@ -684,199 +885,9 @@ def listarCatalogo(nomeProduto, descricaoProduto, categoriaProduto, precosProdut
             print("\n")
         
         print("\nTotal de produtos: " + str(numProdutos))
-        print("==================================\n")
+        print("\n")
     else:
         print("❌ O Catálogo está vazio! ❌")
-
-
-def adicionarStock(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
-    # Adiciona stock a produto existente 
-    
-    if numProdutos > 0:
-        print("\n📥 ===== Adicionar Stock ===== 📥")
-        print("\nInsira o ID do produto para adicionar stock: ")
-        idEscolhido = validarID(numProdutos)
-        i = idEscolhido - 1
-
-        # Usar múltiplos prints (mais claro que um print com \n múltiplos)
-        print("\n--- Produto Selecionado ---")
-        print("Nome: " + nomeProduto[i])
-        print("Stock atual: " + str(stock[i]) + " unidades")
-        print("---------------------------")
-        
-        quantidade = lerInteiro("Quantidade a adicionar: ")
-        
-        while quantidade <= 0:
-            print("Erro: Quantidade tem que ser superior a 0!")
-            quantidade = lerInteiro("Quantidade a adicionar: ")
-        
-        stockAntigo = stock[i]
-        stock[i] = stock[i] + quantidade
-        
-        print("\n✅ Stock atualizado com sucesso!")
-        print("Stock anterior: " + str(stockAntigo) + " unidades")
-        print("Quantidade adicionada: " + str(quantidade) + " unidades")
-        print("Novo stock: " + str(stock[i]) + " unidades")
-        
-        # Atualizar disponibilidade se estava esgotado
-        if stockAntigo == 0 and disponibilidade[i] == "N":
-            disponibilidade[i] = "S"
-            print("✅ Produto voltou a ficar disponível!")
-
-        # Guardar alterações no ficheiro CSV
-        guardarProdutosCSV(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade)
-    else:
-        print("❌ Catálogo vazio!")
-
-# Remove um produto do catálogo
-def removerProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
-
-    if numProdutos > 0:
-        print("Insira o ID do produto a remover: ")
-        idEscolhido = validarID(numProdutos)
-        i = idEscolhido - 1
-
-        # Usar múltiplos prints (mais claro que um print com \n múltiplos)
-        print("\n⚠️  Vai remover o seguinte produto:")
-        print("--- Produto a Remover ---")
-        print("ID: " + str(idEscolhido))
-        print("Nome: " + nomeProduto[i])
-        print("Descrição: " + descricaoProduto[i])
-        print("Categoria: " + categoriaProduto[i])
-        print("Preço: " + str(precosProduto[i]) + "€")
-        print("Stock: " + str(stock[i]) + " unidades")
-        print("-------------------------\n")
-        
-        # Pedir confirmação
-        print("Tem a certeza que deseja remover? (S/N): ")
-        confirmacao = input()
-        
-        if confirmacao.upper() == "S":
-            # Remover de todas as listas usando .pop()
-            nomeProduto.pop(i)
-            descricaoProduto.pop(i)
-            categoriaProduto.pop(i)
-            precosProduto.pop(i)
-            stock.pop(i)
-            disponibilidade.pop(i)
-            
-            print("🗑️  Produto removido com sucesso!")
-            numProdutos = numProdutos - 1
-
-            # Guardar alterações no ficheiro CSV
-            guardarProdutosCSV(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade)
-        else:
-            print("Operação cancelada.")
-    else:
-        print("❌ O Catálogo está vazio!")
-    
-    return numProdutos
-
-
-# Função que valida se o nome do produto não é vazio
-def validarNome():
-    nome = ""
-    print("Insira nome do Produto: ")
-    nome = input()
-    while len(nome) == 0:
-        print("Erro: Nome tem que ter mais que 1 carater!")
-        print("Insira nome do Produto: ")
-        nome = input() 
-    return nome
-
-
-# Função para validar stock (evitar negativos) 
-def validarStock():
-    print("Insira a quantidade de produto para stock: ")
-    stock = lerInteiro()
-    while stock < 0:
-        print("Erro: O stock do produto não pode ser negativo! Volte a inserir, por favor!")
-        stock = lerInteiro()
-    return stock
-
-
-# Função que muda a pergunta consoante o parâmetro (1, 2, 3)
-def verificarDisponibilidade(opcaoOperacao):
-    
-    disponibilidade = ""
-
-    if opcaoOperacao == 1:
-        print("Informe se está disponível(S/N): ")
-    elif opcaoOperacao == 2:
-        print("Disponibilidade desejada (S - Disponível / N - Indisponível): ")
-    elif opcaoOperacao == 3:
-        print("⚠️ Tem a certeza que deseja remover o produto(S/N)?")
-    disponibilidade = input().upper()  
-    
-    while disponibilidade != "S" and disponibilidade != "N":
-        print("Erro: Opção inválida. Insira apenas 'S' ou 'N': ")
-        disponibilidade = input().upper()
-    
-    return disponibilidade
-
-def verificarEncomenda(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
-    
-    # Processa encomenda de produto 
-    # Melhorias de apresentação e validações.
-    
-    if numProdutos > 0:
-        # Usar múltiplos prints (mais claro que um print com \n múltiplos)
-        print("\n📋 ===== Catálogo para Encomenda ===== 📋")
-        
-        for i in range(0, numProdutos, 1):
-            print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Preço: " + str(precosProduto[i]) + "€" + " | Stock: " + str(stock[i]))
-        
-        print("\nQual o nº do item/ID que deseja encomendar: ")
-        numItemEscolhido = lerInteiro()
-        
-        while numItemEscolhido < 1 or numItemEscolhido > numProdutos:
-            print("❌ ID/Nº Artigo Inválido!")
-            numItemEscolhido = lerInteiro("Insira ID válido: ")
-        
-        i = numItemEscolhido - 1
-        
-        # Mostrar produto selecionado
-        print("\n--- Produto Selecionado ---")
-        print("Nome: " + nomeProduto[i])
-        print("Preço: " + str(precosProduto[i]) + "€")
-        print("Stock disponível: " + str(stock[i]) + " unidades")
-        print("---------------------------")
-        
-        if stock[i] == 0:
-            print("\n❌ Sem stock!")
-            print("Produto indisponível de momento!")
-        else:
-            if disponibilidade[i] == "N":
-                print("\n⚠️ Produto marcado como indisponível!")
-                print("Não é possível encomendar neste momento.")
-            else:
-                print("\nInsira a quantidade a encomendar: ")
-                encomenda = lerInteiro()
-
-                while encomenda <= 0:
-                    print("Erro: Quantidade tem que ser superior a 0!")
-                    print("Insira a quantidade a encomendar: ")
-                    encomenda = lerInteiro()
-
-                if encomenda <= stock[i]:
-                    stock[i] = stock[i] - encomenda
-                    print("\n✅ Encomenda realizada com sucesso!")
-                    print("Quantidade encomendada: " + str(encomenda) + " unidades")
-                    print("Stock restante: " + str(stock[i]) + " unidades")
-                    
-                    # Atualizar disponibilidade se esgotou
-                    if stock[i] == 0:
-                        disponibilidade[i] = "N"
-                        print("⚠️ Produto esgotou! Marcado como indisponível.")
-
-                    # Guardar alterações no ficheiro CSV
-                    guardarProdutosCSV(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade)
-                else:
-                    print("\n❌ Stock insuficiente!")
-                    print("Stock disponível: " + str(stock[i]) + " unidades")
-                    print("Quantidade solicitada: " + str(encomenda) + " unidades")
-    else:
-        print("❌ Catálogo vazio. Não existe stock!")
 
 # Função para mostrar estatísticas do catálogo
 def verificarEstatisticas(precosProduto, categoriaProduto, stock, disponibilidade, numProdutos):
@@ -898,28 +909,91 @@ def verificarEstatisticas(precosProduto, categoriaProduto, stock, disponibilidad
         
         # Usar múltiplos prints (mais claro que um print com \n múltiplos)
         print("\n📈 ===== Estatísticas do Catálogo ===== 📈")
-        print("\n--- Resumo Geral ---")
+        print("\nResumo Geral")
         print("Total de Produtos registados: " + str(numProdutos))
         print("Produtos Disponíveis: " + str(disponivel))
         print("Produtos Esgotados/Indisponíveis: " + str(esgotado))
-        print("\n--- Valor em Stock ---")
+        print("\nValor em Stock")
         print("Valor Total: " + str(total) + "€")
-        print("========================================\n")
+    print("\n")
+    
+    print("\n TOP 5 Categorias ")
+    
+    # Ler CSV para ter acesso aos dados completos
+    if os.path.exists("catalogo.csv"):
+            try:
+                df = pd.read_csv("catalogo.csv")
+                
+                listaCategorias = []
+                listaQuantidades = []
+                
+                # Contar produtos por categoria
+                for i in range(len(df)):
+                    categoriaAtual = df['categoria'][i]
+                    
+                    categoriaExiste = False
+                    posicao = -1
+                    
+                    for j in range(len(listaCategorias)):
+                        if listaCategorias[j] == categoriaAtual:
+                            categoriaExiste = True
+                            posicao = j
+                            break
+                    
+                    if categoriaExiste:
+                        listaQuantidades[posicao] = listaQuantidades[posicao] + 1
+                    else:
+                        listaCategorias.append(categoriaAtual)
+                        listaQuantidades.append(1)
+                
+                # Ordenar listas
+                for i in range(len(listaQuantidades)):
+                    for j in range(i + 1, len(listaQuantidades)):
+                        if listaQuantidades[j] > listaQuantidades[i]:
+                            tempQtd = listaQuantidades[i]
+                            listaQuantidades[i] = listaQuantidades[j]
+                            listaQuantidades[j] = tempQtd
+                            
+                            tempCat = listaCategorias[i]
+                            listaCategorias[i] = listaCategorias[j]
+                            listaCategorias[j] = tempCat
+                
+                # Mostrar TOP 5
+                limite = 5
+                if len(listaCategorias) < 5:
+                    limite = len(listaCategorias)
+                
+                for i in range(limite):
+                    print(str(i + 1) + ". " + listaCategorias[i] + ": " + str(listaQuantidades[i]) + " produto(s)")
+                
+                
+                # ADICIONAR: PREÇO MÉDIO POR CATEGORIA (enunciado exige!)
+                print("\nPreço Médio por Categoria")
+                
+                for i in range(len(listaCategorias)):
+                    categoria = listaCategorias[i]
+                    
+                    somaPrecos = 0
+                    contador = 0
+                    
+                    for j in range(len(df)):
+                        if df['categoria'][j] == categoria:
+                            somaPrecos = somaPrecos + df['preco'][j]
+                            contador = contador + 1
+                    
+                    precoMedio = somaPrecos / contador
+                    print(categoria + ": " + str(round(precoMedio, 2)) + "€")
+                
+            except:
+                print("❌ Erro ao calcular estatísticas avançadas!")
+        
+            print("\n")
     else:
         print("❌ Catálogo vazio. Não é possível fornecer estatísticas.")
 
-# Função para validar preço (evitar negativos) 
-def verificarPreco():
-    print("Insira o Preço: ")
-    preco =lerFloat()
-    while preco < 0:
-        print("Erro: O Preço do produto não pode ser negativo! Volte a inserir, por favor!")
-        preco =lerFloat()
-    return preco
+# MENU PRINCIPAL
 
-# Main
-# Arrays para armazenar produtos, os seus detalhes e preço
-# Mudei de arrays fixos para listas dinâmicas para não ter limite de 10 produtos
+# Listas para armazenar os dados dos produtos
 stock = [] 
 nomeProduto = [] 
 descricaoProduto = []
