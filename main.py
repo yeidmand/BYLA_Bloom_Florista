@@ -128,7 +128,7 @@ def mock_portal(portal_name, user_info):
 
         if op == '0': break
         if op == '1': 
-        op = input("Opção: ").strip()
+            op = input("Opção: ").strip()
         
         if op == '0': 
             return op
