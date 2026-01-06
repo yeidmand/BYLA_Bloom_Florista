@@ -1,7 +1,7 @@
 import os
-import sys
 import time
 import pandas as pd
+import mod_complaint
 
 
 FILE_CLIENTS = "login_client.csv"
@@ -92,6 +92,7 @@ def verify_login_csv(user_role_choice):
 # SIMULATION PORTAL (avoid crashing)
 # =============================================================================
 def mock_portal(portal_name, user_info):
+
     while True:
         clear()
         print(f"✨ PORTAL: {portal_name} ✨")
@@ -101,6 +102,7 @@ def mock_portal(portal_name, user_info):
         print("0. Sair (Logout)")
         print("="*40)
         op = input("Opção: ")
+
         if op == '0': break
         if op == '1': 
             print("... A trabalhar ...")
@@ -124,9 +126,33 @@ def main():
         elif op == '1':
             print("\n1. Login\n2. Registar")
             sub = input(">> ")
+
             if sub == '1':
                 user = verify_login_csv('client')
-                if user: mock_portal("ÁREA CLIENTE", user)
+
+                if user: 
+                    while True:
+                        clear()
+                        print(f"👋 Olá, {user['name']}!")
+                        print("="*30)
+                        print("1. Ir para Loja (Client Portal)")
+                        print("2. Fazer Reclamação (Complaint)")
+                        print("0. Logout")
+                        print("="*30)
+
+                        action = input("👉 Opção: ")
+
+                        if action == '1':
+                            mock_portal("LOJA / CLIENT PORTAL", user)
+                        
+                        elif action == '2':
+                            print("\n📝 A abrir Livro de Reclamações...")
+                            time.sleep(1)
+                            mod_complaint.process_smart_complaint(user['id']) 
+                            
+                        elif action == '0':
+                            break
+
             elif sub == '2':
                 mock_portal("NOVO REGISTO", {"id": "NEW", "name": "Visitante"})
 
@@ -134,9 +160,11 @@ def main():
         elif op == '2':
             print("\n1. Estafeta\n2. Gestor")
             sub = input(">> ")
+
             if sub == '1':
                 user = verify_login_csv('estafeta')
                 if user: mock_portal("PORTAL ESTAFETA", user)
+
             elif sub == '2':
                 user = verify_login_csv('manager')
                 if user: mock_portal("PORTAL GESTOR", user)
