@@ -3,6 +3,8 @@ import sys
 import time
 import pandas as pd
 from mod_order_gestao import ModOrderGestao
+from mod_delivery import main_delivery
+
 
 
 FILE_CLIENTS = "login_client.csv"
@@ -71,6 +73,10 @@ def verify_login_csv(user_role_choice):
                             print(f"✅ Login Gestor de Productos Aceite! ({duty_area})")
                             time.sleep(1)
                             return {"id": user_id, "módulo": "Produtos"}
+                        elif "estafeta" in duty_area:
+                            print(f"✅ Login Gestor de Estafeta Aceite! ({duty_area})")
+                            time.sleep(1)
+                            return {"id": user_id, "módulo": "Estafeta"}
                         elif "reclamações" in duty_area:
                             print(f"✅ Login Gestor de Reclamações Aceite! ({duty_area})")
                             time.sleep(1)
@@ -177,7 +183,8 @@ def main():
                     if op_in == '0': 
                         break
                     elif op_in == '1':
-                        print("....Função PORTAL ESTAFETA....") #MODIFICAR UMA VEZ EXISTA A FUNÇÂO PORTAL ESTAFETA ex. mod_estafeta(user['id'])
+                        print("....Função PORTAL ESTAFETA....") #ESTAFETA
+                        main_delivery(user['id'])
                         time.sleep(1)
                         break
                 else:   
@@ -192,11 +199,16 @@ def main():
                     elif op_in == '1':
                         if user['módulo'] == 'Encomendas':
                             print("....Função PORTAL GESTOR DE ENCOMENDAS....")
-                            ModOrderGestao(user['id']) 
+                            ModOrderGestao(user['id'])                             # GESTOR DE ENCOMENDAS
                             time.sleep(1)
                             break
                         elif user['módulo'] == 'Produtos':
                             print("....Função PORTAL GESTOR DE PRODUTOS....") # MODIFICAR UMA VEZ EXISTA ex. mod_product()
+                            time.sleep(1)
+                            break
+                        elif user['módulo'] == 'Estafeta':
+                            print("....Função PORTAL GESTOR DE ESTAFETA....")
+                            main_delivery(user['id'])
                             time.sleep(1)
                             break
                         elif user['módulo'] == 'Reclamações':
