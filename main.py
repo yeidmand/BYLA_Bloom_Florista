@@ -38,11 +38,13 @@ def verify_login_csv(user_role_choice):
             match = df[ (df['contact'].str.strip() == user_id) & (df['password'].str.strip() == password) ] #Verificamos o contacto e a password
             
             if not match.empty:
-                
                 name = match.iloc[0]['name']
+                real_id = match.iloc[0]['id_client']
+                
                 print(f"✅ Sucesso! Bem-vindo, {name}")
                 time.sleep(1)
-                return {"id": user_id, "name": name}
+                
+                return {"id": real_id, "name": name}
 
         # --- 2.  (STAFF) ---
         elif user_role_choice in ['estafeta', 'manager']:
@@ -179,7 +181,16 @@ def main():
                         elif action == '2':
                             print("\n📝 A abrir Livro de Reclamações...")
                             time.sleep(1)
-                            mod_complaint.process_smart_complaint(user['id']) 
+
+                            try:
+                                mod_complaint.process_smart_complaint(user['id'])
+                            except Exception as e:
+                                print(f"❌ Error system: {e}")
+
+                            
+                            print("\n" + "="*40)
+                            input("👉 Pressione ENTER para voltar ao menu...") 
+                            
                             
                         elif action == '0':
                             break
