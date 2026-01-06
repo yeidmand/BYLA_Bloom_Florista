@@ -1,10 +1,10 @@
 """
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                    MOD_ORDER_GESTAO - VERSÃO MELHORADA                       ║
+╔═════════════════════════════════════════════════════════════════════════════╗
+║                    MOD_ORDER_GESTAO                                          ║
 ║                                                                               ║
 ║  Melhorias aplicadas:                                                        ║
-║  ✓ Estética melhorada (outputs mais agradáveis)                             ║
-║  ✓ Cores e formatação (emojis e separadores)                                ║
+║  ✓ Estética melhorada (outputs mais agradáveis)                              ║
+║  ✓ Cores e formatação (emojis e separadores)                                  ║
 ║  ✓ Inputs mais personalizados                                                ║
 ║  ✓ Função centralizada para registar eventos                                 ║
 ║  ✓ Lógica original mantida intacta                                          ║

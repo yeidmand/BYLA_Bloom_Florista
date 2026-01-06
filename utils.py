@@ -258,18 +258,9 @@ def code_zone(ZP1, df_zones, df_user_workers):
     # Converter Codes para string também (garantir)
     if df_zones['Codes'].dtype != 'object':
         df_zones['Codes'] = df_zones['Codes'].astype(str)
-    
-    # Procurar o código postal
-    if ZP1_str in df_zones['Codes'].values:
-        zone = df_zones.loc[df_zones['Codes'] == ZP1_str, 'Zone'].iloc[0]
-        estafetas = df_user_workers[df_user_workers['dutyArea'] == zone]['id_worker'].tolist()
-        
-        if estafetas:
-            estafeta = rd.choice(estafetas)
-        else:
-            estafeta = '1001'
-    else:
-        estafeta = '1001'
-        zone = "Fora do limite"
+
+    zone = df_zones.loc[df_zones['Codes'] == ZP1_str, 'Zone'].iloc[0]
+    estafetas = df_user_workers[df_user_workers['dutyArea'] == zone]['id_worker'].tolist()
+    estafeta = rd.choice(estafetas)
     
     return estafeta, zone

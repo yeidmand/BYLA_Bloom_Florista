@@ -1,7 +1,6 @@
 id_worker;password;dutyArea;work_hour
 SUPm;Flor001;GestorEncomendas;all_day
 JUNm;Flor002;GestorEncomendas;all_day
-CLBloom;Flor003;GestorClientes;all_day
 PRBloom;Flor004;GestorProdutos;all_day
 ESBloom;Flor005;GestorEstafeta;all_day
 RCBloom;Flor006;GestorReclamações;all_day
