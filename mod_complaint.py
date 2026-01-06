@@ -35,7 +35,7 @@ def process_smart_complaint(current_client_id):
         if confirm != 'y': return
 
     
-    current_status = order_pedido.iloc[0]['status']
+    current_status = order_pedido.iloc[0]['order_status']
 
     shipper_id_from_order = order_pedido.iloc[0]['id_worker']
 

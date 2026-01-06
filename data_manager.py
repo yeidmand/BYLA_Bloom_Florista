@@ -38,10 +38,10 @@ def load_all_users_for_login():
 
                 all_users.append(
                     {
-                        "id": str(row["login"]),
+                        "id": str(row["id_worker"]),
                         "pass": str(row["password"]),
                         "role": user_role,
-                        "name": str(row["login"]),
+                        "name": str(row["id_worker"]),
                     }
                 )
         except Exception as e:
@@ -49,25 +49,24 @@ def load_all_users_for_login():
 
     return pd.DataFrame(all_users)
 
-
 def load_products():
     if os.path.exists(FILE_PRODUCTS):
         return pd.read_csv(FILE_PRODUCTS, sep=";", dtype= {
             "product_id": str,
             "name_product": str,
             "stock_quantity": int,
-            "price_unit": float
+            "price_unit": float,
+            "available": str
         })
     return pd.DataFrame()
-
 
 def save_products(df):
     df.to_csv(FILE_PRODUCTS, index=False, sep=";")
 
-
 def load_orders():
     if os.path.exists(FILE_ORDERS):
-        return pd.read_csv(FILE_ORDERS, sep=';', dtype=str)
+        df = pd.read_csv(FILE_ORDERS, sep=";", dtype=str)
+        return df
     return pd.DataFrame(columns= [
     "order_id",
     "id_client",
@@ -77,13 +76,12 @@ def load_orders():
     "ZP1",
     "ZP2",
     "order_status",
-    "tracking_number",
+    "order_reason",
     "id_worker"
 ])
 
 def save_orders(df):
     df.to_csv(FILE_ORDERS, index=False, sep=";")
-
 
 def load_complaints():
     if os.path.exists(FILE_COMPLAINTS):
@@ -103,25 +101,33 @@ def load_complaints():
         "status"
     ])
 
-
 def save_complaints(df):
     df.to_csv(FILE_COMPLAINTS, index=False, sep=';', encoding='utf-8-sig')
 
-
 def load_order_events():
     if os.path.exists(FILE_ENEVENTS):
-        return pd.read_csv(FILE_ENEVENTS, sep=";")
+        df = pd.read_csv(FILE_ENEVENTS, sep=";")
+        df['latitude'] = pd.to_numeric(df['latitude'], errors='coerce')
+        df['longitude'] = pd.to_numeric(df['longitude'], errors='coerce')
+        df['staptime_1'] = pd.to_datetime(df['staptime_1'], errors='coerce')
+        df['staptime_2'] = pd.to_datetime(df['staptime_2'], errors='coerce')
+        return df
     return pd.DataFrame(
         columns=[
-            "event_id", "order_id", "order_status",
-            "timestamp", "login", "reason"
+            "event_id",
+            "order_id",
+            "event_type",
+            "staptime_1",
+            "staptime_2",
+            "login",
+            "details",
+            "latitude",
+            "longitude"
         ]
     )
 
-
 def save_order_events(df):
     df.to_csv(FILE_ENEVENTS, index=False, sep=";")
-
 
 def load_order_items():
     if os.path.exists(FILE_ORDERS_ITEMS):
@@ -131,7 +137,9 @@ def load_order_items():
                 "product_id": str,
                 "quantity_ordered": int,
                 "price_unit": float,
-                "subtotal": float
+                "subtotal": float,
+                "status": str,
+                "quantity_returned": "Int64"
             }
         )
     return pd.DataFrame(
@@ -141,6 +149,19 @@ def load_order_items():
         ]
     )
 
-
 def save_order_items(df):
     df.to_csv(FILE_ORDERS_ITEMS, index=False, sep=";")
+
+def load_user_work_profil():
+    if os.path.exists(FILE_STAFF):
+        return pd.read_csv(FILE_STAFF, sep=";", dtype=str)
+    else:
+        return pd.DataFrame(
+            columns=[
+                "id_worker",
+                "password",
+                "duty_area",
+                "work_hour"
+            ]
+
+        )   
