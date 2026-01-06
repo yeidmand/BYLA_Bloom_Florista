@@ -200,7 +200,7 @@ def main():
                     if op_in == '0': 
                         break
                     elif op_in == '1':
-                        print("....Função PORTAL CLIENTE....") #MODIFICAR UMA VEZ EXISTA A FUNÇÂO PORTAL CLIENTE ex. mod_cliente(user['id'])
+                        print("....Função PORTAL CLIENTE....") # MODIFICAR UMA VEZ EXISTA A FUNÇÂO PORTAL CLIENTE ex. mod_cliente(user['id'])
                         time.sleep(1)
                         break
                 else:
@@ -208,7 +208,7 @@ def main():
 
 
             elif sub == '2':
-                print("...ABRIR PORTAL CLIENTE PARA NOVO REGISTO...") #MODIFICAR UMA VEZ EXISTA A FUNÇÂO PORTAL CLIENTE ex. mod_cliente("")
+                print("...ABRIR PORTAL CLIENTE PARA NOVO REGISTO...") # MODIFICAR UMA VEZ EXISTA A FUNÇÂO PORTAL CLIENTE ex. mod_cliente("")
                 time.sleep(1)
                 break
 
@@ -227,7 +227,7 @@ def main():
                     if op_in == '0': 
                         break
                     elif op_in == '1':
-                        print("....Função PORTAL ESTAFETA....") #ESTAFETA
+                        print("....Função PORTAL ESTAFETA....") # ESTAFETA
                         main_delivery(user['id'])
                         time.sleep(1)
                         break
@@ -250,13 +250,6 @@ def main():
                             print("....Função PORTAL GESTOR DE PRODUTOS....") # MODIFICAR UMA VEZ EXISTA ex. mod_product()
                             time.sleep(1)
                             break
-                        elif user['módulo'] == 'Estafeta':
-                            print("....Função PORTAL GESTOR DE ESTAFETA....")
-                            main_delivery(user['id'])
-                            time.sleep(1)
-                            break
-                        elif user['módulo'] == 'Reclamações':
-                            print("....Função PORTAL GESTOR DE RECLAMAÇÕES....") # MODIFICAR UMA VEZ EXISTA ex. mod_reclamacoes()
                 else:
                     break
         else:

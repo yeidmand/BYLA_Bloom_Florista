@@ -2,8 +2,6 @@ id_worker;password;dutyArea;work_hour
 SUPm;Flor001;GestorEncomendas;all_day
 JUNm;Flor002;GestorEncomendas;all_day
 PRBloom;Flor004;GestorProdutos;all_day
-ESBloom;Flor005;GestorEstafeta;all_day
-RCBloom;Flor006;GestorReclamações;all_day
 113168;Andre;Center;week_morning
 502;estafeta2;North;week_morning
 503;estafeta3;South;week_morning
@@ -24,4 +22,3 @@ RCBloom;Flor006;GestorReclamações;all_day
 518;estafeta18;South;weekend_afternoon
 519;estafeta19;East;weekend_afternoon
 520;estafeta20;West;weekend_afternoon
-1001;estafeta21;Fora do limite;all_day
