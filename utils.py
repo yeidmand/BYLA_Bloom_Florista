@@ -237,14 +237,7 @@ def code_zone(ZP1, df_zones, df_user_workers):
     """
     Atribuir estafeta baseado no código postal (ZP1)
     """
-    # Converter ZP1 para string e remover espaços
-    ZP1_str = str(ZP1).strip()
-    
-    # Converter Codes para string também (garantir)
-    if df_zones['Codes'].dtype != 'object':
-        df_zones['Codes'] = df_zones['Codes'].astype(str)
-
-    zone = df_zones.loc[df_zones['Codes'] == ZP1_str, 'Zone'].iloc[0]
+    zone = df_zones.loc[df_zones['Codes'] == ZP1, 'Zone'].iloc[0]
     estafetas = df_user_workers[df_user_workers['dutyArea'] == zone]['id_worker'].tolist()
     estafeta = rd.choice(estafetas)
     
@@ -267,6 +260,6 @@ def bloquear_sistema_10s():
     print("\r" + " "*70, end="", flush=True)  # Limpa linha anterior
     print("\n" + "═" * 70)
     print("✅ BLOQUEIO TERMINADO")
-    print("🔄 Voltando ao sistema principal...")
+    print("🔄 Voltando ao Menu Principal...")
     print("═" * 70 + "\n")
     time.sleep(0.5)

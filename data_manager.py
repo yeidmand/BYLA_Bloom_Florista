@@ -10,45 +10,6 @@ FILE_ENEVENTS = "order_events.csv"
 FILE_ORDERS_ITEMS = "order_items.csv"
 
 
-def load_all_users_for_login():
-    all_users = []
-
-    if os.path.exists(FILE_CLIENTS):
-        try:
-            df = pd.read_csv(FILE_CLIENTS, sep=";", dtype=str)
-            for _, row in df.iterrows():
-                all_users.append(
-                    {
-                        "id": str(row["contact"]),
-                        "pass": str(row["password"]),
-                        "role": "client",
-                        "name": str(row["name"]),
-                    }
-                )
-        except Exception as e:
-            print(f"Error read clients: {e}")
-
-    if os.path.exists(FILE_STAFF):
-        try:
-            df = pd.read_csv(FILE_STAFF, sep=";", dtype=str)
-            for _, row in df.iterrows():
-                user_role = "estafeta"
-                if "Gestor" in str(row["dutyArea"]):
-                    user_role = "manager"
-
-                all_users.append(
-                    {
-                        "id": str(row["id_worker"]),
-                        "pass": str(row["password"]),
-                        "role": user_role,
-                        "name": str(row["id_worker"]),
-                    }
-                )
-        except Exception as e:
-            print(f"⚠ Lỗi đọc Staff: {e}")
-
-    return pd.DataFrame(all_users)
-
 def load_products():
     if os.path.exists(FILE_PRODUCTS):
         return pd.read_csv(FILE_PRODUCTS, sep=";", dtype= {
@@ -77,7 +38,8 @@ def load_orders():
     "ZP2",
     "order_status",
     "order_reason",
-    "id_worker"
+    "id_worker",
+    "duty_area"
 ])
 
 def save_orders(df):
