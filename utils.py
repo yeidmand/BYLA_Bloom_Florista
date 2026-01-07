@@ -170,7 +170,7 @@ def stockValidation(order_items_df, products_df):
     missing_products = []
     
     for _, item in merged_items.iterrows():
-        if item['available'] == "N":
+        if item['available'] == False:
             missing_products.append(item['product_id'])
                 
     return missing_products

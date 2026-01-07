@@ -17,8 +17,10 @@ def load_products():
             "name_product": str,
             "stock_quantity": int,
             "price_unit": float,
-            "available": str
-        })
+            "available": bool,
+            "category": str,
+            "product_type": str,
+            "description": str})
     return pd.DataFrame()
 
 def save_products(df):

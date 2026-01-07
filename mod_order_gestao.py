@@ -937,13 +937,3 @@ def ModOrderGestao(Manager):
             print("\n👋 Saindo do módulo de gestão de pedidos...\n")
             menu_ativo = False
             return
-
-
-# ════════════════════════════════════════════════════════════════════════════════
-# 🧪 TESTE
-# ════════════════════════════════════════════════════════════════════════════════
-
-if __name__ == "__main__":
-    print("🚀 Módulo de Gestão de Pedidos Carregado")
-    print("Chame: ModOrderGestao(manager_id)")
-    ModOrderGestao('JUNm')
