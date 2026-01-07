@@ -38,11 +38,13 @@ def verify_login_csv(user_role_choice):
             match = df[ (df['contact'].str.strip() == user_id) & (df['password'].str.strip() == password) ] #Verificamos o contacto e a password
             
             if not match.empty:
-                
                 name = match.iloc[0]['name']
+                real_id = match.iloc[0]['id_client']
+                
                 print(f"✅ Sucesso! Bem-vindo, {name}")
                 time.sleep(1)
-                return {"id": user_id, "name": name}
+                
+                return {"id": real_id, "name": name}
 
         # --- 2.  (STAFF) ---
         elif user_role_choice in ['estafeta', 'manager']:
@@ -179,7 +181,16 @@ def main():
                         elif action == '2':
                             print("\n📝 A abrir Livro de Reclamações...")
                             time.sleep(1)
-                            mod_complaint.process_smart_complaint(user['id']) 
+
+                            try:
+                                mod_complaint.process_smart_complaint(user['id'])
+                            except Exception as e:
+                                print(f"❌ Error system: {e}")
+
+                            
+                            print("\n" + "="*40)
+                            input("👉 Pressione ENTER para voltar ao menu...") 
+                            
                             
                         elif action == '0':
                             break
@@ -189,7 +200,7 @@ def main():
                     if op_in == '0': 
                         break
                     elif op_in == '1':
-                        print("....Função PORTAL CLIENTE....") #MODIFICAR UMA VEZ EXISTA A FUNÇÂO PORTAL CLIENTE ex. mod_cliente(user['id'])
+                        print("....Função PORTAL CLIENTE....") # MODIFICAR UMA VEZ EXISTA A FUNÇÂO PORTAL CLIENTE ex. mod_cliente(user['id'])
                         time.sleep(1)
                         break
                 else:
@@ -197,7 +208,7 @@ def main():
 
 
             elif sub == '2':
-                print("...ABRIR PORTAL CLIENTE PARA NOVO REGISTO...") #MODIFICAR UMA VEZ EXISTA A FUNÇÂO PORTAL CLIENTE ex. mod_cliente("")
+                print("...ABRIR PORTAL CLIENTE PARA NOVO REGISTO...") # MODIFICAR UMA VEZ EXISTA A FUNÇÂO PORTAL CLIENTE ex. mod_cliente("")
                 time.sleep(1)
                 break
 
@@ -216,7 +227,7 @@ def main():
                     if op_in == '0': 
                         break
                     elif op_in == '1':
-                        print("....Função PORTAL ESTAFETA....") #ESTAFETA
+                        print("....Função PORTAL ESTAFETA....") # ESTAFETA
                         main_delivery(user['id'])
                         time.sleep(1)
                         break
@@ -239,13 +250,6 @@ def main():
                             print("....Função PORTAL GESTOR DE PRODUTOS....") # MODIFICAR UMA VEZ EXISTA ex. mod_product()
                             time.sleep(1)
                             break
-                        elif user['módulo'] == 'Estafeta':
-                            print("....Função PORTAL GESTOR DE ESTAFETA....")
-                            main_delivery(user['id'])
-                            time.sleep(1)
-                            break
-                        elif user['módulo'] == 'Reclamações':
-                            print("....Função PORTAL GESTOR DE RECLAMAÇÕES....") # MODIFICAR UMA VEZ EXISTA ex. mod_reclamacoes()
                 else:
                     break
         else:

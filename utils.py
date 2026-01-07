@@ -2,6 +2,8 @@ import pandas as pd
 import datetime as dtime
 import random as rd
 import data_manager as dm
+import time
+import sys
 
 
 df_zone = pd.read_csv("zp_zones.csv", sep=";", dtype=str)
@@ -14,14 +16,6 @@ def showDetailsOrder(order_details, order_items_df, products_df):
     Mostrar os detalhes de um pedido específico, incluindo informações do pedido e itens associados.
     Mostra apenas os itens cujo status é diferente de 'canceled'.
     """
-    if order_details.empty:
-        print("\n")
-        print("─" * 80)
-        print("❌ ERRO: Detalhes do pedido não encontrados".center(80))
-        print("─" * 80)
-        print()
-        return
-
     # Detalhes do pedido
     row = order_details.iloc[0]
     
@@ -33,9 +27,9 @@ def showDetailsOrder(order_details, order_items_df, products_df):
     estado_pedido = row['order_status']
     
     print("\n")
-    print("─" * 80)
-    print("📋 DETALHES DO PEDIDO".center(80))
-    print("─" * 80)
+    print("─" * 70)
+    print("📋 DETALHES DO PEDIDO".center(70))
+    print("─" * 70)
     print()
     print(f"  🔢 Número do Pedido:    {numero_pedido}")
     print(f"  👤 Cliente:             {nome_cliente}")
@@ -46,8 +40,7 @@ def showDetailsOrder(order_details, order_items_df, products_df):
     print()
 
     # Filtrar itens não cancelados
-    if 'status' in order_items_df.columns:
-        order_items_df = order_items_df[order_items_df['status'] != 'canceled']
+    order_items_df = order_items_df[order_items_df['status'] != 'canceled']
 
     # Merge com produtos para ter o nome
     merged_items = order_items_df.merge(
@@ -56,34 +49,27 @@ def showDetailsOrder(order_details, order_items_df, products_df):
         how='left'
     )
 
-    print("─" * 80)
+    print("─" * 70)
     print("📦 ITENS DO PEDIDO".center(80))
-    print("─" * 80)
+    print("─" * 70)
     print()
     
     if merged_items.empty:
         print("  ⚠️  Nenhum item encontrado (todos os itens podem estar cancelados)")
         print()
     else:
-        for idx, item in merged_items.iterrows():
+        for _, item in merged_items.iterrows():
             product_name = item['name_product'] if pd.notna(item['name_product']) else f"Produto ID: {item['product_id']} (Nome não encontrado)"
             print(f"  📦 {product_name}")
             print(f"     └─ Quantidade: {item['quantity_ordered']} | Preço Unit.: {item['price_unit']}€ | Subtotal: {item['subtotal']}€")
         
         total = merged_items['subtotal'].sum()
         print()
-        print("─" * 80)
-        print(f"  💰 TOTAL DO PEDIDO: {total}€".ljust(79))
-        print("─" * 80)
+        print("─" * 70)
+        print(f"  💰 TOTAL DO PEDIDO: {total}€".ljust(69))
+        print("─" * 70)
         print()
     
-    return
-
-# Mostrar o estado de todos os pedidos
-def showOrderStatus(df_orders): # Mostrar o estado de todos os pedidos
-    print("\n=== Encomendas ===")
-    for _, row in df_orders.iterrows():
-        print(f"ID: {row['order_id']} | Estado: {row['order_status']}")
     return
 
 # Mostrar os detalhes do destinatário de um pedido específico
@@ -105,20 +91,9 @@ def showDetailsDestinatario(order_details):
     if isinstance(order_details, pd.Series):
         order_details = pd.DataFrame([order_details])
     
-    # Se DataFrame vazio, não há dados para mostrar
-    if order_details.empty:
-        print("\n")
-        print("─" * 70)
-        print("❌ ERRO: Detalhes do pedido não encontrados".center(70))
-        print("─" * 70)
-        print()
-        return
-    
-    # Garantir que temos a primeira linha (caso tenha múltiplas)
-    # iloc[0] = primeira linha (índice 0)
     row = order_details.iloc[0]
     # Extrair os valores necessários
-    # row['name'] = acessa a coluna 'name' da linha
+    
     nome = row['name']
     contacto = row['contact']
     morada = row['address']
@@ -214,7 +189,17 @@ def return_stock (order_items_df_canceled, products_df):
 #Função de rejeitar encomenda
 def reject_order(order_id, orders_df, order_it, products_df, order_events_df, manager, save_orders, save_order_items, save_products, save_order_events):
     # Perguntar motivo
-    cancellation_reason = input("Insira o motivo da rejeição da encomenda: ")
+    valid_reason = False
+    while not valid_reason:
+        cancellation_reason = input("Insira o motivo da rejeição da encomenda: ")
+        if cancellation_reason:
+            valid_reason = True
+        elif len(cancellation_reason) < 5:
+            print("❌ O motivo naõ é válido. Ingresse um motivo mais detalhado.")
+        else:
+            print("❌ O motivo da rejeição não pode estar vazio.")
+
+
 
     # Atualizar encomenda
     orders_df.loc[orders_df['order_id'] == order_id, 'order_reason'] = cancellation_reason
@@ -264,3 +249,24 @@ def code_zone(ZP1, df_zones, df_user_workers):
     estafeta = rd.choice(estafetas)
     
     return estafeta, zone
+
+# Bloqueii de 10s
+def bloquear_sistema_10s():
+    print("\n" + "═" * 70)
+    print("🔒 ACESSO NEGADO - BLOQUEIO DE SEGURANÇA")
+    print("═" * 70)
+    print("❌ Tentativa de acesso não autorizado detectada!")
+    print("⏳ Sistema bloqueado por 10 segundos")
+    print("═" * 70 + "\n")
+
+    for i in range(10, 0, -1):  # Countdown de 10 até 1 (mais natural)
+        # Limpa a linha anterior (efeito dinâmico)
+        print(f"\r⏳ Aguardando {i} segundos... ", end="", flush=True)
+        time.sleep(1)
+    
+    print("\r" + " "*70, end="", flush=True)  # Limpa linha anterior
+    print("\n" + "═" * 70)
+    print("✅ BLOQUEIO TERMINADO")
+    print("🔄 Voltando ao sistema principal...")
+    print("═" * 70 + "\n")
+    time.sleep(0.5)

@@ -1,16 +1,8 @@
 """
 ╔═════════════════════════════════════════════════════════════════════════════╗
 ║                    MOD_ORDER_GESTAO                                          
-║                                                                               
-║  06/01 Atulizações Feitas:                                                        
-║  ✓ Estética melhorada (outputs mais agradáveis)                              
-║  ✓ Cores e formatação (emojis e separadores)                                  
-║  ✓ Inputs mais personalizados                                               
-║  ✓ Função centralizada para registar eventos                                 
-║  ✓ Lógica original mantida intacta                                          
-║  ✓ Sem try-except (validações simples)
-║  ✓ Reimplemetação de função para partilly shipped                            
-║                                                                               
+║       last modification 06/01                                                                      
+║                            
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
 
@@ -21,24 +13,23 @@ from data_manager import (
     load_products, save_products,
     load_order_events, save_order_events,
     load_order_items, save_order_items,
-    load_user_work_profil
+    load_user_work_profil, load_zone_codes
 )
 import utils as ut
 import random as rd
 import time
+from tabulate import tabulate
 
 
 # ════════════════════════════════════════════════════════════════════════════════
-# 🎯 SEÇÃO 1: FUNÇÃO CENTRALIZADA PARA REGISTAR EVENTOS
+# 🎯 SEÇÃO 1: FUNÇÃO PARA REGISTAR EVENTOS
 # ════════════════════════════════════════════════════════════════════════════════
-# Esta função centraliza o registo de eventos para evitar duplicações de código
 # Recebe: order_id, tipo_evento, detalhes, e o gerente que fez a ação
 # Devolve: novo evento formatado pronto para guardar
 
 def registar_evento(order_id, tipo_evento, detalhes, manager):
     """
-    Registra um evento de forma centralizada.
-    
+    Registra um evento.    
     Parâmetros:
     - order_id: ID da encomenda (ex: "PT01")
     - tipo_evento: tipo de ação (ex: "edit_name", "validate", "reject")
@@ -63,7 +54,6 @@ def registar_evento(order_id, tipo_evento, detalhes, manager):
     
     return novo_evento
 
-
 # ════════════════════════════════════════════════════════════════════════════════
 # 🎯 SEÇÃO 2: MENUS COM FORMATAÇÃO MELHORADA
 # ════════════════════════════════════════════════════════════════════════════════
@@ -79,7 +69,7 @@ def mostrar_linha_decorativa(caractere="═", comprimento=70):
 
 def menu_principal_pedidos():
     """
-    Menu principal de gestão de pedidos com formatação melhorada.
+    Menu principal de gestão de pedidos.
     Mostra 6 opções principais para o gerente escolher.
     """
     
@@ -104,7 +94,7 @@ def menu_principal_pedidos():
     print("\n")
     mostrar_linha_decorativa("─", 70)
     
-    # Pedir input com validação simples
+    # Pedir input com validação
     while True:
         escolha = input("👉 Seleccione uma opção (1-6): ").strip()
         if escolha in ['1', '2', '3', '4', '5', '6']:
@@ -114,7 +104,7 @@ def menu_principal_pedidos():
 
 def menu_editar_pedido(order_id):
     """
-    Menu de edição de um pedido específico.
+    Menu de edição e validação de um pedido específico.
     Permite editar dados ou validar/rejeitar a encomenda.
     """
     
@@ -162,17 +152,16 @@ def menu_filtrar_zona():
     print("  3. ⬇️  Sul")
     print("  4. ➡️  Este")
     print("  5. ⬅️  Oeste")
-    print("  6. 🚫 Fora do limite")
-    print("  7. ↩️  Voltar ao menu anterior")
+    print("  6. ↩️  Voltar ao menu anterior")
     
     print("\n")
     mostrar_linha_decorativa("─", 70)
     
     while True:
         escolha = input("👉 Seleccione uma opção (1-7): ").strip()
-        if escolha in ['1', '2', '3', '4', '5', '6', '7']:
+        if escolha in ['1', '2', '3', '4', '5', '6']:
             return escolha
-        print("❌ Opção inválida. Digite um número entre 1 e 7.")
+        print("❌ Opção inválida. Digite um número entre 1 e 6.")
 
 
 # ════════════════════════════════════════════════════════════════════════════════
@@ -186,18 +175,23 @@ def editar_nome(orders_df, order_id, manager, order_events_df):
     - Atualiza na base de dados
     - Registra evento
     """
-    
-    print("\n" + "─" * 70)
-    nome_atual = orders_df[orders_df['order_id'] == order_id]['name'].iloc[0]
+    print("\n")
+    mostrar_linha_decorativa("─", 70)
+    nome_atual = orders_df[orders_df['order_id'] == order_id].iloc[0]['name']
     print(f"Nome actual: {nome_atual}")
-    print("─" * 70)
+    mostrar_linha_decorativa("─", 70)
     
-    nome_novo = input("👤 Insira o novo nome completo: ").strip()
-    
-    if not nome_novo:
-        print("❌ Nome não pode estar vazio!")
-        return orders_df, order_events_df
-    
+    nome_novo_validation = True
+    while nome_novo_validation:
+        nome_novo = input("👤 Insira o novo nome completo: ").strip()
+        
+        if not nome_novo:
+            print("❌ Nome não pode estar vazio!")
+        elif len(nome_novo) < 2:
+            print("❌ Dimensão do nome inválida. Ingresse um nome com mis dois caracteres. ")
+        else:
+            nome_novo_validation = False
+        
     # Atualizar na base de dados
     orders_df.loc[orders_df['order_id'] == order_id, 'name'] = nome_novo
     save_orders(orders_df)
@@ -226,16 +220,24 @@ def editar_contacto(orders_df, order_id, manager, order_events_df):
     - Registra evento
     """
     
-    print("\n" + "─" * 70)
+    print("\n")
+    mostrar_linha_decorativa("─", 70)
     contacto_atual = orders_df[orders_df['order_id'] == order_id]['contact'].iloc[0]
     print(f"Contacto actual: {contacto_atual}")
-    print("─" * 70)
+    mostrar_linha_decorativa("─", 70)
     
-    contacto_novo = input("📱 Insira o novo contacto (ex: 961234567): ").strip()
-    
-    if not contacto_novo:
-        print("❌ Contacto não pode estar vazio!")
-        return orders_df, order_events_df
+    contacto_novo_validation = True
+    while contacto_novo_validation:
+        contacto_novo = input("📱 Insira o novo contacto (ex: 961234567): ").strip()
+        
+        if not contacto_novo:
+            print("❌ Contacto não pode estar vazio!")
+        elif len(contacto_novo) != 9:
+            print("❌ Dimensão do contacto inválida. Ingresse nove digitos. ")
+        elif contacto_novo[0] != '9' or contacto_novo[0] != '2':
+            print("❌ Contacto inválido. Tem que começar por 9 ou 2")
+        else:
+            contacto_novo_validation = False
     
     # Atualizar na base de dados
     orders_df.loc[orders_df['order_id'] == order_id, 'contact'] = contacto_novo
@@ -265,16 +267,22 @@ def editar_morada(orders_df, order_id, manager, order_events_df):
     - Registra evento
     """
     
-    print("\n" + "─" * 70)
+    print("\n")
+    mostrar_linha_decorativa("─", 70)
     morada_atual = orders_df[orders_df['order_id'] == order_id]['address'].iloc[0]
     print(f"Morada actual: {morada_atual}")
-    print("─" * 70)
+    mostrar_linha_decorativa("─", 70)
     
-    morada_nova = input("🏠 Insira a nova morada (ex: Rua Principal, nº 42): ").strip()
-    
-    if not morada_nova:
-        print("❌ Morada não pode estar vazia!")
-        return orders_df, order_events_df
+    morada_nova_validation = True
+    while morada_nova_validation:
+        morada_nova = input("🏠 Insira a nova morada (ex: Rua Principal, nº 42): ").strip()
+        
+        if not morada_nova:
+            print("❌ A Morada não pode estar vazia!")
+        elif len(morada_nova) < 5:
+            print("❌ Dimensão da morada inválida. Ingresse por ex. Rua Principal, nº 42.")
+        else:
+            morada_nova_validation = False
     
     # Atualizar na base de dados
     orders_df.loc[orders_df['order_id'] == order_id, 'address'] = morada_nova
@@ -304,18 +312,35 @@ def editar_codigo_postal(orders_df, order_id, manager, order_events_df):
     - Registra evento
     """
     
-    print("\n" + "─" * 70)
+    print("\n")
+    mostrar_linha_decorativa("─", 70)
     zp1_atual = orders_df[orders_df['order_id'] == order_id]['ZP1'].iloc[0]
     zp2_atual = orders_df[orders_df['order_id'] == order_id]['ZP2'].iloc[0]
     print(f"Código postal actual: {zp1_atual}-{zp2_atual}")
-    print("─" * 70)
+    mostrar_linha_decorativa("─", 70)
     
     zp1_novo = input("📮 Código postal (parte 1, ex: 4750): ").strip()
     zp2_novo = input("📮 Código postal (parte 2, ex: 123): ").strip()
     
-    if not zp1_novo or not zp2_novo:
-        print("❌ Código postal não pode estar vazio!")
-        return orders_df, order_events_df
+    zp_novo_validation = True
+
+    while  zp_novo_validation:
+        zp1_novo = input("📮 Código postal (parte 1, ex: 4750): ").strip()
+        zp2_novo = input("📮 Código postal (parte 2, ex: 123): ").strip()
+        
+        if not zp1_novo or not zp2_novo:
+            print("❌ Código postal não pode estar vazio!")
+        elif len(zp1_novo) != 4 or len(zp2_novo) != 3:
+            print("❌ Dimensão do código postal inválida. Ingresse por ex. 4750 e depois 123")
+        elif not zp1_novo.isdigit() or not zp2_novo.isdigit():
+            print("❌ Código postal inválido. Ingresse apenas números")
+        else:
+            zone_codes = load_zone_codes()
+            if zp1_novo not in zone_codes['ZP1'].values:
+                print("❌ Código postal não pertence a nenhuma zona válida: Veja a tabela abaixo:")
+                print(tabulate(zone_codes, headers='keys', tablefmt='grid'))
+            else:
+                zp_novo_validation = False
     
     # Atualizar na base de dados
     orders_df.loc[orders_df['order_id'] == order_id, 'ZP1'] = zp1_novo
@@ -374,6 +399,7 @@ def ModOrderGestao(Manager):
     
     while menu_ativo:
         
+        bloqueo = 0
         # Mostrar menu e pedir escolha
         opcao = menu_principal_pedidos()
         
@@ -478,7 +504,12 @@ def ModOrderGestao(Manager):
                                 print("\n✅ Encomenda rejeitada com sucesso.\n")
                                 editando = False
                             else:
+                                bloqueo += 1
                                 print("\n❌ Apenas o Supervisor pode rejeitar encomendas.\n")
+                                if bloqueo == 3:
+                                    ut.bloquear_sistema_10s()
+                                    bloqueo = 0
+                                    new_event = registar_evento(user_input, "⚠️system_lock", "Operação não autorizada: privilégios necessários ausentes", Manager)
                                 editando = False
                         
                         # Opção 7: Validar automaticamente (só supervisor)
@@ -530,22 +561,22 @@ def ModOrderGestao(Manager):
                                         
                                         else:
                                             qty_prod = order_it[order_it['order_id'] == user_input].shape[0]
-                                            print("─"*55)
+                                            print("\n")
+                                            mostrar_linha_decorativa("─", 70)
                                             print("❌ Encomenda inválida. Existem produtos não disponíveis.\n")
-                                            print("═"*55)
+                                            mostrar_linha_decorativa("═", 70)
                                             print(f"📦 ITEN(S) NÃO DISPONÍVEI(S):".center())
-                                            print("═"*55)
+                                            mostrar_linha_decorativa("═", 70)
                                             print("\n")
                                             print("".join(f"  SKU: {sku} | Produto: {products_name.get(sku, 'Desconhecido')}\n"
                                                                 for sku in produtos_faltantes))
-                                            print("─"*55)
+                                            mostrar_linha_decorativa("─", 70)
 
                                                 # Se TODOS os produtos da encomenda estão indisponíveis → cancelar encomenda
                                             if qty_prod == len(produtos_faltantes):
                                                 print(f"\n⚠️ A encomenda {user_input} deve ser cancelada. Todos os produtos estão indisponíveis.\n")
 
-
-                                                    # Usa a tua função utilitária de rejeição
+                                                # Usa a tua função utilitária de rejeição
                                                 orders_df, order_it, products_df, order_events_df = ut.reject_order(
                                                     user_input,
                                                     orders_df,
@@ -628,8 +659,14 @@ def ModOrderGestao(Manager):
                                         editando = False
                             
                             else:
+                                bloqueo += 1
                                 print("\n❌ Apenas o Supervisor pode validar encomendas.\n")
                                 editando = False
+                                if bloqueo == 3:
+                                    ut.bloquear_sistema_10s()
+                                    bloqueo = 0
+                                    new_event = registar_evento(user_input, "⚠️system_lock", "Operação não autorizada: privilégios necessários ausentes", Manager)
+                                    editando = False
                         
                         # Opção 8: Voltar
                         elif edicao_opcao == '8':
@@ -651,9 +688,7 @@ def ModOrderGestao(Manager):
         
         elif opcao == '2':
             
-            pedidos_validados = orders_df[
-                orders_df['order_status'].isin(['validated', 'partially shipped'])
-            ].reset_index(drop=True)
+            pedidos_validados = orders_df[orders_df['order_status'].isin(['validated', 'partially shipped'])].reset_index(drop=True)
             
             print("\n")
             mostrar_linha_decorativa("═")
@@ -673,11 +708,12 @@ def ModOrderGestao(Manager):
                     
                     pedido = pedidos_validados.iloc[i]
                     
-                    print("\n" + "─" * 70)
+                    print("\n")
+                    mostrar_linha_decorativa("─", 70)
                     print(f"ID: {pedido['order_id']} | Estado: {pedido['order_status']}")
                     print(f"Cliente: {pedido['name']} | Teléfono: {pedido['contact']}")
                     print(f"Morada: {pedido['address']} | CP: {pedido['ZP1']}-{pedido['ZP2']}")
-                    print("─" * 70)
+                    mostrar_linha_decorativa("─", 70)
                     
                     if i < total - 1:
                         while True:

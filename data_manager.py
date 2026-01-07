@@ -165,3 +165,14 @@ def load_user_work_profil():
             ]
 
         )   
+
+def load_zone_codes():
+    if os.path.exists("zp_zones.csv"):
+        return pd.read_csv("zp_zones.csv", sep=";", dtype=str)
+    else:
+        return pd.DataFrame(
+            columns=[
+                "Codes",
+                "Zone"
+            ]
+        )
