@@ -1,3 +1,11 @@
-import mod_order_gestao 
+import utils as ut
+import pandas as pd
+import datetime as dtime
+import random as rd
+import data_manager as dm
+import time
+import sys
 
-mod_order_gestao.ModOrderGestao("SUPm")
+order_df = dm.load_orders()
+
+ut.order_filters("CL001", order_df)

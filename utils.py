@@ -9,6 +9,8 @@ import sys
 df_zone = pd.read_csv("zp_zones.csv", sep=";", dtype=str)
 codes_list = df_zone['Codes'].tolist()
 df_user_worker = dm.load_user_work_profil()
+products_df = dm.load_products()
+order_items = dm.load_order_items()
 
 # Mostrar os detalhes de um pedido específico, incluindo informações do pedido e itens associados.
 def showDetailsOrder(order_details, order_items_df, products_df):
@@ -263,3 +265,84 @@ def bloquear_sistema_10s():
     print("🔄 Voltando ao Menu Principal...")
     print("═" * 70 + "\n")
     time.sleep(0.5)
+
+#---------------------------------------------------#
+# Função para filtrar encomendas do cliente por status
+def order_filters(id_client, orders_df, produtos=products_df):
+    # Detecta coluna de cliente automaticamente
+    
+    orders_client = orders_df[orders_df['id_client'] == id_client]
+
+    if orders_client.empty:
+        print("\nNão há encomendas para este cliente.")
+        return
+
+    MenuOrderFilter = True
+    while MenuOrderFilter:
+        print("\n" + "═" * 70)
+        print("Filtrar Minhas Encomendas por status".center(70))
+        print("═" * 70)
+        print()
+        print("Escolha uma das seguintes opções: ")
+        print("1. Pendentes")
+        print("2. Validadas")
+        print("3. Parcialmente Validadas")
+        print("4. Canceladas")
+        print("5. Em distribuição")
+        print("6. Entregue")
+        print("7. Recusada")
+        print("8. Não Entregue")
+        print("9. Voltar")
+        print()
+        print("─" * 70)
+        
+        opcao = input("Opção: ")
+        if opcao not in ["1", "2", "3", "4", "5", "6", "7", "8", "9"]:
+            print("Opção inválida. Tente novamente.")
+            continue
+
+        if opcao == "9":
+            MenuOrderFilter = False
+            break
+        else:
+            # Status diponíveis
+            status_map = {
+                "1": ["pending", "pendente"],
+                "2": ["validated", "validada"], 
+                "3": ["partially_validated", "parcialmente validada"],
+                "4": ["canceled", "cancelada"],
+                "5": "em distribuição",
+                "6": "entregue",
+                "7": "recusada",
+                "8": "não entregue"
+            }
+
+            status = status_map[opcao]
+            
+            if isinstance(status, list):
+                encomendas = orders_client[orders_client['order_status'] == status[0]].reset_index(drop=True)
+
+                if encomendas.empty:
+                    print(f"\nNão há encomendas '{status[1]}' para este cliente.")
+                else:
+                    for i in range(len(encomendas)):
+
+                        encomenda_df = encomendas.iloc[[i]]
+                        
+                        order_id = encomendas.iloc[i]['order_id']
+                        artigos_df = order_items[order_items['order_id'] == order_id]
+                        showDetailsOrder(encomenda_df, artigos_df, produtos)
+                    print("\nVoltando...")
+            else:
+                encomendas = orders_client[orders_client['order_status'] == status].reset_index(drop=True)
+                if encomendas.empty:
+                    print(f"\nNão há encomendas '{status}' para este cliente.")
+                else:
+                    for i in range(len(encomendas)):
+
+                        encomenda_df = encomendas.iloc[[i]]
+                        
+                        order_id = encomendas.iloc[i]['order_id']
+                        artigos_df = order_items[order_items['order_id'] == order_id]
+                        showDetailsOrder(encomenda_df, artigos_df, produtos)
+                    print("\nVoltando...")
