@@ -360,63 +360,67 @@ def adicionarProduto():
     print("\n")
 
 
-def alterarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
-    # NOTA: O stock não é alterado aqui para garantir a integridade das opções 6 e 7 (Saídas/Entradas)
-    # Permite alterar dados de um produto 
+def alterarProduto():
+    global numProdutos
+
+    if numProdutos == 0: 
+        print("❌ O Catálogo está vazio!") 
+        return
+    
+    listarCatalogo()
+    print("Insira o ID/Nº que pretende alterar: ")
+    numItemEscolhido = validarID(numProdutos)
+    i = numItemEscolhido - 1 # Este Assign serve para não ultrapassar o fim da lista/Array
+
+    print("\n--- Produto Selecionado ---")
+    print("Nome: " + nomeProduto[i])
+    print("Descrição: " + descricaoProduto[i])
+    print("Categoria: " + categoriaProduto[i])
+    print("Tipo: " + tiposProduto[i])  
+    print("Preço: " + str(precosProduto[i]) + "€")
+    print("Stock: " + str(stock[i]) + " unidades")
+    print("Disponibilidade: " + disponibilidade[i])
+    print("---------------------------\n")
+
     opcaomenu = -1
 
-    if numProdutos > 0:
-        print("Insira o ID/Nº que pretende alterar: ")
-        numItemEscolhido = validarID(numProdutos)
-        i = numItemEscolhido - 1 # Este Assign serve para não ultrapassar o fim da lista/Array
+    while opcaomenu != 0:
+        print("\nEscolha, através do número, o que deseja alterar:")
+        print("1. Alterar Nome")
+        print("2. Alterar Descrição")
+        print("3. Alterar Categoria")
+        print("4. Alterar Tipo")
+        print("5. Alterar Preço")
+        print("6. Alterar Disponibilidade")
+        print("0. Concluir Alterações")
 
+        opcaomenu = lerInteiro()  
 
-        # Usar múltiplos prints (mais claro que um print com \n múltiplos) 
-        print("\n--- Produto Selecionado ---")
-        print("Nome: " + nomeProduto[i])
-        print("Descrição: " + descricaoProduto[i])
-        print("Categoria: " + categoriaProduto[i])
-        print("Preço: " + str(precosProduto[i]) + "€")
-        print("Stock: " + str(stock[i]) + " unidades")
-        print("Disponibilidade: " + disponibilidade[i])
-        print("---------------------------\n")
-
-        while opcaomenu != 0:
-            # Menu de opções com vários prints em vez de char13.
-            print("\nEscolha, através do número, o que deseja alterar:")
-            print("1. Alterar Nome")
-            print("2. Alterar Descrição")
-            print("3. Alterar Categoria")
-            print("4. Alterar Preço")
-            print("5. Alterar Disponibilidade")
-            print("0. Concluir Alterações")
-
-            # Lê a opção do utilizador.
-            opcaomenu = lerInteiro()  
-
-            if opcaomenu == 1:
+        if opcaomenu == 1:
                 nomeProduto[i] = validarNome()
                 print("Nome alterado com sucesso!")
-            elif opcaomenu == 2:
+        elif opcaomenu == 2:
                 descricaoProduto[i] = validarTexto("Insira a nova Descrição: ")
                 print("Descrição alterada com sucesso!")
-            elif opcaomenu == 3:
+        elif opcaomenu == 3:
                 categoriaProduto[i] = validarTexto("Escreva nova categoria: ")
                 print("Categoria alterada com sucesso!")
-            elif opcaomenu == 4:
+        elif opcaomenu == 4:
+                tiposProduto[i] = validarTexto("Escreva novo tipo de produto: ")
+                print("Tipo alterado com sucesso!")
+        elif opcaomenu == 5:
                 precosProduto[i] = verificarPreco()
                 print("Preço alterado com sucesso!")
-            elif opcaomenu == 5:
+        elif opcaomenu == 6:
                 disponibilidade[i] = verificarDisponibilidade(1)
                 print("Disponibilidade alterada com sucesso!")
-            elif opcaomenu == 0:
+        elif opcaomenu == 0:
                 print("Alterações Concluídas!")
                 # Guardar alterações no ficheiro CSV
-                guardarProdutosCSV(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade)
-            else:
+                guardarProdutosCSV()
+                return
+        else:
                 print("Opção inválida!")
-    else:
-        print("O Catálogo está vazio!")
 
 def adicionarStock():
     # Adiciona stock a produto existente 
@@ -673,30 +677,28 @@ def filtrarCatalogo():
 
     
 
-def listarCatalogo(idsProduto, nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
+def listarCatalogo():
      # Lista todos os produtos do catálogo
 
     if numProdutos > 0:
         print("\n🌻 ===== Catálogo de Produtos ===== 🌻")
-        
-        # Usar múltiplos prints (mais claro que um print com \n múltiplos)  
-        # Percorrer todos os produtos
-        for i in range(0, numProdutos, 1):
+
+        for i in range(numProdutos):
             print("\n--- Produto " + str(i + 1) + " ---")
             print("ID: " + str(idsProduto[i]))
             print("Nome: " + nomeProduto[i])
             print("Descrição: " + descricaoProduto[i])
             print("Categoria: " + categoriaProduto[i])
+            print("Tipo: " + tiposProduto[i])   
             print("Preço: " + str(precosProduto[i]) + "€")
             print("Stock: " + str(stock[i]) + " unidades")
             
-            # Mostrar estado de disponibilidade
+
             if disponibilidade[i] == "S":
                 print("Estado: Disponível ✅")
             else:
-                print("Estado: Indisponível ❌")
-            print("\n")
-        
+                print("Estado: Indisponível ❌") 
+
         print("\nTotal de produtos: " + str(numProdutos))
         print("\n")
     else:
