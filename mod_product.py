@@ -5,11 +5,7 @@ import os
 import pandas as pd 
 
 # Funções de Validação e Input
-
 def lerInteiro(mensagem=""):
-    
-    # Lê inteiro com proteção contra crashes - inserir texto em vez de número Inteiro 
-    while True:
         try:
             valor = int(input(mensagem))
             return valor
@@ -17,8 +13,6 @@ def lerInteiro(mensagem=""):
             print("❌ Erro: Insira apenas números inteiros!")
 
 def lerFloat(mensagem=""):
-    
-    # Lê float com proteção contra crashes - inserir texto em vez de número 
     while True:
         try:
             valor = float(input(mensagem))
@@ -45,21 +39,18 @@ def validarNome():
         nome = input() 
     return nome
 
-
 def validarStock():
-    print("Insira a quantidade de produto para stock: ")
-    stock = lerInteiro()
+    stock = lerInteiro("Insira a quantidade de produto para stock: ")
     while stock < 0:
         print("Erro: O stock do produto não pode ser negativo! Volte a inserir, por favor!")
-        stock = lerInteiro()
+        stock = lerInteiro("Insira a quantidade de produto para stock: ")
     return stock
 
 def verificarPreco():
-    print("Insira o Preço: ")
-    preco =lerFloat()
+    preco =lerFloat("Insira o Preço: ")
     while preco < 0:
         print("Erro: O Preço do produto não pode ser negativo! Volte a inserir, por favor!")
-        preco =lerFloat()
+        preco =lerFloat("Insira o Preço: ")
     return preco
 
 def verificarDisponibilidade(opcaoOperacao):
@@ -152,36 +143,32 @@ def lerProdutosCSV():
 
 # Função para validar stock disponível de um produto (USADO POR: Yeidman (Gestão Encomendas))
 def validarStockDisponivel(idItem, quantidade):
-    # Verificar se ficheiro existe
-    if not os.path.exists("catalogo.csv"):
-        print("⚠️ Ficheiro catalogo.csv não foi encontrado!")
+    if not os.path.exists("products_stock.csv"):
+        print("⚠️ Ficheiro products_stock.csv não foi encontrado!")
         return False
     
-    # Tentar ler o ficheiro
     try:
-        df = pd.read_csv("catalogo.csv")
+        df = pd.read_csv("products_stock.csv")
         
-        # Procurar o produto pelo ID
         produto_encontrado = False
         numProdutos = len(df)
         
-        for i in range(0, numProdutos, 1):
+        for i in range(numProdutos):
             if df["idItem"][i] == idItem:
                 produto_encontrado = True
                 
                 # Verificar se está ativo
-                if str(df["ativo"][i]) != "true":
+                if str(df["available"][i]) != "true":
                     print("⚠️ Produto está Indisponível!")
                     return False
                 
                 # Verificar stock
-                if df["stock"][i] >= quantidade:
+                if df["quantity_stock"][i] >= quantidade:
                     return True
                 else:
-                    print("⚠️ Stock insuficiente! Disponível: " + str(df["stock"][i]))
+                    print("⚠️ Stock insuficiente! Disponível: " + str(df["quantity_stock"][i]))
                     return False
         
-        # Se chegou aqui, produto não existe
         if not produto_encontrado:
             print("⚠️ Produto não foi encontrado!")
 
@@ -194,19 +181,18 @@ def validarStockDisponivel(idItem, quantidade):
 
 # Função para decrementar Stock após encomenda (USADO POR: Yeidman (Gestão Encomendas))
 def reservarStock(idItem, quantidade):
-    # Verificar se ficheiro existe
-    if not os.path.exists("catalogo.csv"):
-        print("❌ Ficheiro catalogo.csv não foi encontrado!")
+    if not os.path.exists("products_stock.csv"):
+        print("❌ Ficheiro products_stock.csv não foi encontrado!")
         return False
     try:
-        # Ler ficheiro atual
-        df = pd.read_csv("catalogo.csv")
+        df = pd.read_csv("products_stock.csv")
         # Criar listas para guardar dados
+
         ids = []
-        tipos = []
         nomes = [] 
         descricoes = []
         categorias = []
+        tipos = []
         precos = []
         stocks = []
         ativos = []
@@ -215,18 +201,17 @@ def reservarStock(idItem, quantidade):
         numProdutos = len(df)
 
         # Copiar todos os dados para listas
-        for i in range(0, numProdutos, 1):
-            ids.append(df["idItem"][i])
-            tipos.append(df["tipo"][i])
-            nomes.append(df["nome"][i])
-            descricoes.append(df["descricao"][i])
-            categorias.append(df["categoria"][i])
-            precos.append(df["preco"][i])
-            stocks.append(df["stock"][i])
-            ativos.append(df["ativo"][i])
+        for i in range(numProdutos):
+            ids.append(df["product_id"][i])
+            nomes.append(df["name_product"][i])
+            descricoes.append(df["description"][i])
+            categorias.append(df["category"][i])
+            tipos.append(df["product_type"][i])
+            precos.append(df["price_unit"][i])
+            stocks.append(df["quantity_stock"][i])
+            ativos.append(df["available"][i])
 
-            # Se encontrar o produto, modificar stock
-            if df["idItem"][i] == idItem:
+            if df["product_id"][i] == idItem:
                 produto_encontrado = True
 
                 # Verificar se tem stock suficiente
@@ -241,7 +226,7 @@ def reservarStock(idItem, quantidade):
                 # Se esgotou, marcar inativo
                 if stocks[i] == 0:
                     ativos[i] = "false"    
-                    print("⚠️ " + nomes[i] + " esgotou!")   
+                    print("⚠️ " + str(nomes[i]) + " esgotou!")   
 
                 print("✅ Stock reservado: " + str(quantidade) + "x " + nomes[i])
                 print("   Anterior: " + str(stock_antigo) + " → Novo: " + str(stocks[i]))
@@ -252,18 +237,18 @@ def reservarStock(idItem, quantidade):
         
         # Criar DataFrame novo
         dados_novos = {
-            "idItem": ids,
-            "tipo": tipos,
-            "nome": nomes,
-            "descricao": descricoes,
-            "categoria": categorias,
-            "preco": precos,
-            "stock": stocks,
-            "ativo": ativos
+            "product_id": ids,
+            "name_product": nomes,
+            "quantity_stock": stocks,
+            "price_unit": precos,
+            "available": ativos,
+            "category": categorias,
+            "product_type": tipos,
+            "description": descricoes
         }
         
         df_novo = pd.DataFrame(dados_novos)
-        df_novo.to_csv("catalogo.csv", index=False)
+        df_novo.to_csv("products_stock.csv", index=False, sep=";")
         
         return True
         
@@ -272,26 +257,24 @@ def reservarStock(idItem, quantidade):
         return False
 
 def devolverStock(idItem, quantidade):
-    # Validar quantidade positiva
     if quantidade <= 0:
         print("❌ Quantidade inválida para devolução! Deve ser maior que 0.")
         return False  
     
-    # Verificar se ficheiro existe
-    if not os.path.exists("catalogo.csv"):
-        print("❌ Ficheiro catalogo.csv não foi encontrado!")
+    if not os.path.exists("products_stock.csv"):
+        print("❌ Ficheiro products_stock.csv não foi encontrado!")
         return False 
      
     try:
         # Ler ficheiro atual
-        df = pd.read_csv("catalogo.csv")
+        df = pd.read_csv("products_stock.csv")
 
         # Criar listas para guardar dados
         ids = []
-        tipos = []
-        nomes = [] 
+        nomes = []
         descricoes = []
         categorias = []
+        tipos = []
         precos = []
         stocks = []
         ativos = []
@@ -300,18 +283,18 @@ def devolverStock(idItem, quantidade):
         numProdutos = len(df)
 
             # Copiar todos os dados para listas
-        for i in range(0, numProdutos, 1):
-            ids.append(df["idItem"][i])
-            tipos.append(df["tipo"][i])
-            nomes.append(df["nome"][i])
-            descricoes.append(df["descricao"][i])
-            categorias.append(df["categoria"][i])
-            precos.append(df["preco"][i])
-            stocks.append(df["stock"][i])
-            ativos.append(df["ativo"][i])
+        for i in range(numProdutos):
+            ids.append(df["product_id"][i])
+            nomes.append(df["name_product"][i])
+            descricoes.append(df["description"][i])
+            categorias.append(df["category"][i])
+            tipos.append(df["product_type"][i])
+            precos.append(df["price_unit"][i])
+            stocks.append(df["quantity_stock"][i])
+            ativos.append(df["available"][i])
 
             # Se encontrar o produto, modificar stock  
-            if df["idItem"][i] == idItem:
+            if df["product_id"][i] == idItem:
                 produto_encontrado = True
 
                 # Incrementar stock
@@ -331,17 +314,18 @@ def devolverStock(idItem, quantidade):
             return False
         # Criar DataFrame novo  
         dados_novos = {
-            "idItem": ids,
-            "tipo": tipos,
-            "nome": nomes,
-            "descricao": descricoes,
-            "categoria": categorias,
-            "preco": precos,
-            "stock": stocks,
-            "ativo": ativos
+            "product_id": ids,
+            "name_product": nomes,
+            "quantity_stock": stocks,
+            "price_unit": precos,
+            "available": ativos,
+            "category": categorias,
+            "product_type": tipos,
+            "description": descricoes
         }
+
         df_novo = pd.DataFrame(dados_novos)
-        df_novo.to_csv("catalogo.csv", index=False)
+        df_novo.to_csv("products_stock.csv", index=False, sep=";")
         return True
     except:
         print("❌ Erro ao devolver stock!")
@@ -349,14 +333,12 @@ def devolverStock(idItem, quantidade):
             
 # Função para listar produtos disponíveis (USADO POR: Beatriz (Portal Cliente)) - retorna DataFrame com produtos que estão ativos e têm stock
 def listarProdutosDisponiveis():
-    # Verificar se ficheiro existe
-    if not os.path.exists("catalogo.csv"):
-        print("⚠️ Ficheiro catalogo.csv não foi encontrado!")
+    if not os.path.exists("products_stock.csv"):
+        print("⚠️ Ficheiro products_stock.csv não foi encontrado!")
         return pd.DataFrame()
     
     try:
-        # Ler ficheiro atual
-        df = pd.read_csv("catalogo.csv")
+        df = pd.read_csv("products_stock.csv")
 
         # Criar listas para produtos disponíveis
         ids_disponiveis = []
@@ -367,31 +349,31 @@ def listarProdutosDisponiveis():
         stocks_disponiveis = []
 
         numProdutos = len(df)
-        for i in range(0, numProdutos, 1):
+        for i in range(numProdutos):
             # Verificar se ativo E tem stock
-            if str(df["ativo"][i]) == "true" and df["stock"][i] > 0:
-                ids_disponiveis.append(df["idItem"][i])
-                nomes_disponiveis.append(df["nome"][i])
-                descricoes_disponiveis.append(df["descricao"][i])
-                categorias_disponiveis.append(df["categoria"][i])
-                precos_disponiveis.append(df["preco"][i])
-                stocks_disponiveis.append(df["stock"][i])
+            if str(df["available"][i]) == "true" and df["quantity_stock"][i] > 0:
+                ids_disponiveis.append(df["product_id"][i])
+                nomes_disponiveis.append(df["name_product"][i])
+                descricoes_disponiveis.append(df["description"][i])
+                categorias_disponiveis.append(df["category"][i])
+                precos_disponiveis.append(df["price_unit"][i])
+                stocks_disponiveis.append(df["quantity_stock"][i])
 
         # Criar DataFrame com produtos disponíveis
         dados_disponiveis = {   
-            "idItem": ids_disponiveis,
-            "nome": nomes_disponiveis,
-            "descricao": descricoes_disponiveis,
-            "categoria": categorias_disponiveis,
-            "preco": precos_disponiveis,
-            "stock": stocks_disponiveis
+            "product_id": ids_disponiveis,
+            "name_product": nomes_disponiveis,
+            "description": descricoes_disponiveis,
+            "category": categorias_disponiveis,
+            "price_unit": precos_disponiveis,
+            "quantity_stock": stocks_disponiveis
         }
         df_disponiveis = pd.DataFrame(dados_disponiveis)
 
         if len(ids_disponiveis) > 0:
             print("\nCatálogo de Produtos Disponíveis 🌻")
             
-            for i in range(0, len(ids_disponiveis), 1):
+            for i in range(len(ids_disponiveis)):
                 print("\nProduto ID: " + str(ids_disponiveis[i]))
                 print("Nome: " + nomes_disponiveis[i])
                 print("Descrição: " + descricoes_disponiveis[i])
@@ -412,42 +394,40 @@ def listarProdutosDisponiveis():
 
 
 def obterDetalhesProduto(idItem):
-    # Verificar se ficheiro existe  
-    if not os.path.exists("catalogo.csv"):
-        print("⚠️ Ficheiro catalogo.csv não foi encontrado!")
+    if not os.path.exists("products_stock.csv"):
+        print("⚠️ Ficheiro products_stock.csv não foi encontrado!")
         return None
     
     try:
-        # Ler ficheiro atual
-        df = pd.read_csv("catalogo.csv")
+        df = pd.read_csv("products_stock.csv")
         numProdutos = len(df)
         
         # Procurar produto pelo ID
-        for i in range(0, numProdutos, 1):
-            if df["idItem"][i] == idItem:
+        for i in range(numProdutos):
+            if df["product_id"][i] == idItem:
 
                 detalhes = {
-                    "idItem": df["idItem"][i],
-                    "tipo": df["tipo"][i],
-                    "nome": df["nome"][i],
-                    "descricao": df["descricao"][i],
-                    "categoria": df["categoria"][i],
-                    "preco": df["preco"][i],
-                    "stock": df["stock"][i],
-                    "ativo": df["ativo"][i]
+                    "product_id": df["product_id"][i],
+                    "product_type": df["product_type"][i],
+                    "name_product": df["name_product"][i],
+                    "description": df["description"][i],
+                    "category": df["category"][i],
+                    "price_unit": df["price_unit"][i],
+                    "quantity_stock": df["quantity_stock"][i],
+                    "available": df["available"][i]
                 }
                 
                 print("\n🌻 ===== Detalhes do Produto ===== 🌻")
-                print("\n--- Produto ID: " + str(detalhes["idItem"]) + " ---")
-                print("Nome: " + detalhes["nome"])
-                print("Descrição: " + detalhes["descricao"])
-                print("Categoria: " + detalhes["categoria"])
-                print("Preço: " + str(detalhes["preco"]) + "€")
-                print("Stock: " + str(detalhes["stock"]) + " unidades")
+                print("\n--- Produto ID: " + str(detalhes["product_id"]) + " ---")
+                print("Nome: " + detalhes["name_product"])
+                print("Descrição: " + detalhes["description"])
+                print("Categoria: " + detalhes["category"])
+                print("Preço: " + str(detalhes["price_unit"]) + "€")
+                print("Stock: " + str(detalhes["quantity_stock"]) + " unidades")
                 
-                if str(detalhes["ativo"]).lower() == "true" and detalhes["stock"] > 0:
+                if str(detalhes["available"]).lower() == "true" and detalhes["quantity_stock"] > 0:
                     print("Estado: Disponível ✅")
-                elif detalhes["stock"] == 0:
+                elif detalhes["quantity_stock"] == 0:
                     print("Estado: Esgotado ❌")
                 else:
                     print("Estado: Indisponível ❌")
@@ -467,20 +447,25 @@ def obterDetalhesProduto(idItem):
 
 # Adiciona um novo produto ao catálogo 
 def adicionarProduto():
-        
-    # Usar múltiplos prints (mais claro que um print com \n múltiplos)
+
     print("Adicionar Novo Produto\n")
+
+    # Gerar ID automático
+    novo_id = 1 if not idsProduto else max(idsProduto) + 1
+    idsProduto.append(novo_id)
     
     # Recolher dados utilizando funções de validação existentes
     nomeProduto.append(validarNome())
     descricaoProduto.append(validarTexto("Insira a descrição do produto: "))
     categoriaProduto.append(validarTexto("Insira a categoria: "))
+    tiposProduto.append(validarTexto("Insira o tipo do produto: "))
     precosProduto.append(verificarPreco())
     stock.append(validarStock())
     disponibilidade.append(verificarDisponibilidade(1))
     
-    numProdutos = numProdutos + 1
-    
+    # Guardar alterações no ficheiro CSV
+    guardarProdutosCSV()
+
     # Confirmação dos dados do produto adicionado
     print("\n Produto adicionado com sucesso! ✅")
     print("\n")
@@ -490,10 +475,6 @@ def adicionarProduto():
     print("Stock: " + str(stock[numProdutos - 1]) + " unidades")
     print("\n")
 
-    # Guardar alterações no ficheiro CSV
-    guardarProdutosCSV(idsProduto, nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade)
-
-    return numProdutos
 
 def alterarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos):
     # NOTA: O stock não é alterado aqui para garantir a integridade das opções 6 e 7 (Saídas/Entradas)
@@ -909,9 +890,9 @@ def verificarEstatisticas(precosProduto, categoriaProduto, stock, disponibilidad
     print("\n TOP 5 Categorias ")
     
     # Ler CSV para ter acesso aos dados completos
-    if os.path.exists("catalogo.csv"):
+    if os.path.exists("products_stock.csv"):
             try:
-                df = pd.read_csv("catalogo.csv")
+                df = pd.read_csv("products_stock.csv")
                 
                 listaCategorias = []
                 listaQuantidades = []
@@ -1054,7 +1035,7 @@ while opcaoMenu != 0:
     
     if opcaoMenu == 1:
         # Chama função para criar o registo do item
-        numProdutos = adicionarProduto(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos)
+        numProdutos = adicionarProduto()
     elif opcaoMenu == 2:
         # Chama função para alterar dados pré-definidos ou inseridos
         alterarProduto()
