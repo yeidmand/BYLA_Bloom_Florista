@@ -3,49 +3,7 @@ import datetime as dtime
 import os
 import random
 import math
-
-# Load files and store changes
-
-def load_orders():
-    # Read file
-    if os.path.exists("order_data.csv"):
-        return pd.read_csv("order_data.csv", sep=";")
-    return pd.DataFrame()
-
-
-def load_events():
-    # Read file
-    """Carga eventos del CSV"""
-    if os.path.exists("order_events.csv"):
-        return pd.read_csv("order_events.csv", sep=";")
-    return pd.DataFrame(columns=[
-        "event_id", "order_id", "event_type", "staptime_1", "staptime_2", 
-        "login", "details", "latitude", "longitude"
-    ])
-
-
-def load_products():
-    # Read file
-    if os.path.exists("products_stock.csv"):
-        return pd.read_csv("products_stock.csv", sep=";")
-    return pd.DataFrame()
-
-
-def load_orders_items():
-    # Read file
-    if os.path.exists("order_items.csv"):
-        return pd.read_csv("order_items.csv", sep=";")
-    return pd.DataFrame()
-
-
-def store_orders(df):
-    # Save changes to the respective file
-    df.to_csv("order_data.csv", index=False, sep=";")
-
-
-def store_events(df):
-    # Save changes to the respective file
-    df.to_csv("order_events.csv", index=False, sep=";")
+import data_manager as dm
 
 def create_event(order_id, event_type, id_worker, details = "", lat = "", 
                  lon = ""):
@@ -66,7 +24,6 @@ def create_event(order_id, event_type, id_worker, details = "", lat = "",
     }
     
     return event
-
 
 # Create GPS coordinates
 # Point of reference: Universidade do Minho, Campus Gualtar
@@ -345,8 +302,9 @@ def main_delivery(id_worker):
     while open_portal:
         
         # Cargar datos frescos
-        orders = load_orders()
-        events = load_events()
+        orders = dm.load_orders()
+        events = dm.load_order_events()
+        
         
         print("\n" + "="*70)
         print("MENU PRINCIPAL")
@@ -375,8 +333,8 @@ def main_delivery(id_worker):
                 orders, events = accept_order(
                     orders, events, order_id, id_worker
                 )
-                store_orders(orders)
-                store_events(events)
+                dm.save_orders(orders)
+                dm.save_order_events(events)
             input("\nPrima ENTER para continuar...")
         
         # OPTION 3: Declined
@@ -386,8 +344,8 @@ def main_delivery(id_worker):
                 order_id = input("\n✏️ ID da encomenda recusada: ").strip().upper()
                 orders, events = decline_orders(
                     orders, events, order_id, id_worker)
-                store_orders(orders)
-                store_events(events)
+                dm.save_orders(orders)
+                dm.save_order_events(events)
             input("\nPrima ENTER para continuar...")
         
         # OPTION 4: Delivery
@@ -398,8 +356,8 @@ def main_delivery(id_worker):
                 orders, events = delivery_orders(
                     orders, events, order_id, id_worker
                 )
-                store_orders(orders)
-                store_events(events)
+                dm.save_orders(orders)
+                dm.save_order_events(events)
             input("\nPrima ENTER para continuar...")
         
         # OPTION 5: Not Delivery
@@ -410,8 +368,8 @@ def main_delivery(id_worker):
                 orders, events = decline_delivery(
                     orders, events, order_id, id_worker
                 )
-                store_orders(orders)
-                store_events(events)
+                dm.save_orders(orders)
+                dm.save_order_events(events)
             input("\nPrima ENTER para continuar...")
         
         # OPTION 6: Métricas

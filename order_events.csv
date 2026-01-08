@@ -1,12 +1,2 @@
 event_id;order_id;event_type;staptime_1;staptime_2;login;details;latitude;longitude;timestamp
 EVT01;PT01;pending;2025-12-12 10:15:00;;SUPm;teste;;;
-EV20260104211238;PT01;auto_validate;2026-01-04 21:12:38;;SUPm;Pedido validado automaticamente pelo sistema;;;
-EV20260104211251;PT02;auto_validate;2026-01-04 21:12:51;;SUPm;Pedido validado automaticamente pelo sistema;;;
-EV20260104211304;PT01;assign_courier;2026-01-04 21:13:04;;SUPm;Estafeta 511 atribuído (Zona: Center);;;
-EV20260104211307;PT02;assign_courier;2026-01-04 21:13:07;;SUPm;Estafeta 512 atribuído (Zona: North);;;
-EV20260104212215;PT03;auto_validate;2026-01-04 21:22:15;;SUPm;Pedido validado automaticamente pelo sistema;;;
-EV20260104212225;PT04;auto_validate;2026-01-04 21:22:25;;SUPm;Pedido validado automaticamente pelo sistema;;;
-EV20260104212245;PT06;edit_name;2026-01-04 21:22:45;;SUPm;Nome alterado de 'Ana Silva' para 'Maria Magdalene Faria';;;
-EV20260104212250;PT06;auto_validate;2026-01-04 21:22:50;;SUPm;Pedido validado automaticamente pelo sistema;;;
-EV20260104212341;PT50;auto_validate;2026-01-04 21:23:41;;SUPm;Pedido validado automaticamente pelo sistema;;;
-EV20260104212355;PT49;reject_order;;;SUPm;Encomenda rejeitada pelo gestor.;;;2026-01-04 21:23:55

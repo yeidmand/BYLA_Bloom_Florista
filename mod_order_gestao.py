@@ -158,7 +158,7 @@ def menu_filtrar_zona():
     mostrar_linha_decorativa("─", 70)
     
     while True:
-        escolha = input("👉 Seleccione uma opção (1-7): ").strip()
+        escolha = input("👉 Seleccione uma opção (1-6): ").strip()
         if escolha in ['1', '2', '3', '4', '5', '6']:
             return escolha
         print("❌ Opção inválida. Digite um número entre 1 e 6.")
@@ -317,11 +317,7 @@ def editar_codigo_postal(orders_df, order_id, manager, order_events_df):
     zp1_atual = orders_df[orders_df['order_id'] == order_id]['ZP1'].iloc[0]
     zp2_atual = orders_df[orders_df['order_id'] == order_id]['ZP2'].iloc[0]
     print(f"Código postal actual: {zp1_atual}-{zp2_atual}")
-    mostrar_linha_decorativa("─", 70)
-    
-    zp1_novo = input("📮 Código postal (parte 1, ex: 4750): ").strip()
-    zp2_novo = input("📮 Código postal (parte 2, ex: 123): ").strip()
-    
+    mostrar_linha_decorativa("─", 70)    
     zp_novo_validation = True
 
     while  zp_novo_validation:
@@ -336,7 +332,7 @@ def editar_codigo_postal(orders_df, order_id, manager, order_events_df):
             print("❌ Código postal inválido. Ingresse apenas números")
         else:
             zone_codes = load_zone_codes()
-            if zp1_novo not in zone_codes['ZP1'].values:
+            if zp1_novo not in zone_codes['Codes'].values:
                 print("❌ Código postal não pertence a nenhuma zona válida: Veja a tabela abaixo:")
                 print(tabulate(zone_codes, headers='keys', tablefmt='grid'))
             else:
@@ -382,9 +378,9 @@ def ModOrderGestao(Manager):
     
     # Verificar se é supervisor (pode rejeitar pedidos)
     isSupervisor = (Manager == "SUPm")
-    
+    bloqueo = 0
     # Carregar dados (CSV convertidos em DataFrames)
-    df_zone = pd.read_csv("zp_zones.csv", sep=";", dtype=str)
+    df_zone = load_zone_codes()
     df_user_worker = load_user_work_profil()
     orders_df = load_orders()
     order_it = load_order_items()
@@ -399,7 +395,6 @@ def ModOrderGestao(Manager):
     
     while menu_ativo:
         
-        bloqueo = 0
         # Mostrar menu e pedir escolha
         opcao = menu_principal_pedidos()
         
@@ -688,7 +683,7 @@ def ModOrderGestao(Manager):
         
         elif opcao == '2':
             
-            pedidos_validados = orders_df[orders_df['order_status'].isin(['validated', 'partially shipped'])].reset_index(drop=True)
+            pedidos_validados = orders_df[orders_df['order_status'].isin(['validated', 'partially shipped'])] 
             
             print("\n")
             mostrar_linha_decorativa("═")
@@ -742,7 +737,7 @@ def ModOrderGestao(Manager):
             
             pedidos_cancelados = orders_df[
                 orders_df['order_status'] == 'canceled'
-            ].reset_index(drop=True)
+            ] 
             
             print("\n")
             mostrar_linha_decorativa("═")
@@ -793,20 +788,14 @@ def ModOrderGestao(Manager):
         
         elif opcao == '4':
             
-            pedidos_validados = orders_df[
-                orders_df['order_status'].isin(['validated', 'partially shipped'])
-            ].reset_index(drop=True)
+            pedidos_validados = orders_df[orders_df['order_status'].isin(['validated', 'partially shipped'])] 
             
             if pedidos_validados.empty:
                 print("\n❌ Não há pedidos validados para atribuir estafeta.\n")
                 continue
             
             # Filtrar pedidos SEM estafeta
-            pedidos_sem_estafeta = pedidos_validados[
-                (pedidos_validados['id_worker'].isna()) |
-                (pedidos_validados['id_worker'].astype(str).str.strip() == '') |
-                (pedidos_validados['id_worker'].astype(str).str.lower() == 'nan')
-            ].reset_index(drop=True)
+            pedidos_sem_estafeta = pedidos_validados[(pedidos_validados['id_worker'].isna())] 
             
             if pedidos_sem_estafeta.empty:
                 print("\n✅ Todos os pedidos já têm estafeta atribuído.\n")
@@ -824,9 +813,10 @@ def ModOrderGestao(Manager):
                 
                 pedido = pedidos_sem_estafeta.iloc[i]
                 
-                print("\n" + "─" * 70)
+                print("\n")
+                mostrar_linha_decorativa("─", 70)
                 ut.showDetailsDestinatario(pedido)
-                print("─" * 70)
+                mostrar_linha_decorativa("─", 70)
                 
                 print("\n1️⃣  Atribuir estafeta automaticamente")
                 print("2️⃣  Próximo pedido")
@@ -835,8 +825,9 @@ def ModOrderGestao(Manager):
                 resp = input("👉 Escolha: ").strip()
                 
                 if resp == '1':
-                    estafeta, zona = ut.code_zone(int(pedido['ZP1']), df_zone, df_user_worker)
+                    estafeta, zona = ut.code_zone((pedido['ZP1']), df_zone, df_user_worker)
                     orders_df.loc[orders_df['order_id'] == pedido['order_id'], 'id_worker'] = estafeta
+                    orders_df.loc[orders_df['order_id'] == pedido['order_id'], 'duty_zone'] = zona
                     save_orders(orders_df)
                     
                     evento = registar_evento(
@@ -869,7 +860,7 @@ def ModOrderGestao(Manager):
             
             pedidos_validados = orders_df[
                 orders_df['order_status'].isin(['validated', 'partially shipped'])
-            ].reset_index(drop=True)
+            ] 
             
             if pedidos_validados.empty:
                 print("\n❌ Não há pedidos validados.\n")
@@ -880,7 +871,7 @@ def ModOrderGestao(Manager):
                 (pedidos_validados['id_worker'].notna()) &
                 (pedidos_validados['id_worker'].astype(str).str.strip() != '') &
                 (pedidos_validados['id_worker'].astype(str).str.lower() != 'nan')
-            ].reset_index(drop=True)
+            ] 
             
             if pedidos_com_estafeta.empty:
                 print("\n❌ Não há pedidos com estafeta atribuído.\n")
@@ -946,13 +937,3 @@ def ModOrderGestao(Manager):
             print("\n👋 Saindo do módulo de gestão de pedidos...\n")
             menu_ativo = False
             return
-
-
-# ════════════════════════════════════════════════════════════════════════════════
-# 🧪 TESTE
-# ════════════════════════════════════════════════════════════════════════════════
-
-if __name__ == "__main__":
-    print("🚀 Módulo de Gestão de Pedidos Carregado")
-    print("Chame: ModOrderGestao(manager_id)")
-    ModOrderGestao('SUPm')
