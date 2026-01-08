@@ -1,3 +1,11 @@
 order_id;id_client;name;contact;address;ZP1;ZP2;order_status;order_reason;id_worker;duty_zone
-PT01;CL001;João Pereira;961219231;Travessia Amelia Rodrigues 152;4700;103;pending;;;
-PT02;CL002;Maria Fernandes;930153233;Rua Antonio Fonseca 743;4720;336;pending;;;
+PT01;CL001;João Pereira;961219231;Travessia Amelia Rodrigues 152;4700;103;aceite;;511;Center
+PT02;CL003;Jorge Reu;987562418;Rua Herculano 79;4720;580;validated;;517;North
+PT03;CL007;Miguel Costa;937654321;Avenida da Liberdade 456;4700;520;pending;;;
+PT04;CL001;João Pereira;961219231;Travessia Amelia Rodrigues 152;4700;103;pending;;;
+PT05;CL012;Joana Costa;969334455;Rua do Parque 321;4710;365;pending;;;
+PT06;CL019;Gonçalo Silva;933112233;Avenida da Praça 567;4700;155;pending;;;
+PT07;CL003;Jorge Reu;987562418;Rua Herculano 79;4720;580;pending;;;
+PT08;CL007;Miguel Costa;937654321;Avenida da Liberdade 456;4700;520;pending;;;
+PT09;CL012;Joana Costa;969334455;Rua do Parque 321;4710;365;pending;;;
+PT10;CL019;Gonçalo Silva;933112233;Avenida da Praça 567;4700;155;validated;;516;Center

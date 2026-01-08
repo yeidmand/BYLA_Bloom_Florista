@@ -126,11 +126,7 @@ def mock_portal(portal_name, user_info):
         print("1. Entrar (Simulação)")
         print("0. Sair (Logout)")
         print("="*40)
-        op = input("Opção: ")
-
-        if op == '0': break
-        if op == '1': 
-            op = input("Opção: ").strip()
+        op = input("Opção: ").strip()
         
         if op == '0': 
             return op
@@ -230,7 +226,7 @@ def main():
                         print("....Função PORTAL ESTAFETA....") # ESTAFETA
                         main_delivery(user['id'])
                         time.sleep(1)
-                        break
+                        
                 else:   
                     break
 
@@ -245,7 +241,7 @@ def main():
                             print("....Função PORTAL GESTOR DE ENCOMENDAS....")
                             ModOrderGestao(user['id'])                             # GESTOR DE ENCOMENDAS
                             time.sleep(1)
-                            break
+
                         elif user['módulo'] == 'Produtos':
                             print("....Função PORTAL GESTOR DE PRODUTOS....") # MODIFICAR UMA VEZ EXISTA ex. mod_product()
                             time.sleep(1)
