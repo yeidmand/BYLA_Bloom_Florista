@@ -1,7 +1,6 @@
 import pandas as pd
 import os
 
-FILE_CLIENTS = "login_client.csv"
 FILE_STAFF = "user_work_profil.csv"
 FILE_PRODUCTS = "products_stock.csv"
 FILE_ORDERS = "order_data.csv"
