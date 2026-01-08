@@ -4,15 +4,14 @@
 import os
 import pandas as pd 
 
-numProdutos = 0
-
 # Funções de Validação e Input
 def lerInteiro(mensagem=""):
+    while True: 
         try:
             valor = int(input(mensagem))
             return valor
         except ValueError:
-            print("❌ Erro: Insira apenas números inteiros!")
+            print("❌ Erro: Insira apenas números!")
 
 def lerFloat(mensagem=""):
     while True:
@@ -20,7 +19,7 @@ def lerFloat(mensagem=""):
             valor = float(input(mensagem))
             return valor
         except ValueError:
-            print("❌ Erro: Insira apenas números!")
+            print("❌ Erro: Insira apenas números decimais!")            
 
 def validarTexto(mensagem):
     print(mensagem)
@@ -74,33 +73,37 @@ def verificarDisponibilidade(opcaoOperacao):
     return disponibilidade
 
 # Função para validar ID do produto
-def validarID(numProdutos):
-    idEscolhido = lerInteiro()
-    while idEscolhido < 1 or idEscolhido > numProdutos:
+def validarID():
+    while True:
+        idEscolhido = lerInteiro("Insira ID do produto: ")
+        
+        if idEscolhido in idsProduto: 
+            return idEscolhido
+        
         print("❌ ID inválido!")
-        print("Insira um ID entre 1 e " + str(numProdutos))
-        idEscolhido = lerInteiro()
-    return idEscolhido
+        print(f"IDs disponíveis: {idsProduto}")
 
 
 # Funções de Leitura/Escrita CSV
 
-
 tiposProduto = []       
 categoriaProduto = []   
-descricaoProduto = []   
+descricaoProduto = []  
+duracoesProduto = []
+
 
 def guardarProdutosCSV():
     ativo = ["true" if d == "S" else "false" for d in disponibilidade]
     dados_produtos = {
         "product_id": idsProduto,
         "name_product": nomeProduto,
-        "quantity_stock": stock,
+        "stock_quantity": stock,
         "price_unit": precosProduto,
         "available": ativo,
         "category": categoriaProduto,
         "product_type": tiposProduto,
-        "description": descricaoProduto
+        "description": descricaoProduto,
+        "duracaoPadraoMin": duracoesProduto
     }
     df = pd.DataFrame(dados_produtos)
     df.to_csv("products_stock.csv", index=False, sep=";")
@@ -108,6 +111,7 @@ def guardarProdutosCSV():
 
 
 def lerProdutosCSV():
+    global numProdutos
     if not os.path.exists("products_stock.csv"):
         print("⚠️ Ficheiro products_stock.csv não encontrado.")
         return 0
@@ -122,17 +126,19 @@ def lerProdutosCSV():
         stock.clear()
         disponibilidade.clear()
         tiposProduto.clear()
+        duracoesProduto.clear()
         
         for i in range(len(df)):
             idsProduto.append(int(df["product_id"][i]))
             nomeProduto.append(str(df["name_product"][i]))
-            stock.append(int(df["quantity_stock"][i]))
+            stock.append(int(df["stock_quantity"][i]))
             precosProduto.append(float(df["price_unit"][i]))
             avail = str(df["available"][i]).strip().lower()
             disponibilidade.append("S" if avail == "true" else "N")
             categoriaProduto.append(str(df["category"][i]))
             tiposProduto.append(str(df["product_type"][i]))
             descricaoProduto.append(str(df["description"][i]))
+            duracoesProduto.append(int(df["duracaoPadraoMin"][i]) if "duracaoPadraoMin" in df.columns else 0)
 
         numProdutos = len(nomeProduto)
         print(f"✅ {numProdutos} itens carregados!")
@@ -235,13 +241,13 @@ def listarProdutosDisponiveis():
         numProdutos = len(df)
         for i in range(numProdutos):
             # Verificar se ativo E tem stock
-            if str(df["available"][i]) == "true" and df["quantity_stock"][i] > 0:
+            if str(df["available"][i]) == "true" and df["stock_quantity"][i] > 0:
                 ids_disponiveis.append(df["product_id"][i])
                 nomes_disponiveis.append(df["name_product"][i])
                 descricoes_disponiveis.append(df["description"][i])
                 categorias_disponiveis.append(df["category"][i])
                 precos_disponiveis.append(df["price_unit"][i])
-                stocks_disponiveis.append(df["quantity_stock"][i])
+                stocks_disponiveis.append(df["stock_quantity"][i])
 
         # Criar DataFrame com produtos disponíveis
         dados_disponiveis = {   
@@ -250,7 +256,7 @@ def listarProdutosDisponiveis():
             "description": descricoes_disponiveis,
             "category": categorias_disponiveis,
             "price_unit": precos_disponiveis,
-            "quantity_stock": stocks_disponiveis
+            "stock_quantity": stocks_disponiveis
         }
         df_disponiveis = pd.DataFrame(dados_disponiveis)
 
@@ -297,7 +303,7 @@ def obterDetalhesProduto(idItem):
                     "description": df["description"][i],
                     "category": df["category"][i],
                     "price_unit": df["price_unit"][i],
-                    "quantity_stock": df["quantity_stock"][i],
+                    "stock_quantity": df["stock_quantity"][i],
                     "available": df["available"][i]
                 }
                 
@@ -307,11 +313,11 @@ def obterDetalhesProduto(idItem):
                 print("Descrição: " + detalhes["description"])
                 print("Categoria: " + detalhes["category"])
                 print("Preço: " + str(detalhes["price_unit"]) + "€")
-                print("Stock: " + str(detalhes["quantity_stock"]) + " unidades")
+                print("Stock: " + str(detalhes["stock_quantity"]) + " unidades")
                 
-                if str(detalhes["available"]).lower() == "true" and detalhes["quantity_stock"] > 0:
+                if str(detalhes["available"]).lower() == "true" and detalhes["stock_quantity"] > 0:                    
                     print("Estado: Disponível ✅")
-                elif detalhes["quantity_stock"] == 0:
+                elif detalhes["stock_quantity"] == 0:
                     print("Estado: Esgotado ❌")
                 else:
                     print("Estado: Indisponível ❌")
@@ -332,6 +338,7 @@ def obterDetalhesProduto(idItem):
 # Adiciona um novo produto ao catálogo 
 def adicionarProduto():
 
+    global numProdutos
     print("Adicionar Novo Produto\n")
 
     # Gerar ID automático
@@ -342,13 +349,15 @@ def adicionarProduto():
     nomeProduto.append(validarNome())
     descricaoProduto.append(validarTexto("Insira a descrição do produto: "))
     categoriaProduto.append(validarTexto("Insira a categoria: "))
-    tiposProduto.append(validarTexto("Insira o tipo do produto: "))
+    tiposProduto.append("produto")
+    duracoesProduto.append(0)
     precosProduto.append(verificarPreco())
     stock.append(validarStock())
     disponibilidade.append(verificarDisponibilidade(1))
     
     # Guardar alterações no ficheiro CSV
     guardarProdutosCSV()
+    numProdutos = len(nomeProduto)
 
     # Confirmação dos dados do produto adicionado
     print("\n Produto adicionado com sucesso! ✅")
@@ -369,8 +378,8 @@ def alterarProduto():
     
     listarCatalogo()
     print("Insira o ID/Nº que pretende alterar: ")
-    numItemEscolhido = validarID(numProdutos)
-    i = numItemEscolhido - 1 # Este Assign serve para não ultrapassar o fim da lista/Array
+    idEscolhido = validarID()
+    i = idsProduto.index(idEscolhido) 
 
     print("\n--- Produto Selecionado ---")
     print("Nome: " + nomeProduto[i])
@@ -406,8 +415,8 @@ def alterarProduto():
                 categoriaProduto[i] = validarTexto("Escreva nova categoria: ")
                 print("Categoria alterada com sucesso!")
         elif opcaomenu == 4:
-                tiposProduto[i] = validarTexto("Escreva novo tipo de produto: ")
-                print("Tipo alterado com sucesso!")
+                tiposProduto[i] = "produto" 
+                print("⚠️ O tipo de produto é fixo: 'produto'.") # nao trabalhamos com serviços
         elif opcaomenu == 5:
                 precosProduto[i] = verificarPreco()
                 print("Preço alterado com sucesso!")
@@ -428,8 +437,8 @@ def adicionarStock():
     if numProdutos > 0:
         print("\n📥 ===== Adicionar Stock ===== 📥")
         print("\nInsira o ID do produto para adicionar stock: ")
-        idEscolhido = validarID(numProdutos)
-        i = idEscolhido - 1
+        idEscolhido = validarID()
+        i = idsProduto.index(idEscolhido)
 
         # Usar múltiplos prints (mais claro que um print com \n múltiplos)
         print("\n--- Produto Selecionado ---")
@@ -457,21 +466,17 @@ def adicionarStock():
             print("✅ Produto voltou a ficar disponível!")
 
         # Guardar alterações no ficheiro CSV
-        guardarProdutosCSV(idsProduto, nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade)
+        guardarProdutosCSV()
     else:
         print("❌ Catálogo vazio!")
 
 # Remove um produto do catálogo
 def removerProduto():
 
+    global numProdutos
     if numProdutos > 0:
         print("Insira o ID do produto a remover: ")
-        idEscolhido = validarID(numProdutos)
-        
-        if idEscolhido not in idsProduto: 
-            print("❌ ID não encontrado!")
-            return numProdutos
-         
+        idEscolhido = validarID()   
         i = idsProduto.index(idEscolhido)
 
         print("--- Produto a Remover ---")
@@ -487,14 +492,13 @@ def removerProduto():
         
         if confirmacao == "S": 
             disponibilidade[i] = "N" 
+            numProdutos = len(nomeProduto)
             guardarProdutosCSV()
             print("🗑️  Produto removido com sucesso!")
         else:
             print("Operação cancelada.")
     else:
         print("❌ O Catálogo está vazio!")
-    
-    return numProdutos
 
 
 def verificarEncomenda():
@@ -503,20 +507,15 @@ def verificarEncomenda():
     # Melhorias de apresentação e validações.
     
     if numProdutos > 0:
-        # Usar múltiplos prints (mais claro que um print com \n múltiplos)
         print("\n📋 ===== Catálogo para Encomenda ===== 📋")
         
-        for i in range(0, numProdutos, 1):
-            print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Preço: " + str(precosProduto[i]) + "€" + " | Stock: " + str(stock[i]))
+        # ✅ Mostra IDs reais
+        for i in range(numProdutos):
+            print(f"ID: {idsProduto[i]} | Nome: {nomeProduto[i]} | Preço: {precosProduto[i]}€ | Stock: {stock[i]}")
         
-        print("\nQual o nº do item/ID que deseja encomendar: ")
-        numItemEscolhido = lerInteiro()
-        
-        while numItemEscolhido < 1 or numItemEscolhido > numProdutos:
-            print("❌ ID/Nº Artigo Inválido!")
-            numItemEscolhido = lerInteiro("Insira ID válido: ")
-        
-        i = numItemEscolhido - 1
+        print("\nInsira o ID do produto que deseja encomendar: ")
+        idEscolhido = validarID()  
+        i = idsProduto.index(idEscolhido)  
         
         # Mostrar produto selecionado
         print("\n--- Produto Selecionado ---")
@@ -553,7 +552,7 @@ def verificarEncomenda():
                         print("⚠️ Produto esgotou! Marcado como indisponível.")
 
                     # Guardar alterações no ficheiro CSV
-                    guardarProdutosCSV(idsProduto, nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade)
+                    guardarProdutosCSV()
                 else:
                     print("\n❌ Stock insuficiente!")
                     print("Stock disponível: " + str(stock[i]) + " unidades")
@@ -565,115 +564,95 @@ def verificarEncomenda():
 
 
 def filtrarCatalogo():
+    """Filtros combinados usando 100% Pandas"""
     
-    # Filtra produtos por múltiplos critérios (categoria, disponibilidade, preço, stock) usando Pandas
-    
-    if len(nomeProduto) == 0:
-        print("❌ Catálogo Vazio. Impossível filtrar!")
+    if numProdutos == 0:
+        print("❌ Catálogo vazio!")
         return
     
     try:
         df = pd.read_csv("products_stock.csv", sep=";")
     except:
-        print("❌ Erro ao ler ficheiro!")
-        return 
-    
+        print("❌ Erro ao ler CSV!")
+        return
+
+    # Blindagem de tipos
+    df["price_unit"] = pd.to_numeric(df["price_unit"], errors="coerce")
+    df["stock_quantity"] = pd.to_numeric(df["stock_quantity"], errors="coerce")
+    df["category"] = df["category"].astype(str).str.strip()
+
+    df = df.dropna(subset=["price_unit", "stock_quantity"])
+
     opcao = -1
     
-    if numProdutos > 0:
-        # While para manter menu ativo até escolher 0
-        while opcao != 0:
-            # Reset a cada pesquisa (evitar resultados errados)
-            resultadoFiltro = False
+    while opcao != 0:
+        print("\n🔍 ===== Filtros Combinados ===== 🔍")
+        print("1 - Categoria | 2 - Disponibilidade | 3 - Preço | 4 - Stock | 0 - Sair")
+        opcao = lerInteiro("Escolha: ")
+        
+        if opcao == 1:
+            cat = validarTexto("Categoria: ").strip()
+            resultado = df[df["category"].str.contains(cat, case=False, na=False)]
             
-            print("\n🔍 ===== Filtrar o Catálogo ===== 🔍")
-            print("1 - Por Categoria")
-            print("2 - Por Disponibilidade")
-            print("3 - Por Preço")
-            print("4 - Por Stock")
-            print("0 - Menu Principal")
-            opcao = lerInteiro("Escolha: ")
-            
-            # OPÇÃO 1: Filtrar por Categoria
-            if opcao == 1:
-                filtroCategoria = validarTexto("Insira a categoria pela qual deseja filtrar: ")
-                df_filtro = df[df["category"].str.contains(filtroCategoria, case=False, na=False)]
-                
-                for i in range(0, numProdutos, 1):
-                    if categoriaProduto[i] == filtroCategoria:
-                        print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Categoria: " + categoriaProduto[i])
-                        resultadoFiltro = True
-                
-                if len(df_filtro) == 0:
-                    print("❌ Não foi encontrado nenhum produto!")
-                else:
-                    print(df_filtro[["product_id", "name_product", "category"]].to_string(index=False))
-            
-            # OPÇÃO 2: Filtrar por Disponibilidade
-            elif opcao == 2:
-                filtroDisponibilidade = verificarDisponibilidade(2)
-                df_filtro = df[df["available"].astype(str).str.lower() == ("true" if filtroDisponibilidade == "S" else "false")]
-                
-                for i in range(0, numProdutos, 1):
-                    if disponibilidade[i] == filtroDisponibilidade:
-                        if disponibilidade[i] == "N" and stock[i] == 0:
-                            print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Disponibilidade: " + disponibilidade[i] + " - está esgotado!")
-                        else:
-                            print("ID: " + str(i + 1) + " | Nome: " + nomeProduto[i] + " | Disponibilidade: " + disponibilidade[i])
-                        
-                        resultadoFiltro = True
-
-                if len(df_filtro) == 0:
-                    print("❌ Não foi encontrado nenhum produto!")
-                else:
-                    print(df_filtro[["product_id", "name_product", "available"]].to_string(index=False))
-            
-            # OPÇÃO 3: Filtrar por Preço
-            elif opcao == 3:
-                print("Filtrar Preço:")
-                print("1. Preço igual a")
-                print("2. Preço acima de")
-                print("3. Preço abaixo de")
-                opcaoPreco = lerInteiro()
-               
-                if opcaoPreco in [1,2,3]:
-                    filtroPreco = verificarPreco()
-                    if opcaoPreco == 1:
-                        df_filtro = df[df["price_unit"] == filtroPreco]
-                    elif opcaoPreco == 2:
-                        df_filtro = df[df["price_unit"] > filtroPreco]
-                    else:
-                        df_filtro = df[df["price_unit"] < filtroPreco]
-                    
-                    if len(df_filtro) == 0:
-                        print("❌ Não foi encontrado nenhum produto!")
-                    else:
-                        print(df_filtro[["product_id", "name_product", "price_unit"]].to_string(index=False))
-            
-            # OPÇÃO 4: Filtrar por Stock
-            elif opcao == 4:
-                print("Filtrar Stock:")
-                print("1. Stock igual a")
-                print("2. Stock acima de")
-                print("3. Stock abaixo de")
-                opcaoStock = lerInteiro()
-
-                if opcaoStock in [1, 2, 3]:
-                    filtroStock = validarStock()  
-                    if opcaoStock == 1:
-                        df_filtro = df[df["quantity_stock"] == filtroStock]
-                    elif opcaoStock == 2:
-                        df_filtro = df[df["quantity_stock"] > filtroStock]
-                    else:
-                        df_filtro = df[df["quantity_stock"] < filtroStock]
-
-                    if len(df_filtro) == 0:
-                        print("❌ Não foi encontrado nenhum produto!")
-                    else:
-                        print(df_filtro[["product_id", "name_product", "quantity_stock"]].to_string(index=False))
+            if resultado.empty:
+                print("❌ Nenhum produto encontrado!")
             else:
-                if opcao != 0:
-                    print("❌ Opção inválida! Escolha uma opção entre 0 e 4.")
+                print("\n✅ Resultados:")
+                print(resultado[["product_id", "name_product", "category", "price_unit"]].to_string(index=False))
+        
+        elif opcao == 2:
+            disp = verificarDisponibilidade(2)
+            ativo_val = "true" if disp == "S" else "false"
+            resultado = df[df["available"].astype(str).str.lower() == ativo_val]
+            
+            if resultado.empty:
+                print("❌ Nenhum produto encontrado!")
+            else:
+                print("\n✅ Resultados:")
+                print(resultado[["product_id", "name_product", "available", "stock_quantity"]].to_string(index=False))
+        
+        elif opcao == 3:
+            print("1-Igual | 2-Acima | 3-Abaixo")
+            op = lerInteiro()
+            
+            if op in [1, 2, 3]:
+                preco = verificarPreco()
+                
+                if op == 1:
+                    resultado = df[df["price_unit"] == preco]
+                elif op == 2:
+                    resultado = df[df["price_unit"] > preco]
+                else:
+                    resultado = df[df["price_unit"] < preco]
+                
+                if resultado.empty:
+                    print("❌ Nenhum encontrado!")
+                else:
+                    print("\n✅ Resultados:")
+                    print(resultado[["product_id", "name_product", "price_unit"]].to_string(index=False))
+        
+        elif opcao == 4:
+            print("1-Igual | 2-Acima | 3-Abaixo")
+            op = lerInteiro()
+            
+            if op in [1, 2, 3]:
+                stk = validarStock()
+                
+                if op == 1:
+                    resultado = df[df["stock_quantity"] == stk]
+                elif op == 2:
+                    resultado = df[df["stock_quantity"] > stk]
+                else:
+                    resultado = df[df["stock_quantity"] < stk]
+                
+                if resultado.empty:
+                    print("❌ Nenhum produto encontrado!")
+                else:
+                    print("\n✅ Resultados:")
+                    print(resultado[["product_id", "name_product", "stock_quantity"]].to_string(index=False))
+        
+        elif opcao != 0:
+            print("❌ Opção inválida!")
 
     
 
@@ -684,8 +663,7 @@ def listarCatalogo():
         print("\n🌻 ===== Catálogo de Produtos ===== 🌻")
 
         for i in range(numProdutos):
-            print("\n--- Produto " + str(i + 1) + " ---")
-            print("ID: " + str(idsProduto[i]))
+            print(f"\n--- Produto #{i + 1} (ID Real: {idsProduto[i]}) ---")
             print("Nome: " + nomeProduto[i])
             print("Descrição: " + descricaoProduto[i])
             print("Categoria: " + categoriaProduto[i])
@@ -705,106 +683,66 @@ def listarCatalogo():
         print("❌ O Catálogo está vazio! ❌")
 
 # Função para mostrar estatísticas do catálogo
-def verificarEstatisticas(precosProduto, categoriaProduto, stock, disponibilidade, numProdutos):
+def verificarEstatisticas():
+    print("\n📈 ===== Estatísticas do Catálogo ===== 📈")
     
+    # Resumo Geral (usa listas globais)
     if numProdutos > 0:
-        disponivel = 0
-        esgotado = 0
-        total = 0
+        disponivel = sum(1 for i in range(numProdutos) if disponibilidade[i] == "S" and stock[i] > 0)
+        esgotado = sum(1 for i in range(numProdutos) if stock[i] == 0 or disponibilidade[i] == "N")
+        valor_total = sum(stock[i] * precosProduto[i] for i in range(numProdutos))
         
-        # Calcular estatísticas num único ciclo
-        for i in range(0, numProdutos, 1):
-            if disponibilidade[i] == "S" and stock[i] > 0:
-                disponivel = disponivel + 1
-            else:
-                if stock[i] == 0 or disponibilidade[i] == "N":
-                    esgotado = esgotado + 1
-            
-            total = total + stock[i] * precosProduto[i]
-        
-        # Usar múltiplos prints (mais claro que um print com \n múltiplos)
-        print("\n📈 ===== Estatísticas do Catálogo ===== 📈")
-        print("\nResumo Geral")
-        print("Total de Produtos registados: " + str(numProdutos))
-        print("Produtos Disponíveis: " + str(disponivel))
-        print("Produtos Esgotados/Indisponíveis: " + str(esgotado))
-        print("\nValor em Stock")
-        print("Valor Total: " + str(total) + "€")
-    print("\n")
+        print(f"\nResumo Geral")
+        print(f"Total de Produtos: {numProdutos}")
+        print(f"Disponíveis: {disponivel}")
+        print(f"Esgotados: {esgotado}")
+        print(f"Valor em Stock: {valor_total}€\n")
     
-    print("\n TOP 5 Categorias ")
+    print("🏆 TOP 5 Categorias")
     
-    # Ler CSV para ter acesso aos dados completos
-    if os.path.exists("products_stock.csv"):
-            try:
-                df = pd.read_csv("products_stock.csv", sep=";")
-                
-                listaCategorias = []
-                listaQuantidades = []
-                
-                # Contar produtos por categoria
-                for i in range(len(df)):
-                    categoriaAtual = df['categoria'][i]
-                    
-                    categoriaExiste = False
-                    posicao = -1
-                    
-                    for j in range(len(listaCategorias)):
-                        if listaCategorias[j] == categoriaAtual:
-                            categoriaExiste = True
-                            posicao = j
-                            break
-                    
-                    if categoriaExiste:
-                        listaQuantidades[posicao] = listaQuantidades[posicao] + 1
-                    else:
-                        listaCategorias.append(categoriaAtual)
-                        listaQuantidades.append(1)
-                
-                # Ordenar listas
-                for i in range(len(listaQuantidades)):
-                    for j in range(i + 1, len(listaQuantidades)):
-                        if listaQuantidades[j] > listaQuantidades[i]:
-                            tempQtd = listaQuantidades[i]
-                            listaQuantidades[i] = listaQuantidades[j]
-                            listaQuantidades[j] = tempQtd
-                            
-                            tempCat = listaCategorias[i]
-                            listaCategorias[i] = listaCategorias[j]
-                            listaCategorias[j] = tempCat
-                
-                # Mostrar TOP 5
-                limite = 5
-                if len(listaCategorias) < 5:
-                    limite = len(listaCategorias)
-                
-                for i in range(limite):
-                    print(str(i + 1) + ". " + listaCategorias[i] + ": " + str(listaQuantidades[i]) + " produto(s)")
-                
-                
-                # ADICIONAR: PREÇO MÉDIO POR CATEGORIA (enunciado exige!)
-                print("\nPreço Médio por Categoria")
-                
-                for i in range(len(listaCategorias)):
-                    categoria = listaCategorias[i]
-                    
-                    somaPrecos = 0
-                    contador = 0
-                    
-                    for j in range(len(df)):
-                        if df['categoria'][j] == categoria:
-                            somaPrecos = somaPrecos + df['preco'][j]
-                            contador = contador + 1
-                    
-                    precoMedio = somaPrecos / contador
-                    print(categoria + ": " + str(round(precoMedio, 2)) + "€")
-                
-            except:
-                print("❌ Erro ao calcular estatísticas avançadas!")
+    if not os.path.exists("products_stock.csv"):
+        print("⚠️ Ficheiro não encontrado!")
+        return
+    
+    try:
+        df = pd.read_csv("products_stock.csv", sep=";")
         
-            print("\n")
-    else:
-        print("❌ Catálogo vazio. Não é possível fornecer estatísticas.")
+        if df.empty:
+            print("⚠️ Não há produtos no catálogo!")
+            return
+        # Limpar e padronizar categorias
+        df["category"] = df["category"].astype(str).str.strip().str.title()
+        
+        # Converter preço para número
+        df["price_unit"] = pd.to_numeric(df["price_unit"], errors="coerce")
+        
+        # Remover linhas sem categoria ou preço válido
+        df = df.dropna(subset=["category", "price_unit"])
+        
+        if df.empty:
+            print("⚠️ Não há dados válidos para estatísticas!")
+            return
+        
+        # TOP 5 categorias
+        top5 = df["category"].value_counts().head(5)
+        for i, (cat, qtd) in enumerate(top5.items(), 1):
+            print(f"{i}. {cat}: {qtd} produto(s)")
+        
+        # Preço médio por categoria
+        print("\n💰 Preço Médio por Categoria:")
+        preco_medio = df.groupby("category")["price_unit"].mean().round(2)
+        
+        if preco_medio.empty:
+            print("⚠️ Não foi possível calcular preços médios!")
+            return
+        
+        for categoria, preco in preco_medio.items():
+            print(f"{categoria}: {preco}€")
+    
+    except Exception as e:
+        print(f"❌ Erro ao calcular estatísticas: {e}")
+
+
 
 # MENU PRINCIPAL
 
@@ -833,6 +771,7 @@ if numProdutos == 0:
     stock.append(10)
     disponibilidade.append("S")
     tiposProduto.append("Flor")
+    duracoesProduto.append(0)
     
     # Produto 2: Rosa
     idsProduto.append(2)
@@ -843,6 +782,7 @@ if numProdutos == 0:
     stock.append(20)
     disponibilidade.append("S")
     tiposProduto.append("Flor")
+    duracoesProduto.append(0)
     
     # Produto 3: Orquídea
     idsProduto.append(3)
@@ -853,6 +793,7 @@ if numProdutos == 0:
     stock.append(1)
     disponibilidade.append("S")
     tiposProduto.append("Planta")
+    duracoesProduto.append(0)
     
     numProdutos = 3
     print("✅ 3 produtos padrão criados.")
@@ -880,28 +821,28 @@ while opcaoMenu != 0:
     
     if opcaoMenu == 1:
         # Chama função para criar o registo do item
-        numProdutos = adicionarProduto()
+        adicionarProduto()
     elif opcaoMenu == 2:
         # Chama função para alterar dados pré-definidos ou inseridos
         alterarProduto()
     elif opcaoMenu == 3:
         # Chama função para apagar registo
-        numProdutos = removerProduto(idsProduto, nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos)
+        removerProduto()
     elif opcaoMenu == 4:
         # Função para mostrar todos os dados em formato catálogo
-        listarCatalogo(idsProduto, nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos)
+        listarCatalogo()
     elif opcaoMenu == 5:
         # Função para mostrar todos os dados de uma filtragem requisitada
         filtrarCatalogo()
     elif opcaoMenu == 6:
         # Função que simula a saída de stock
-        verificarEncomenda(nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos)
+        verificarEncomenda()
     elif opcaoMenu == 7:
         # Função que simula a entrada de stock
-        adicionarStock(idsProduto, nomeProduto, descricaoProduto, categoriaProduto, precosProduto, stock, disponibilidade, numProdutos)
+        adicionarStock()
     elif opcaoMenu == 8:
         # Funcionalidade extra da parte 2 enunciado
-        verificarEstatisticas(precosProduto, categoriaProduto, stock, disponibilidade, numProdutos)
+        verificarEstatisticas()
     elif opcaoMenu == 0:
         # Antes de sair, guardar produtos no ficheiro CSV!
         guardarProdutosCSV()
