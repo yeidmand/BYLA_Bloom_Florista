@@ -97,3 +97,5 @@ def ver_encomendas(client_id):
         order_filters(client_id, orders_df, dm.load_products())
 
 mod_client("CL001")
+
+#reservarstock
