@@ -97,7 +97,7 @@ def guardarProdutosCSV():
     dados_produtos = {
         "product_id": idsProduto,
         "name_product": nomeProduto,
-        "stock_quantity": stock,
+        "quantity_stock": stock,
         "price_unit": precosProduto,
         "available": ativo,
         "category": categoriaProduto,
@@ -131,7 +131,7 @@ def lerProdutosCSV():
         for i in range(len(df)):
             idsProduto.append(int(df["product_id"][i]))
             nomeProduto.append(str(df["name_product"][i]))
-            stock.append(int(df["stock_quantity"][i]))
+            stock.append(int(df["quantity_stock"][i]))
             precosProduto.append(float(df["price_unit"][i]))
             avail = str(df["available"][i]).strip().lower()
             disponibilidade.append("S" if avail == "true" else "N")
@@ -229,59 +229,41 @@ def listarProdutosDisponiveis():
     
     try:
         df = pd.read_csv("products_stock.csv", sep=";")
-
-        # Criar listas para produtos disponíveis
-        ids_disponiveis = []
-        nomes_disponiveis = []
-        descricoes_disponiveis = []
-        categorias_disponiveis = []
-        precos_disponiveis = []
-        stocks_disponiveis = []
-
-        numProdutos = len(df)
-        for i in range(numProdutos):
-            # Verificar se ativo E tem stock
-            if str(df["available"][i]) == "true" and df["stock_quantity"][i] > 0:
-                ids_disponiveis.append(df["product_id"][i])
-                nomes_disponiveis.append(df["name_product"][i])
-                descricoes_disponiveis.append(df["description"][i])
-                categorias_disponiveis.append(df["category"][i])
-                precos_disponiveis.append(df["price_unit"][i])
-                stocks_disponiveis.append(df["stock_quantity"][i])
-
-        # Criar DataFrame com produtos disponíveis
-        dados_disponiveis = {   
-            "product_id": ids_disponiveis,
-            "name_product": nomes_disponiveis,
-            "description": descricoes_disponiveis,
-            "category": categorias_disponiveis,
-            "price_unit": precos_disponiveis,
-            "stock_quantity": stocks_disponiveis
-        }
-        df_disponiveis = pd.DataFrame(dados_disponiveis)
-
-        if len(ids_disponiveis) > 0:
+        
+        # ✅ Filtrar produtos disponíveis usando boolean direto
+        df_disponiveis = df[
+            (df["available"] == True) &  # ✅ Compara com boolean
+            (df["quantity_stock"] > 0)
+        ].copy()
+        
+        if len(df_disponiveis) > 0:
             print("\nCatálogo de Produtos Disponíveis 🌻")
             
-            for i in range(len(ids_disponiveis)):
-                print("\nProduto ID: " + str(ids_disponiveis[i]))
-                print("Nome: " + nomes_disponiveis[i])
-                print("Descrição: " + descricoes_disponiveis[i])
-                print("Categoria: " + categorias_disponiveis[i])
-                print("Preço: " + str(precos_disponiveis[i]) + "€")
-                print("Stock: " + str(stocks_disponiveis[i]) + " unidades")
-                print("\n")
+            for idx, row in df_disponiveis.iterrows():
+                print(f"\nProduto ID: {row['product_id']}")
+                print(f"Nome: {row['name_product']}")
+                print(f"Descrição: {row['description']}")
+                print(f"Categoria: {row['category']}")
+                print(f"Preço: {row['price_unit']}€")
+                print(f"Stock: {row['quantity_stock']} unidades")
+                print()
             
-            print("Total disponível: " + str(len(ids_disponiveis)) + " produtos")
+            print(f"Total disponível: {len(df_disponiveis)} produtos")
         else:
             print("⚠️ Nenhum produto disponível no momento!")
         
-        return df_disponiveis
+        return df_disponiveis[[
+            "product_id",
+            "name_product", 
+            "description",
+            "category",
+            "price_unit",
+            "quantity_stock"
+        ]]
         
-    except:
-        print("❌ Erro ao listar produtos disponíveis!")
+    except Exception as e:
+        print(f"❌ Erro ao listar produtos disponíveis: {e}")
         return pd.DataFrame()
-
 
 def obterDetalhesProduto(idItem):
     if not os.path.exists("products_stock.csv"):
@@ -303,7 +285,7 @@ def obterDetalhesProduto(idItem):
                     "description": df["description"][i],
                     "category": df["category"][i],
                     "price_unit": df["price_unit"][i],
-                    "stock_quantity": df["stock_quantity"][i],
+                    "quantity_stock": df["quantity_stock"][i],
                     "available": df["available"][i]
                 }
                 
@@ -313,11 +295,11 @@ def obterDetalhesProduto(idItem):
                 print("Descrição: " + detalhes["description"])
                 print("Categoria: " + detalhes["category"])
                 print("Preço: " + str(detalhes["price_unit"]) + "€")
-                print("Stock: " + str(detalhes["stock_quantity"]) + " unidades")
+                print("Stock: " + str(detalhes["quantity_stock"]) + " unidades")
                 
-                if str(detalhes["available"]).lower() == "true" and detalhes["stock_quantity"] > 0:                    
+                if str(detalhes["available"]).lower() == "true" and detalhes["quantity_stock"] > 0:                    
                     print("Estado: Disponível ✅")
-                elif detalhes["stock_quantity"] == 0:
+                elif detalhes["quantity_stock"] == 0:
                     print("Estado: Esgotado ❌")
                 else:
                     print("Estado: Indisponível ❌")
@@ -578,10 +560,10 @@ def filtrarCatalogo():
 
     # Blindagem de tipos
     df["price_unit"] = pd.to_numeric(df["price_unit"], errors="coerce")
-    df["stock_quantity"] = pd.to_numeric(df["stock_quantity"], errors="coerce")
+    df["quantity_stock"] = pd.to_numeric(df["quantity_stock"], errors="coerce")
     df["category"] = df["category"].astype(str).str.strip()
 
-    df = df.dropna(subset=["price_unit", "stock_quantity"])
+    df = df.dropna(subset=["price_unit", "quantity_stock"])
 
     opcao = -1
     
@@ -609,7 +591,7 @@ def filtrarCatalogo():
                 print("❌ Nenhum produto encontrado!")
             else:
                 print("\n✅ Resultados:")
-                print(resultado[["product_id", "name_product", "available", "stock_quantity"]].to_string(index=False))
+                print(resultado[["product_id", "name_product", "available", "quantity_stock"]].to_string(index=False))
         
         elif opcao == 3:
             print("1-Igual | 2-Acima | 3-Abaixo")
@@ -639,17 +621,17 @@ def filtrarCatalogo():
                 stk = validarStock()
                 
                 if op == 1:
-                    resultado = df[df["stock_quantity"] == stk]
+                    resultado = df[df["quantity_stock"] == stk]
                 elif op == 2:
-                    resultado = df[df["stock_quantity"] > stk]
+                    resultado = df[df["quantity_stock"] > stk]
                 else:
-                    resultado = df[df["stock_quantity"] < stk]
+                    resultado = df[df["quantity_stock"] < stk]
                 
                 if resultado.empty:
                     print("❌ Nenhum produto encontrado!")
                 else:
                     print("\n✅ Resultados:")
-                    print(resultado[["product_id", "name_product", "stock_quantity"]].to_string(index=False))
+                    print(resultado[["product_id", "name_product", "quantity_stock"]].to_string(index=False))
         
         elif opcao != 0:
             print("❌ Opção inválida!")
