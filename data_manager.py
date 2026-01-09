@@ -14,7 +14,7 @@ def load_products():
         return pd.read_csv(FILE_PRODUCTS, sep=";", dtype= {
             "product_id": str,
             "name_product": str,
-            "stock_quantity": int,
+            "quantity_stock": int,
             "price_unit": float,
             "available": bool,
             "category": str,
