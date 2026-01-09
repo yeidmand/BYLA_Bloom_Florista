@@ -92,6 +92,8 @@ descricaoProduto = []
 duracoesProduto = []
 
 
+
+
 def guardarProdutosCSV():
     ativo = ["true" if d == "S" else "false" for d in disponibilidade]
     dados_produtos = {
@@ -724,11 +726,7 @@ def verificarEstatisticas():
     except Exception as e:
         print(f"❌ Erro ao calcular estatísticas: {e}")
 
-
-
-# MENU PRINCIPAL
-
-# Listas para armazenar os dados dos produtos
+#LISTAS GLOBAIS - Inicializadas ao importar módulo
 idsProduto = []
 stock = [] 
 nomeProduto = [] 
@@ -780,54 +778,49 @@ if numProdutos == 0:
     numProdutos = 3
     print("✅ 3 produtos padrão criados.")
 
-# Controla a execução do menu principal
-opcaoMenu = -1
 
-# Mantém o programa a correr até o utilizador escolher 0
-while opcaoMenu != 0:
-    # Menu Gestor
-    # posso utilizar /n para nova linha num unico print 
-    print("🌻 ===== Portal Gestor Florista ===== 🌻")
-    print("1. Adicionar Produto ➕")
-    print("2. Alterar Produto 📝")
-    print("3. Remover Produto ❌")
-    print("4. Listar Catálogo 📋")
-    print("5. Filtrar Catálogo 🔍")
-    print("6. Fazer Encomenda 📤")
-    print("7. Adicionar Stock 📥")
-    print("8. Ver estatisticas 📈")
-    print("0. Sair 👋")
-    print()
+# Função do Menu Principal para o main.py=
+def menu_produtos():
+    opcaoMenu = -1
     
-    opcaoMenu = lerInteiro("Escolha uma opção: ")
-    
-    if opcaoMenu == 1:
-        # Chama função para criar o registo do item
-        adicionarProduto()
-    elif opcaoMenu == 2:
-        # Chama função para alterar dados pré-definidos ou inseridos
-        alterarProduto()
-    elif opcaoMenu == 3:
-        # Chama função para apagar registo
-        removerProduto()
-    elif opcaoMenu == 4:
-        # Função para mostrar todos os dados em formato catálogo
-        listarCatalogo()
-    elif opcaoMenu == 5:
-        # Função para mostrar todos os dados de uma filtragem requisitada
-        filtrarCatalogo()
-    elif opcaoMenu == 6:
-        # Função que simula a saída de stock
-        verificarEncomenda()
-    elif opcaoMenu == 7:
-        # Função que simula a entrada de stock
-        adicionarStock()
-    elif opcaoMenu == 8:
-        # Funcionalidade extra da parte 2 enunciado
-        verificarEstatisticas()
-    elif opcaoMenu == 0:
-        # Antes de sair, guardar produtos no ficheiro CSV!
-        guardarProdutosCSV()
-        print("👋 A sair da aplicação...")
-    else:
-        print("Opção inválida. Insira um número de 0 a 8 e tente novamente.")
+    while opcaoMenu != 0:
+        print("🌻 ===== Portal Gestor Florista ===== 🌻")
+        print("1. Adicionar Produto ➕")
+        print("2. Alterar Produto 📝")
+        print("3. Remover Produto ❌")
+        print("4. Listar Catálogo 📋")
+        print("5. Filtrar Catálogo 🔍")
+        print("6. Fazer Encomenda 📤")
+        print("7. Adicionar Stock 📥")
+        print("8. Ver estatisticas 📈")
+        print("0. Voltar ao Menu Principal 👋")
+        print()
+        
+        opcaoMenu = lerInteiro("Escolha uma opção: ")
+        
+        if opcaoMenu == 1:
+            adicionarProduto()
+        elif opcaoMenu == 2:
+            alterarProduto()
+        elif opcaoMenu == 3:
+            removerProduto()
+        elif opcaoMenu == 4:
+            listarCatalogo()
+        elif opcaoMenu == 5:
+            filtrarCatalogo()
+        elif opcaoMenu == 6:
+            verificarEncomenda()
+        elif opcaoMenu == 7:
+            adicionarStock()
+        elif opcaoMenu == 8:
+            verificarEstatisticas()
+        elif opcaoMenu == 0:
+            guardarProdutosCSV()
+            print("👋 A voltar ao menu principal...")
+            return  # ✅ Volta para main.py
+        else:
+            print("Opção inválida. Insira um número de 0 a 8 e tente novamente.")
+
+# EXECUÇÃO DIRETA (só corre se: python mod_product.py)
+if __name__ == "__main__":
+    menu_produtos()
