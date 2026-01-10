@@ -18,3 +18,6 @@ EV20260109221453;PT13;assign_courier;2026-01-09 22:14:53;;SUPm;Estafeta 517 atri
 EV20260109221517;PT14;edit_postal_code;2026-01-09 22:15:17;;SUPm;Código postal alterado de '8000-369' para '4905-258';;;
 EV20260109221519;PT14;auto_validate;2026-01-09 22:15:19;;SUPm;Pedido validado automaticamente pelo sistema;;;
 EV20260109221828;PT15;reject_order;;;SUPm;Encomenda rejeitada pelo gestor.;;;2026-01-09 22:18:28
+EV20260110215607;PT17;created;;;CL001;Pedido criado pelo cliente.;;;2026-01-10 21:56:07
+EV20260110221244;PT18;created;;;CL023;Pedido criado pelo cliente.;;;2026-01-10 22:12:44
+EV20260110221438;PT18;created;;;CL023;Pedido criado pelo cliente.;;;2026-01-10 22:14:38

@@ -75,12 +75,15 @@ def verificarDisponibilidade(opcaoOperacao):
 # Função para validar ID do produto
 def validarID():
     while True:
-        idEscolhido = input("Insira ID do produto: ").strip()  # Convertido para string para estar alinhado com restantes módulos.
-        if idEscolhido in [str(id) for id in idsProduto]:  
-            return idEscolhido
+        idEscolhido = input("Insira ID do produto: ").strip()
+        if idEscolhido.isdigit():
+            id_int = int(idEscolhido)  # ✅ Converter para int
+            if id_int in idsProduto:   # ✅ Comparar int com int
+                return id_int
         
         print("❌ ID inválido!")
         print(f"IDs disponíveis: {idsProduto}")
+
 
 
 # Funções de Leitura/Escrita CSV
@@ -130,7 +133,7 @@ def lerProdutosCSV():
         duracoesProduto.clear()
         
         for i in range(len(df)):
-            idsProduto.append(str(df["product_id"][i]))
+            idsProduto.append(int(df["product_id"][i]))
             nomeProduto.append(str(df["name_product"][i]))
             stock.append(int(df["quantity_stock"][i]))
             precosProduto.append(float(df["price_unit"][i]))
@@ -152,8 +155,6 @@ def lerProdutosCSV():
 
 # Função para validar stock disponível de um produto (USADO POR: Yeidman (Gestão Encomendas))
 def validarStockDisponivel(idItem, quantidade):
-    idItem = str(idItem)  # Garantir que é string
-    idItem = str(idItem)  # Garantir que é string
     try:
         i = idsProduto.index(int(idItem))
 
@@ -173,8 +174,6 @@ def validarStockDisponivel(idItem, quantidade):
 
 # Função para decrementar Stock após encomenda 
 def reservarStock(idItem, quantidade):
-    idItem = str(idItem)  # Garantir que é string
-    idItem = str(idItem)  # Garantir que é string
     try:
         i = idsProduto.index(int(idItem))
 
@@ -201,8 +200,6 @@ def reservarStock(idItem, quantidade):
 
 
 def devolverStock(idItem, quantidade):
-    idItem = str(idItem)  # Garantir que é string
-    idItem = str(idItem)  # Garantir que é string
     if quantidade <= 0:
         print("❌ Quantidade inválida para devolução!")
         return False
@@ -273,8 +270,6 @@ def listarProdutosDisponiveis():
         return pd.DataFrame()
 
 def obterDetalhesProduto(idItem):
-    idItem = str(idItem)  # Garantir que é string
-    idItem = str(idItem)  # Garantir que é string
     if not os.path.exists("products_stock.csv"):
         print("⚠️ Ficheiro products_stock.csv não foi encontrado!")
         return None
