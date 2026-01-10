@@ -1,4 +1,4 @@
 product_id;name_product;quantity_stock;price_unit;available;category;product_type;description;duracaoPadraoMin
-1;Girassol;10;5.0;true;Flor;Flor;Flor Amarela;0
-2;Rosa;20;7.0;true;Flor;Flor;Flor Vermelha;0
-3;Orquídea;1;27.5;true;Planta;Planta;Flor Roxa;0
+1;Girassol;3;5.0;true;Flor;Flor;Flor Amarela;0
+2;Rosa;6;7.0;true;Flor;Flor;Flor Vermelha;0
+3;Orquídea;0;27.5;false;Planta;Planta;Flor Roxa;0

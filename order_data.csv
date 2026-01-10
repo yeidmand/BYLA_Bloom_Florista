@@ -1,6 +1,6 @@
 order_id;id_client;name;contact;address;ZP1;ZP2;order_status;order_reason;id_worker;duty_zone
-PT01;CL001;João Pereira;961219231;Travessia Amelia Rodrigues 152;4700;103;aceite;;511;Center
-PT02;CL003;Jorge Reu;987562418;Rua Herculano 79;4720;580;validated;;517;North
+PT01;CL001;João Pereira;961219231;Travessia Amelia Rodrigues 152;4700;103;pending;;;
+PT02;CL003;Jorge Reu;987562418;Rua Herculano 79;4720;580;pending;;;
 PT03;CL007;Miguel Costa;937654321;Avenida da Liberdade 456;4700;520;pending;;;
 PT04;CL001;João Pereira;961219231;Travessia Amelia Rodrigues 152;4700;103;pending;;;
 PT05;CL012;Joana Costa;969334455;Rua do Parque 321;4710;365;pending;;;
@@ -8,4 +8,10 @@ PT06;CL019;Gonçalo Silva;933112233;Avenida da Praça 567;4700;155;pending;;;
 PT07;CL003;Jorge Reu;987562418;Rua Herculano 79;4720;580;pending;;;
 PT08;CL007;Miguel Costa;937654321;Avenida da Liberdade 456;4700;520;pending;;;
 PT09;CL012;Joana Costa;969334455;Rua do Parque 321;4710;365;pending;;;
-PT10;CL019;Gonçalo Silva;933112233;Avenida da Praça 567;4700;155;validated;;516;Center
+PT10;CL019;Gonçalo Silva;933112233;Avenida da Praça 567;4700;155;pending;;;
+PT11;CL021;Yeidman Palencia;988547123;Rua Uminho 16;4720;599;validada;;512;North
+PT12;CL021;Yeidman Palencia;988547123;Rua Uminho 16;8000;369;pending;;;
+PT13;CL021;Yeidman Palencia;988547123;Rua Uminho 16;4905;588;validada;;517;North
+PT14;CL021;Yeidman Palencia;988547123;Rua Uminho 16;4905;258;validada;;;
+PT15;CL021;Yeidman Palencia;988547123;Rua Uminho 16;8000;369;canceled;Produtos danificados no armazem;;
+PT16;CL021;Yeidman Palencia;988547123;Rua Uminho 16;4615;258;validada;;508;South

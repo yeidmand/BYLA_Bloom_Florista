@@ -52,11 +52,11 @@ def random_point(lat, lon, meters_radius = meters_random):
 # generate the coordenates
 def generate_coordinates(zone):
     zones = {
-        "centro": (0, 0),
-        "norte": (meters_moviment, 0),
-        "sul": (-meters_moviment, 0),
-        "este": (0, meters_moviment),
-        "oeste": (0, -meters_moviment),
+        "Center": (0, 0),
+        "North": (meters_moviment, 0),
+        "South": (-meters_moviment, 0),
+        "East": (0, meters_moviment),
+        "West": (0, -meters_moviment),
     }
     meters_north, meters_east = zones[zone]
     dlat, dlon = convert_meters_to_degrees(lat_center, meters_north, 
@@ -111,7 +111,7 @@ def accept_order(orders_df, events_df, order_id, id_worker):
     print("📍 Longitude:", lon)
     
     # Update status
-    orders_df.loc[orders_df["order_id"] == order_id, "order_status"] = "aceite"
+    orders_df.loc[orders_df["order_id"] == order_id, "order_status"] = "em distribuição"
     orders_df.loc[orders_df["order_id"] == order_id, "order_reason"] = ""
     
     # Create a event
@@ -192,7 +192,7 @@ def delivery_orders(orders_df, events_df, order_id, id_worker):
     
     # Check if status order is accepted
     status = orders_df[orders_df["order_id"] == order_id]["order_status"].iloc[0]
-    if status != "aceite":
+    if status != "em distribuição":
         print(f"\n❌ Encomenda não foi aceitada (Estado: {status})")
         return orders_df, events_df
     
@@ -228,13 +228,13 @@ def decline_delivery(orders_df, events_df, order_id, id_worker):
     
     # Check if the order exists
     if order_id not in orders_df["order_id"].values:
-        print(f"\n❌ Encomenda {order_id} no encontrada")
+        print(f"\n❌ Encomenda {order_id} não encontrada")
         return orders_df, events_df
     
     # Check if status order is accepted
     status = orders_df[orders_df["order_id"] == order_id]["order_status"].iloc[0]
-    if status != "aceite":
-        print(f"\n❌ Encomenda no está aceptada (Estado: {status})")
+    if status != "em distribuição":
+        print(f"\n❌ Encomenda não foi aceite (Estado: {status})")
         return orders_df, events_df
     
     # Types of reason to not delivery
@@ -286,6 +286,60 @@ def decline_delivery(orders_df, events_df, order_id, id_worker):
     
     return orders_df, events_df
 
+def statistic_events(orders, estafeta_id):
+    # 
+    
+    # Filtrar eventos del estafeta
+    my_orders = orders[orders["id_worker"] == estafeta_id]
+    
+    if my_orders.empty:
+        print("\n❌ Sem eventos efetuados")
+        return
+    print("Impossível calcular estatísticas devido à falta de TRABALHO!")
+    accept = len(my_orders[my_orders["order_status"] == "em distribuição"])
+    declined = len(my_orders[my_orders["order_status"] == "recusada"])
+    if accept == 0:
+        delivery = len(my_orders[my_orders["order_status"] == "entregue"])
+        not_delivery = len(my_orders[my_orders["order_status"] == "não entregue"])
+        accept = delivery + not_delivery
+        if accept == 0:
+            print("Impossível calcular estatísticas devido à falta de TRABALHO!")
+            return
+        else:
+            order_total = len(my_orders["order_id"])
+            sucsses_rate = (delivery / accept * 100) if order_total > 0 else 0
+            # Mostrar
+            print("\n" + "="*70)
+            print("📊 MIS MÉTRICAS")
+            print("="*70)
+            print(f"\n📦 ENCOMENDAS:")
+            print(f"   • Aceites:   {accept}")
+            print(f"   • Recusadas:  {declined}")
+            print(f"   • Entregues:  {delivery}")
+            print(f"   • Não Entregues:    {not_delivery}")
+            print(f"\n✅ Taxa de Sucesso: {sucsses_rate:.1f}%")
+            print(f"   Total de Encomendas: {order_total}")
+            print("\n" + "="*70)
+    else:
+        accept = accept + delivery + not_delivery
+        order_total = len(my_orders["order_id"])
+        sucsses_rate = (delivery / accept * 100) if order_total > 0 else 0
+        # Mostrar
+        print("\n" + "="*70)
+        print("📊 MIS MÉTRICAS")
+        print("="*70)
+        print(f"\n📦 ENCOMENDAS:")
+        print(f"   • Aceites:   {accept}")
+        print(f"   • Recusadas:  {declined}")
+        print(f"   • Entregues:  {delivery}")
+        print(f"   • Não Entregues:    {not_delivery}")
+        print(f"\n✅ Taxa de Sucesso: {sucsses_rate:.1f}%")
+        print(f"   Total de Encomendas: {order_total}")
+        print("\n" + "="*70)
+    
+    
+    
+    
 
 # MAIN MENU PORTAL ESTAFETA
 
@@ -301,7 +355,7 @@ def main_delivery(id_worker):
     
     while open_portal:
         
-        # Cargar datos frescos
+        # load data
         orders = dm.load_orders()
         events = dm.load_order_events()
         
@@ -372,10 +426,10 @@ def main_delivery(id_worker):
                 dm.save_order_events(events)
             input("\nPrima ENTER para continuar...")
         
-        # OPTION 6: Métricas
+        # OPTION 6: STATISTIC
         elif option == "6":
-            # calcular_metricas(events, id_worker)
-            # input("\nPrima ENTER para continuar...")
+            statistic_events(orders, id_worker)
+            input("\nPrima ENTER para continuar...")
             print("Ainda sem função atualizada")
         
         # OPTION 0: Log out

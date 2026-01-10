@@ -75,9 +75,8 @@ def verificarDisponibilidade(opcaoOperacao):
 # Função para validar ID do produto
 def validarID():
     while True:
-        idEscolhido = lerInteiro("Insira ID do produto: ")
-        
-        if idEscolhido in idsProduto: 
+        idEscolhido = input("Insira ID do produto: ").strip()  # Convertido para string para estar alinhado com restantes módulos.
+        if idEscolhido in [str(id) for id in idsProduto]:  
             return idEscolhido
         
         print("❌ ID inválido!")
@@ -131,7 +130,7 @@ def lerProdutosCSV():
         duracoesProduto.clear()
         
         for i in range(len(df)):
-            idsProduto.append(int(df["product_id"][i]))
+            idsProduto.append(str(df["product_id"][i]))
             nomeProduto.append(str(df["name_product"][i]))
             stock.append(int(df["quantity_stock"][i]))
             precosProduto.append(float(df["price_unit"][i]))
@@ -153,8 +152,10 @@ def lerProdutosCSV():
 
 # Função para validar stock disponível de um produto (USADO POR: Yeidman (Gestão Encomendas))
 def validarStockDisponivel(idItem, quantidade):
+    idItem = str(idItem)  # Garantir que é string
+    idItem = str(idItem)  # Garantir que é string
     try:
-        i = idsProduto.index(idItem)
+        i = idsProduto.index(int(idItem))
 
         if disponibilidade[i] != "S":
             print("⚠️ Produto está Indisponível!")
@@ -170,10 +171,12 @@ def validarStockDisponivel(idItem, quantidade):
         print("⚠️ Produto não foi encontrado!")
         return False
 
-# Função para decrementar Stock após encomenda (USADO POR: Yeidman (Gestão Encomendas))
+# Função para decrementar Stock após encomenda 
 def reservarStock(idItem, quantidade):
+    idItem = str(idItem)  # Garantir que é string
+    idItem = str(idItem)  # Garantir que é string
     try:
-        i = idsProduto.index(idItem)
+        i = idsProduto.index(int(idItem))
 
         if stock[i] < quantidade:
             print("❌ Stock insuficiente!")
@@ -198,12 +201,14 @@ def reservarStock(idItem, quantidade):
 
 
 def devolverStock(idItem, quantidade):
+    idItem = str(idItem)  # Garantir que é string
+    idItem = str(idItem)  # Garantir que é string
     if quantidade <= 0:
         print("❌ Quantidade inválida para devolução!")
         return False
     
     try:
-        i = idsProduto.index(idItem)
+        i = idsProduto.index(int(idItem))
 
         stock_antigo = stock[i]
         stock[i] += quantidade
@@ -223,7 +228,7 @@ def devolverStock(idItem, quantidade):
         return False
 
             
-# Função para listar produtos disponíveis (USADO POR: Beatriz (Portal Cliente)) - retorna DataFrame com produtos que estão ativos e têm stock
+# Função para listar produtos disponíveis 
 def listarProdutosDisponiveis():
     if not os.path.exists("products_stock.csv"):
         print("⚠️ Ficheiro products_stock.csv não foi encontrado!")
@@ -268,6 +273,8 @@ def listarProdutosDisponiveis():
         return pd.DataFrame()
 
 def obterDetalhesProduto(idItem):
+    idItem = str(idItem)  # Garantir que é string
+    idItem = str(idItem)  # Garantir que é string
     if not os.path.exists("products_stock.csv"):
         print("⚠️ Ficheiro products_stock.csv não foi encontrado!")
         return None
@@ -278,7 +285,7 @@ def obterDetalhesProduto(idItem):
         
         # Procurar produto pelo ID
         for i in range(numProdutos):
-            if df["product_id"][i] == idItem:
+            if str(df["product_id"][i]) == str(idItem):
 
                 detalhes = {
                     "product_id": df["product_id"][i],
@@ -821,6 +828,5 @@ def menu_produtos():
         else:
             print("Opção inválida. Insira um número de 0 a 8 e tente novamente.")
 
-# EXECUÇÃO DIRETA (só corre se: python mod_product.py)
 if __name__ == "__main__":
     menu_produtos()

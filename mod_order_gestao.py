@@ -1,9 +1,53 @@
 """
 ╔═════════════════════════════════════════════════════════════════════════════╗
-║                    MOD_ORDER_GESTAO                                          
-║       last modification 06/01                                                                      
-║                            
-╚══════════════════════════════════════════════════════════════════════════════╝
+║                    PORTAL GESTOR DE ENCOMENDAS                              ║
+║                                                                             ║
+╠═════════════════════════════════════════════════════════════════════════════╣
+║ Explicação:                                                                 ║
+║                                                                             ║
+║ Assumindo que o main.py já verifica as credenciais do Gestor de Encomendas, ║
+║ este portal considera dois tipos de utilizadores: Gestor Sénior e Gestor    ║
+║ Júnior. O Gestor Sénior possui permissões para todos os processos, enquanto ║
+║ o Gestor Júnior não tem permissões para validar ou rejeitar encomendas.     ║
+║ Caso o Gestor Júnior tente efetuar validações três vezes, o                 ║
+║ sistema bloqueia temporariamente o acesso por alguns segundos por razões    ║
+║ de segurança.                                                               ║
+║                                                                             ║
+║ O portal permite visualizar as encomendas , com                             ║
+║ filtros aplicados sobre os dados recebidos a partir do Portal do Cliente.   ║
+║                                                                             ║
+║ É possível modificar dados de encomendas pendentes, permitindo a alteração  ║
+║ de valores e a atualização imediata na base de dados. Estas alterações só   ║
+║ podem ocorrer dentro dos parâmetros previamente estabelecidos, garantindo   ║
+║ uma dupla verificação: no momento da edição pelo gestor e durante a         ║
+║ validação automática. No caso da mofificação do ZIP1 (parte 1 do c.postal)  ║
+║ se o gestor colocar o ZP1 não compatíve com as zonas de entrega, mostra     ║
+║ mostra um quandro com os códigos postais válidos/possíveis.                 ║
+║                                                                             ║
+║ Cancelamento de encomendas: altera o estado da encomenda, o estado dos      ║
+║ artigos associados e devolve o stock ao ficheiro produto.csv.               ║
+║                                                                             ║
+║ Validação automática da encomenda: implementada através de funções em       ║
+║ utils.py, verifica se os dados de entrega estão corretos segundo os         ║
+║ parâmetros definidos pelo gestor. Em relação ao stock, o sistema verifica   ║
+║ se existem artigos com stock disponível mas bloqueado (stock bloqueado).    ║
+║ Nestes casos, se todos os artigos estiverem                                 ║
+║ bloqueados, a encomenda é cancelada na totalidade (assumindo notificação    ║
+║ ao cliente e reembolso). Caso apenas alguns artigos estejam bloqueados, é   ║
+║ possível enviar a encomenda parcialmente.                                   ║
+║                                                                             ║
+║ Atribuição de estafeta: apenas encomendas validadas ou parcialmente         ║
+║ validadas e sem estafeta atribuído podem receber um estafeta. O sistema     ║
+║ verifica o código postal da encomenda, identifica a zona correspondente e   ║
+║ seleciona aleatoriamente um estafeta disponível dessa zona.                 ║
+║                                                                             ║
+║ Filtragem por zona: a filtragem é realizada com base na duty area           ║
+║ registada no ficheiro CSV, permitindo visualizar todos os pedidos           ║
+║ associados a essa zona.                                                     ║
+║                                                                             ║
+║ Em cada uma das modificações ou validações, o ficheiro order_events.csv, de ║
+║ índole e uso interno, é atualizado com o registo dos eventos ocorridos.     ║                                                   ║
+╚═════════════════════════════════════════════════════════════════════════════╝
 """
 
 import pandas as pd
@@ -214,7 +258,7 @@ def editar_nome(orders_df, order_id, manager, order_events_df):
 
 def editar_contacto(orders_df, order_id, manager, order_events_df):
     """
-    Edita o contacto (teléfone) do destinatário.
+    Edita o contacto do destinatário.
     - Pede novo teléfone
     - Atualiza na base de dados
     - Registra evento
@@ -334,6 +378,8 @@ def editar_codigo_postal(orders_df, order_id, manager, order_events_df):
             zone_codes = load_zone_codes()
             if zp1_novo not in zone_codes['Codes'].values:
                 print("❌ Código postal não pertence a nenhuma zona válida: Veja a tabela abaixo:")
+                # Taela de códigos postais disponíveis
+                # Datos da tabela: DataFrame de códigos postais, nomes das colunas como encabeçado da tabela, e 'grid' formato da mesma.
                 print(tabulate(zone_codes, headers='keys', tablefmt='grid'))
             else:
                 zp_novo_validation = False
@@ -378,7 +424,7 @@ def ModOrderGestao(Manager):
     
     # Verificar se é supervisor (pode rejeitar pedidos)
     isSupervisor = (Manager == "SUPm")
-    bloqueo = 0
+    block_alert = 0
     # Carregar dados (CSV convertidos em DataFrames)
     df_zone = load_zone_codes()
     df_user_worker = load_user_work_profil()
@@ -499,11 +545,11 @@ def ModOrderGestao(Manager):
                                 print("\n✅ Encomenda rejeitada com sucesso.\n")
                                 editando = False
                             else:
-                                bloqueo += 1
+                                block_alert += 1
                                 print("\n❌ Apenas o Supervisor pode rejeitar encomendas.\n")
-                                if bloqueo == 3:
+                                if block_alert == 3:
                                     ut.bloquear_sistema_10s()
-                                    bloqueo = 0
+                                    block_alert = 0
                                     new_event = registar_evento(user_input, "⚠️system_lock", "Operação não autorizada: privilégios necessários ausentes", Manager)
                                 editando = False
                         
@@ -533,7 +579,7 @@ def ModOrderGestao(Manager):
                                             print("✅ Stock disponível\n")
                                             
                                             # Atualizar status
-                                            orders_df.loc[orders_df['order_id'] == user_input, 'order_status'] = 'validated'
+                                            orders_df.loc[orders_df['order_id'] == user_input, 'order_status'] = 'validada'
                                             order_it.loc[order_it['order_id'] == user_input, 'status'] = 'shipped'
                                             save_orders(orders_df)
                                             save_order_items(order_it)
@@ -560,7 +606,7 @@ def ModOrderGestao(Manager):
                                             mostrar_linha_decorativa("─", 70)
                                             print("❌ Encomenda inválida. Existem produtos não disponíveis.\n")
                                             mostrar_linha_decorativa("═", 70)
-                                            print(f"📦 ITEN(S) NÃO DISPONÍVEI(S):".center())
+                                            print("📦 ITEN(S) NÃO DISPONÍVEI(S):".center(70))
                                             mostrar_linha_decorativa("═", 70)
                                             print("\n")
                                             print("".join(f"  SKU: {sku} | Produto: {products_name.get(sku, 'Desconhecido')}\n"
@@ -654,12 +700,12 @@ def ModOrderGestao(Manager):
                                         editando = False
                             
                             else:
-                                bloqueo += 1
+                                block_alert += 1
                                 print("\n❌ Apenas o Supervisor pode validar encomendas.\n")
                                 editando = False
-                                if bloqueo == 3:
+                                if block_alert == 3:
                                     ut.bloquear_sistema_10s()
-                                    bloqueo = 0
+                                    block_alert = 0
                                     new_event = registar_evento(user_input, "⚠️system_lock", "Operação não autorizada: privilégios necessários ausentes", Manager)
                                     editando = False
                         
@@ -683,7 +729,7 @@ def ModOrderGestao(Manager):
         
         elif opcao == '2':
             
-            pedidos_validados = orders_df[orders_df['order_status'].isin(['validated', 'partially shipped'])] 
+            pedidos_validados = orders_df[orders_df['order_status'].isin(['validada', 'partially shipped'])] 
             
             print("\n")
             mostrar_linha_decorativa("═")
@@ -788,7 +834,7 @@ def ModOrderGestao(Manager):
         
         elif opcao == '4':
             
-            pedidos_validados = orders_df[orders_df['order_status'].isin(['validated', 'partially shipped'])] 
+            pedidos_validados = orders_df[orders_df['order_status'].isin(['validada', 'partially shipped'])] 
             
             if pedidos_validados.empty:
                 print("\n❌ Não há pedidos validados para atribuir estafeta.\n")
@@ -858,29 +904,15 @@ def ModOrderGestao(Manager):
         
         elif opcao == '5':
             
-            pedidos_validados = orders_df[
-                orders_df['order_status'].isin(['validated', 'partially shipped'])
-            ] 
+            pedidos_validados = orders_df[orders_df['order_status'].isin(['validada', 'partially shipped'])] 
             
             if pedidos_validados.empty:
                 print("\n❌ Não há pedidos validados.\n")
-                continue
-            
-            # Filtrar apenas pedidos COM estafeta
-            pedidos_com_estafeta = pedidos_validados[
-                (pedidos_validados['id_worker'].notna()) &
-                (pedidos_validados['id_worker'].astype(str).str.strip() != '') &
-                (pedidos_validados['id_worker'].astype(str).str.lower() != 'nan')
-            ] 
-            
-            if pedidos_com_estafeta.empty:
-                print("\n❌ Não há pedidos com estafeta atribuído.\n")
-                continue
             
             # Mostrar menu de filtro
             opcao_zona = menu_filtrar_zona()
             
-            if opcao_zona == '7':
+            if opcao_zona == '6':
                 continue
             
             # Mapa de zonas
@@ -890,26 +922,14 @@ def ModOrderGestao(Manager):
                 '3': ('South', '⬇️  Sul'),
                 '4': ('East', '➡️  Este'),
                 '5': ('West', '⬅️  Oeste'),
-                '6': ('Fora do limite', '🚫 Fora do limite')
             }
             
             if opcao_zona in mapa_zonas:
                 
                 zona_key, zona_emoji = mapa_zonas[opcao_zona]
                 
-                # Filtrar estafetas da zona
-                estafetas_zona = df_user_worker[
-                    (~df_user_worker['dutyArea'].str.startswith('Gestor')) &
-                    (df_user_worker['dutyArea'] == zona_key)
-                ]
-                
-                # Junctar pedidos com estafetas da zona
-                pedidos_zona = pd.merge(
-                    pedidos_com_estafeta,
-                    estafetas_zona,
-                    on='id_worker',
-                    how='inner'
-                )
+                # Filtrar pedidos por zona
+                pedidos_zona = pedidos_validados[pedidos_validados['duty_zone'] == zona_key]
                 
                 print("\n")
                 mostrar_linha_decorativa("═")
